@@ -353,7 +353,7 @@
 
     function copyShareLink() {
         const input = document.getElementById('surveyLinkOutput');
-        navigator.clipboard.writeText(input.value).then(() => {
+        const showCopied = () => {
             const btn = document.getElementById('copyBtn');
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
@@ -364,6 +364,11 @@
                 btn.classList.replace('bg-green-600', 'bg-brand-600');
                 btn.classList.remove('copy-success');
             }, 2000);
+        };
+        navigator.clipboard.writeText(input.value).then(showCopied).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showCopied();
         });
     }
 

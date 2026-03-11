@@ -8,6 +8,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -82,6 +83,11 @@ class Response(Base):
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
+    __table_args__ = (
+        Index("ix_response_team_round", "team_id", "round_id"),
+        Index("ix_response_round_team", "round_id", "team_id"),
+    )
+
     round = relationship("AssessmentRound", back_populates="responses")
     team = relationship("Team", back_populates="responses")
     answers = relationship(
@@ -101,6 +107,7 @@ class ResponseAnswer(Base):
 
     __table_args__ = (
         UniqueConstraint("response_id", "question_id", name="uq_response_question"),
+        Index("ix_ra_question", "question_id"),
     )
 
     response = relationship("Response", back_populates="answers")

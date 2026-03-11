@@ -8,10 +8,11 @@ from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.models import AssessmentRound, Question, Response, ResponseAnswer, Team
+from app.seed import seed_questions
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
@@ -87,6 +88,55 @@ def create_round(
     return RedirectResponse(url="/admin", status_code=303)
 
 
+@router.post("/teams/{team_id}/delete")
+def delete_team(team_id: int, db: Session = Depends(get_db)):
+    """Delete a team and all its responses (answers cascade via SQLAlchemy)."""
+    team = db.get(Team, team_id)
+    if team:
+        db.query(Response).filter(Response.team_id == team_id).delete(
+            synchronize_session=False
+        )
+        db.delete(team)
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+@router.post("/teams/{team_id}/rename")
+def rename_team(
+    team_id: int,
+    new_name: str = Form(...),
+    member_count: int | None = Form(None),
+    db: Session = Depends(get_db),
+):
+    """Edit a team's name and member count, rejecting duplicate names."""
+    team = db.get(Team, team_id)
+    if team:
+        name = new_name.strip()
+        if name:
+            existing = (
+                db.query(Team)
+                .filter(Team.name == name, Team.id != team_id)
+                .first()
+            )
+            if not existing:
+                team.name = name
+                team.member_count = member_count
+                db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+@router.post("/reseed-questions")
+def reseed_questions(db: Session = Depends(get_db)):
+    """Delete all responses and questions, then reseed from the CSV."""
+    # Delete answers first (FK constraint), then responses, then questions
+    db.query(ResponseAnswer).delete()
+    db.query(Response).delete()
+    db.query(Question).delete()
+    db.commit()
+    count = seed_questions(db, force=False)  # table is now empty, so force not needed
+    return RedirectResponse(url="/admin", status_code=303)
+
+
 @router.post("/rounds/{round_id}/toggle")
 def toggle_round(round_id: int, db: Session = Depends(get_db)):
     """Toggle a round's active status."""
@@ -107,6 +157,7 @@ def export_round_csv(round_id: int, db: Session = Depends(get_db)):
     questions = db.query(Question).order_by(Question.display_order).all()
     responses = (
         db.query(Response)
+        .options(selectinload(Response.answers), selectinload(Response.team))
         .filter(Response.round_id == round_id)
         .order_by(Response.team_id, Response.submitted_at)
         .all()

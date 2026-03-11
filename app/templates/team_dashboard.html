@@ -63,7 +63,7 @@
     <div class="stagger-item bg-white rounded-2xl shadow-soft border border-gray-100 p-6 hover:shadow-card transition-shadow duration-200">
         <p class="text-sm font-medium text-gray-500 mb-2">Top Strength</p>
         {% if summary.strengths %}
-        <p class="text-lg font-semibold text-green-700">{{ summary.strengths[0].subcategory }}</p>
+        <p class="text-lg font-semibold text-green-700">{{ summary.strengths[0].category }}</p>
         <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
         {% endif %}
     </div>
@@ -71,7 +71,7 @@
     <div class="stagger-item bg-white rounded-2xl shadow-soft border border-gray-100 p-6 hover:shadow-card transition-shadow duration-200">
         <p class="text-sm font-medium text-gray-500 mb-2">Needs Improvement</p>
         {% if summary.improvements %}
-        <p class="text-lg font-semibold text-orange-700">{{ summary.improvements[0].subcategory }}</p>
+        <p class="text-lg font-semibold text-orange-700">{{ summary.improvements[0].category }}</p>
         <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
         {% endif %}
     </div>
@@ -83,7 +83,7 @@
         <h3 class="text-lg font-semibold text-green-800 mb-4">Top 3 Strengths</h3>
         {% for s in summary.strengths %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-gray-100{% endif %}">
-            <span class="text-gray-700">{{ s.subcategory }}</span>
+            <span class="text-gray-700">{{ s.category }}</span>
             <span class="text-lg font-bold text-green-600">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
@@ -92,7 +92,7 @@
         <h3 class="text-lg font-semibold text-orange-800 mb-4">Top 3 Improvement Areas</h3>
         {% for s in summary.improvements %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-gray-100{% endif %}">
-            <span class="text-gray-700">{{ s.subcategory }}</span>
+            <span class="text-gray-700">{{ s.category }}</span>
             <span class="text-lg font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
@@ -223,27 +223,47 @@
 
 {% if stats and stats.response_count > 0 %}
 <script>
+    // Shared category colour palette — same keys used by both charts
+    const CATEGORY_COLORS = {
+        'Psychological Safety':       'rgba(252,165,165,0.85)',
+        'Value Delivery':             'rgba(45,212,191,0.85)',
+        'Cross-Team Collaboration':   'rgba(192,132,252,0.85)',
+        'Management Support':         'rgba(244,114,182,0.85)',
+        'Release Process':            'rgba(251,146,60,0.85)',
+        'Team Quality':               'rgba(74,222,128,0.85)',
+        'Scrum Events':               'rgba(96,165,250,0.85)',
+        'Backlog & PO Collaboration': 'rgba(129,140,248,0.85)',
+        'Sprint Goals':               'rgba(251,191,36,0.85)',
+        'Team Morale':                'rgba(251,113,133,0.85)',
+        'Self-Management':            'rgba(34,211,238,0.85)',
+    };
+    const DEFAULT_COLOR = 'rgba(156,163,175,0.7)';
+
     // Radar Chart
     {
         const catLabels = [];
         const catValues = [];
         {% for c in stats.category_scores %}
-        catLabels.push("{{ c.category }}");
+        catLabels.push({{ c.category | tojson }});
         catValues.push({{ c.avg }});
         {% endfor %}
 
         if (catLabels.length > 0) {
+            const catColors = catLabels.map(l => CATEGORY_COLORS[l] || DEFAULT_COLOR);
             new Chart(document.getElementById('radarChart'), {
                 type: 'radar',
                 data: {
                     labels: catLabels,
                     datasets: [{
-                        label: '{{ team.name }}',
+                        label: {{ team.name | tojson }},
                         data: catValues,
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(100,100,100,0.07)',
+                        borderColor: 'rgba(100,100,100,0.25)',
+                        borderWidth: 1.5,
+                        pointBackgroundColor: catColors,
+                        pointBorderColor: catColors,
+                        pointRadius: 6,
+                        pointHoverRadius: 9,
                     }]
                 },
                 options: {
@@ -263,18 +283,10 @@
         const subLabels = [];
         const subValues = [];
         const subColors = [];
-        const colorMap = {
-            'Responsiveness': 'rgba(59,130,246,0.7)',
-            'Continuous Improvement': 'rgba(16,185,129,0.7)',
-            'Stakeholders': 'rgba(245,158,11,0.7)',
-            'Team Effectiveness': 'rgba(239,68,68,0.7)',
-            'Team Autonomy': 'rgba(139,92,246,0.7)',
-            'Management Support': 'rgba(236,72,153,0.7)',
-        };
         {% for s in stats.subcategory_scores %}
-        subLabels.push("{{ s.subcategory }}");
+        subLabels.push({{ s.subcategory | tojson }});
         subValues.push({{ s.avg }});
-        subColors.push(colorMap["{{ s.category }}"] || 'rgba(107,114,128,0.7)');
+        subColors.push(CATEGORY_COLORS[{{ s.category | tojson }}] || DEFAULT_COLOR);
         {% endfor %}
 
         new Chart(document.getElementById('subcategoryChart'), {
@@ -302,28 +314,31 @@
     // Trend Chart
     {
         const trendsData = {{ trends | tojson }};
-        const trendColors = [
-            'rgb(59,130,246)', 'rgb(16,185,129)', 'rgb(245,158,11)',
-            'rgb(239,68,68)', 'rgb(139,92,246)', 'rgb(236,72,153)',
-        ];
+        // Three dash patterns — combined with unique colours, lines stay distinguishable
+        const dashPatterns = [[], [6, 3], [2, 3]];
         let roundLabels = [];
         const trendDatasets = [];
-        let colorIdx = 0;
+        let catIdx = 0;
 
         for (const [cat, points] of Object.entries(trendsData)) {
             if (points.length === 0) continue;
             if (roundLabels.length === 0) {
                 roundLabels = points.map(p => p.round_name);
             }
+            const color = (CATEGORY_COLORS[cat] || DEFAULT_COLOR).replace(/[\d.]+\)$/, '0.9)');
             trendDatasets.push({
                 label: cat,
                 data: points.map(p => p.avg),
-                borderColor: trendColors[colorIdx % trendColors.length],
-                backgroundColor: trendColors[colorIdx % trendColors.length] + '33',
-                tension: 0.3,
+                borderColor: color,
+                backgroundColor: 'transparent',
+                borderDash: dashPatterns[Math.floor(catIdx / 4) % dashPatterns.length],
+                tension: 0.25,
                 fill: false,
+                borderWidth: 1.5,
+                pointRadius: 3,
+                pointHoverRadius: 6,
             });
-            colorIdx++;
+            catIdx++;
         }
 
         if (roundLabels.length > 1) {
@@ -333,10 +348,16 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     scales: {
                         y: { beginAtZero: true, max: 5, title: { display: true, text: 'Score' } }
                     },
-                    plugins: { legend: { position: 'top' } }
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { boxWidth: 24, boxHeight: 2, padding: 12, font: { size: 11 } }
+                        }
+                    }
                 }
             });
         } else {

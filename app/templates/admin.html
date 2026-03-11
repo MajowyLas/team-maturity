@@ -33,6 +33,21 @@
                             <span class="ml-2 text-xs text-gray-400">({{ t.member_count }} members)</span>
                             {% endif %}
                         </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button"
+                                    onclick="openRenameModal({{ t.id }}, '{{ t.name | replace("'", "\\'") }}', {{ t.member_count if t.member_count else 'null' }})"
+                                    class="px-2 py-1 text-xs text-brand-600 hover:text-brand-800 hover:bg-brand-50 rounded-md transition-colors duration-150 font-medium">
+                                Edit
+                            </button>
+                            <form method="POST" action="/admin/teams/{{ t.id }}/delete" class="inline"
+                                  data-team-name="{{ t.name | e }}"
+                                  onsubmit="return confirm('Delete team \'' + this.dataset.teamName + '\' and all its responses? This cannot be undone.')">
+                                <button type="submit"
+                                        class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-150 font-medium">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
@@ -96,6 +111,36 @@
 </div>
 
 <!-- Participation Matrix -->
+<!-- Rename Modal -->
+<div id="renameModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 animate-fade-in-up">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Team</h3>
+        <form method="POST" id="renameForm">
+            <div class="mb-3">
+                <label class="block text-sm text-gray-600 mb-1">Team name</label>
+                <input type="text" name="new_name" id="renameInput" required
+                       class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm text-gray-600 mb-1">Number of members <span class="text-gray-400">(optional)</span></label>
+                <input type="number" name="member_count" id="memberCountInput" min="1"
+                       class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" onclick="closeRenameModal()"
+                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 active:scale-[0.97] transition-all shadow-soft">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 {% if rounds and teams %}
 <div class="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
     <div class="p-6 border-b border-gray-100">
@@ -139,7 +184,7 @@
 <script>
     function copyLink(inputId, btn) {
         const input = document.getElementById(inputId);
-        navigator.clipboard.writeText(input.value).then(() => {
+        const showCopied = () => {
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
             btn.classList.add('bg-green-100', 'text-green-700', 'copy-success');
@@ -147,7 +192,32 @@
                 btn.textContent = orig;
                 btn.classList.remove('bg-green-100', 'text-green-700', 'copy-success');
             }, 2000);
+        };
+        navigator.clipboard.writeText(input.value).then(showCopied).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showCopied();
         });
     }
+
+    function openRenameModal(teamId, currentName, currentMembers) {
+        document.getElementById('renameForm').action = `/admin/teams/${teamId}/rename`;
+        document.getElementById('renameInput').value = currentName;
+        document.getElementById('memberCountInput').value = currentMembers ?? '';
+        const modal = document.getElementById('renameModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => document.getElementById('renameInput').select(), 50);
+    }
+
+    function closeRenameModal() {
+        const modal = document.getElementById('renameModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('renameModal').addEventListener('click', function (e) {
+        if (e.target === this) closeRenameModal();
+    });
 </script>
 {% endblock %}

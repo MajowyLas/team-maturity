@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import AssessmentRound, Question, Team
 from app.statistics import (
+    get_all_teams_trend_summary,
     get_exec_summary,
     get_overview_cards,
     get_overview_trends,
@@ -44,6 +45,7 @@ def dashboard_overview(
         cards = get_overview_cards(db, selected_round.id)
 
     overview_trends = get_overview_trends(db)
+    trend_summary = get_all_teams_trend_summary(db)
 
     return templates.TemplateResponse(
         "dashboard.html",
@@ -53,6 +55,7 @@ def dashboard_overview(
             "selected_round": selected_round,
             "cards": cards,
             "overview_trends": overview_trends,
+            "trend_summary": trend_summary,
         },
     )
 

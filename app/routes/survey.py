@@ -75,10 +75,16 @@ async def submit_survey(token: str, request: Request, db: Session = Depends(get_
     for q in questions:
         score_str = form.get(f"q_{q.id}")
         if score_str:
+            try:
+                score = int(score_str)
+            except ValueError:
+                continue
+            if not (1 <= score <= 5):
+                continue
             answer = ResponseAnswer(
                 response_id=response.id,
                 question_id=q.id,
-                score=int(score_str),
+                score=score,
             )
             db.add(answer)
 

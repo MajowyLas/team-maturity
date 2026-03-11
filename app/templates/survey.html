@@ -65,12 +65,12 @@
                     <div class="mb-4 last:mb-0 pl-2">
                         <p class="text-gray-700 text-sm mb-2">{{ q.statement }}</p>
                         <div class="flex items-center space-x-1">
-                            <span class="text-xs text-gray-400 w-24 shrink-0">Strongly Disagree</span>
+                            <span class="text-xs text-gray-400 w-16 sm:w-24 shrink-0 hidden sm:inline">Strongly Disagree</span>
                             {% for score in range(1, 6) %}
                             <label class="relative cursor-pointer">
                                 <input type="radio" name="q_{{ q.id }}" value="{{ score }}" required
                                        class="sr-only peer" onchange="updateProgress()">
-                                <div class="w-10 h-10 rounded-lg border-2 border-gray-200 flex items-center justify-center
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 border-gray-200 flex items-center justify-center
                                             text-sm font-semibold text-gray-500
                                             peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white peer-checked:shadow-soft
                                             hover:border-brand-300 hover:bg-brand-50 transition-all duration-150">
@@ -78,7 +78,7 @@
                                 </div>
                             </label>
                             {% endfor %}
-                            <span class="text-xs text-gray-400 w-24 text-right shrink-0">Strongly Agree</span>
+                            <span class="text-xs text-gray-400 w-16 sm:w-24 text-right shrink-0 hidden sm:inline">Strongly Agree</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -120,11 +120,25 @@
         chevron.classList.toggle('rotate-180');
     }
 
-    // Submit loading state
+    // D6: Auto-expand collapsed sections before native validation fires,
+    // so the browser can highlight unanswered required fields inside them.
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+        document.querySelectorAll('.category-content.hidden').forEach(el => {
+            el.classList.remove('hidden');
+            const chevron = el.previousElementSibling.querySelector('.category-chevron');
+            if (chevron) chevron.classList.remove('rotate-180');
+        });
+    });
+
+    // Submit loading state — runs after expand so validation still works
     document.getElementById('surveyForm').addEventListener('submit', function() {
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
+        // Only show loading if form is valid (all required fields filled)
+        const valid = this.checkValidity();
+        if (valid) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
+        }
     });
 </script>
 {% endblock %}

@@ -40,7 +40,7 @@
         <!-- Card Header -->
         <div class="p-6 pb-4">
             <div class="flex items-start justify-between mb-4">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-brand-600 transition">{{ card.team_name }}</h3>
+                <h3 class="text-lg font-bold text-gray-900 group-hover:text-brand-600 transition truncate max-w-[200px]" title="{{ card.team_name }}">{{ card.team_name }}</h3>
                 <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{{ card.response_count }} response{{ 's' if card.response_count != 1 }}</span>
             </div>
 
@@ -103,6 +103,68 @@
     {% endfor %}
 </div>
 
+<!-- Team Trend Summary -->
+{% if trend_summary %}
+<div class="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 mb-8 animate-fade-in">
+    <h3 class="text-lg font-semibold text-gray-900 mb-1">Team Trend Summary</h3>
+    <p class="text-sm text-gray-400 mb-4">Latest score per team vs. previous round.</p>
+    <div class="divide-y divide-gray-100">
+        {% for t in trend_summary %}
+        <div class="py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors duration-150">
+            <!-- Row 1: team name + overall score -->
+            <div class="flex items-center justify-between gap-4 mb-1">
+                <a href="/dashboard/team/{{ t.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
+                   class="font-medium text-gray-800 hover:text-brand-600 transition-colors text-sm truncate max-w-[180px]"
+                   title="{{ t.team_name }}">
+                    {{ t.team_name }}
+                </a>
+                <div class="flex items-center gap-3 shrink-0">
+                    <span class="text-xs text-gray-400">{{ t.latest_round }}</span>
+                    <span class="text-base font-bold
+                        {% if t.latest_score >= 4.0 %}text-green-600
+                        {% elif t.latest_score >= 3.0 %}text-yellow-600
+                        {% elif t.latest_score >= 2.0 %}text-orange-600
+                        {% else %}text-red-600{% endif %}">
+                        {{ "%.2f"|format(t.latest_score) }}
+                    </span>
+                    {% if t.delta is not none %}
+                    <span class="text-sm font-semibold w-14 text-right
+                        {% if t.delta > 0 %}text-green-600
+                        {% elif t.delta < 0 %}text-red-600
+                        {% else %}text-gray-400{% endif %}">
+                        {% if t.delta > 0 %}▲{% elif t.delta < 0 %}▼{% else %}→{% endif %}{{ "%.2f"|format(t.delta | abs) }}
+                    </span>
+                    {% else %}
+                    <span class="text-sm text-gray-300 w-14 text-right">—</span>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Row 2: category scores inline -->
+            <div class="flex flex-wrap gap-x-4 gap-y-1">
+                {% for cat in t.category_scores %}
+                {% set cdelta = t.category_deltas.get(cat.category) %}
+                <span class="flex items-center gap-1 text-[10px]">
+                    <span class="text-gray-400" title="{{ cat.category }}">{{ cat.category }}</span>
+                    <span class="font-semibold
+                        {% if cat.avg >= 4.0 %}text-green-600
+                        {% elif cat.avg >= 3.0 %}text-yellow-600
+                        {% elif cat.avg >= 2.0 %}text-orange-600
+                        {% else %}text-red-600{% endif %}">{{ "%.2f"|format(cat.avg) }}</span>
+                    {% if cdelta is not none %}
+                    <span class="font-semibold
+                        {% if cdelta > 0 %}text-green-500{% elif cdelta < 0 %}text-red-500{% else %}text-gray-400{% endif %}">
+                        {% if cdelta > 0 %}▲{% elif cdelta < 0 %}▼{% else %}→{% endif %}{{ "%.2f"|format(cdelta | abs) }}
+                    </span>
+                    {% endif %}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <!-- Maturity Trends -->
 {% if overview_trends and overview_trends.round_names | length >= 2 %}
 <div class="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 mb-8 animate-fade-in">
@@ -145,6 +207,12 @@
         'rgb(236, 72, 153)',   // pink
         'rgb(20, 184, 166)',   // teal
         'rgb(249, 115, 22)',   // orange
+        'rgb(14, 165, 233)',   // sky
+        'rgb(168, 85, 247)',   // purple
+        'rgb(234, 179, 8)',    // yellow
+        'rgb(34, 197, 94)',    // lime-green
+        'rgb(244, 63, 94)',    // rose
+        'rgb(6, 182, 212)',    // cyan
     ];
 
     const datasets = trendsData.teams.map((team, i) => ({
