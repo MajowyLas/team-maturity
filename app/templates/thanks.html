@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Thank You -- Team Maturity Assessment{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto text-center py-20">
+    <div class="text-6xl mb-6" style="animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);">✅</div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4 animate-fade-in-up tracking-tight">Thank You!</h1>
+    <p class="text-gray-600 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">Your assessment has been recorded successfully.</p>
+    <div class="flex justify-center space-x-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+        {% if token %}
+        <a href="/survey/{{ token }}" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
+            Submit Another
+        </a>
+        {% endif %}
+        <a href="/dashboard" class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 shadow-soft hover:shadow-card active:scale-[0.97] transition-all duration-200">
+            View Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

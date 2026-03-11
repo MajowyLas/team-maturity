@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Take Survey -- Team Maturity Assessment{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Team Maturity Assessment Survey</h1>
+    <p class="text-gray-600 mb-1">Rate each statement on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).</p>
+    <p class="text-sm text-brand-600 font-medium mb-8">Team: {{ team.name }}</p>
+
+    {% if not rounds %}
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <p class="text-yellow-800 font-medium">No active assessment rounds.</p>
+        <p class="text-yellow-600 text-sm mt-1">Ask your admin to create a round in the Admin panel.</p>
+    </div>
+    {% else %}
+    <form method="POST" action="/survey/{{ team.token }}" id="surveyForm">
+        <!-- Respondent Info -->
+        <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-7 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Assessment Round</label>
+                    <select name="round_id" required class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                        {% for r in rounds %}
+                        <option value="{{ r.id }}">{{ r.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name (First & Last)</label>
+                    <input type="text" name="respondent_name" required placeholder="Jane Smith"
+                           class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-card border border-gray-100 p-4 mb-6 sticky top-[4.5rem] z-10">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Progress</span>
+                <span id="progressText" class="text-sm text-gray-500">0 / {{ total_questions }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Questions by Category -->
+        {% for category, subcategories in grouped_questions.items() %}
+        <div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-6 overflow-hidden hover:shadow-card transition-shadow duration-300">
+            <button type="button" onclick="toggleCategory(this)"
+                    class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50/80 transition-all duration-200">
+                <h2 class="text-xl font-bold text-gray-900">{{ category }}</h2>
+                <svg class="category-chevron w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div class="category-content px-6 pb-6">
+                {% for subcategory, questions in subcategories.items() %}
+                <div class="mb-6 last:mb-0">
+                    <h3 class="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-3 pb-2 border-b border-gray-100">
+                        {{ subcategory }}
+                    </h3>
+                    {% for q in questions %}
+                    <div class="mb-4 last:mb-0 pl-2">
+                        <p class="text-gray-700 text-sm mb-2">{{ q.statement }}</p>
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xs text-gray-400 w-24 shrink-0">Strongly Disagree</span>
+                            {% for score in range(1, 6) %}
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="q_{{ q.id }}" value="{{ score }}" required
+                                       class="sr-only peer" onchange="updateProgress()">
+                                <div class="w-10 h-10 rounded-lg border-2 border-gray-200 flex items-center justify-center
+                                            text-sm font-semibold text-gray-500
+                                            peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white peer-checked:shadow-soft
+                                            hover:border-brand-300 hover:bg-brand-50 transition-all duration-150">
+                                    {{ score }}
+                                </div>
+                            </label>
+                            {% endfor %}
+                            <span class="text-xs text-gray-400 w-24 text-right shrink-0">Strongly Agree</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Submit -->
+        <div class="text-center py-6">
+            <button type="submit" id="submitBtn"
+                    class="px-8 py-3.5 bg-brand-600 text-white font-semibold rounded-xl shadow-card
+                           hover:bg-brand-700 hover:shadow-card-hover focus:ring-4 focus:ring-brand-200
+                           active:scale-[0.97] transition-all duration-200 text-lg">
+                Submit Assessment
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const totalQuestions = {{ total_questions }};
+
+    function updateProgress() {
+        const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
+        const pct = Math.round((answered / totalQuestions) * 100);
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('progressText').textContent = answered + ' / ' + totalQuestions;
+    }
+
+    function toggleCategory(btn) {
+        const content = btn.nextElementSibling;
+        const chevron = btn.querySelector('.category-chevron');
+        content.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+    }
+
+    // Submit loading state
+    document.getElementById('surveyForm').addEventListener('submit', function() {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
+    });
+</script>
+{% endblock %}
