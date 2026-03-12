@@ -2,13 +2,7 @@ services:
   - type: web
     name: team-maturity-assessment
     runtime: docker
-    plan: hobby
-    disk:
-      name: maturity-data
-      mountPath: /data
-      sizeGB: 1
+    plan: free
     envVars:
-      - key: DATABASE_PATH
-        value: /data/maturity.db
       - key: APP_PASSWORD
         sync: false  # set manually in Render dashboard
