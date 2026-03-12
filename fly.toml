@@ -1,0 +1,29 @@
+# Fly.io configuration for Team Maturity Assessment
+# Deploy: fly launch → fly volumes create → fly deploy
+# Docs: https://fly.io/docs/reference/configuration/
+
+app = 'team-maturity-assessment'
+primary_region = 'ams'              # Amsterdam — change if needed
+
+[build]
+  # Uses the existing Dockerfile
+
+[env]
+  PORT = '8000'
+  DATABASE_PATH = '/data/maturity.db'
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = 'stop'       # stop VM when idle (saves free credits)
+  auto_start_machines = true        # wake on incoming request (~3s cold start)
+  min_machines_running = 0
+
+[mounts]
+  source = 'maturity_data'
+  destination = '/data'
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
