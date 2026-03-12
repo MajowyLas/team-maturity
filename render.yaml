@@ -2,7 +2,7 @@ services:
   - type: web
     name: team-maturity-assessment
     runtime: docker
-    plan: free
+    plan: hobby
     disk:
       name: maturity-data
       mountPath: /data
