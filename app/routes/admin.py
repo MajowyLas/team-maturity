@@ -3,7 +3,9 @@
 import csv
 import io
 
-from fastapi import APIRouter, Depends, Form, Request
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, Form, Request, UploadFile
 from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -190,6 +192,179 @@ def export_round_csv(round_id: int, db: Session = Depends(get_db)):
         iter([output.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/export-all")
+def export_all_csv(db: Session = Depends(get_db)):
+    """Export ALL responses across every round as a single flat CSV."""
+    questions = db.query(Question).order_by(Question.display_order).all()
+    responses = (
+        db.query(Response)
+        .options(
+            selectinload(Response.answers),
+            selectinload(Response.team),
+            selectinload(Response.round),
+        )
+        .order_by(Response.round_id, Response.team_id, Response.submitted_at)
+        .all()
+    )
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header: Round + Team + Respondent + Submitted At + one col per question
+    header = ["Round", "Team", "Respondent", "Submitted At"]
+    for q in questions:
+        header.append(f"{q.category} | {q.subcategory} | {q.statement[:60]}")
+    writer.writerow(header)
+
+    for resp in responses:
+        answer_map = {a.question_id: a.score for a in resp.answers}
+        row = [
+            resp.round.name,
+            resp.team.name,
+            resp.respondent_name,
+            resp.submitted_at.strftime("%Y-%m-%d %H:%M"),
+        ]
+        for q in questions:
+            row.append(answer_map.get(q.id, ""))
+        writer.writerow(row)
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=maturity_assessment_all.csv"
+        },
+    )
+
+
+@router.post("/import")
+async def import_csv(file: UploadFile, db: Session = Depends(get_db)):
+    """Import responses from a previously exported CSV (export-all format).
+
+    Auto-creates teams and rounds if they don't exist. Skips duplicate
+    responses (same respondent + team + round).
+    """
+    content = (await file.read()).decode("utf-8-sig")
+    reader = csv.reader(io.StringIO(content))
+    headers = next(reader)
+
+    # First 4 columns are fixed: Round, Team, Respondent, Submitted At
+    if len(headers) < 5 or headers[0] != "Round":
+        return RedirectResponse(url="/admin?import_error=bad_format", status_code=303)
+
+    # Map question header strings → Question.id
+    questions = db.query(Question).order_by(Question.display_order).all()
+    q_header_map: dict[str, int] = {}
+    for q in questions:
+        key = f"{q.category} | {q.subcategory} | {q.statement[:60]}"
+        q_header_map[key] = q.id
+
+    # Match CSV column headers (index 4+) to question IDs
+    col_question_ids: list[int | None] = []
+    for h in headers[4:]:
+        col_question_ids.append(q_header_map.get(h))
+
+    # Cache for find-or-create lookups
+    round_cache: dict[str, AssessmentRound] = {}
+    team_cache: dict[str, Team] = {}
+
+    # Pre-load existing rounds and teams
+    for rnd in db.query(AssessmentRound).all():
+        round_cache[rnd.name] = rnd
+    for team in db.query(Team).all():
+        team_cache[team.name] = team
+
+    # Track existing responses to skip duplicates
+    existing_responses: set[tuple[str, str, str]] = set()
+    for resp in (
+        db.query(Response)
+        .options(selectinload(Response.team), selectinload(Response.round))
+        .all()
+    ):
+        existing_responses.add(
+            (resp.respondent_name, resp.team.name, resp.round.name)
+        )
+
+    imported = 0
+    skipped = 0
+
+    for row in reader:
+        if len(row) < 4:
+            continue
+
+        round_name = row[0].strip()
+        team_name = row[1].strip()
+        respondent_name = row[2].strip()
+        submitted_str = row[3].strip()
+
+        if not all([round_name, team_name, respondent_name]):
+            continue
+
+        # Skip duplicate
+        dup_key = (respondent_name, team_name, round_name)
+        if dup_key in existing_responses:
+            skipped += 1
+            continue
+
+        # Find or create round
+        if round_name not in round_cache:
+            rnd = AssessmentRound(name=round_name, is_active=False)
+            db.add(rnd)
+            db.flush()
+            round_cache[round_name] = rnd
+
+        # Find or create team
+        if team_name not in team_cache:
+            team = Team(name=team_name)
+            db.add(team)
+            db.flush()
+            team_cache[team_name] = team
+
+        # Parse submitted_at
+        try:
+            submitted_at = datetime.strptime(submitted_str, "%Y-%m-%d %H:%M")
+            submitted_at = submitted_at.replace(tzinfo=timezone.utc)
+        except ValueError:
+            submitted_at = datetime.now(timezone.utc)
+
+        # Create response
+        resp = Response(
+            round_id=round_cache[round_name].id,
+            team_id=team_cache[team_name].id,
+            respondent_name=respondent_name,
+            submitted_at=submitted_at,
+        )
+        db.add(resp)
+        db.flush()
+
+        # Create answers from score columns
+        for i, q_id in enumerate(col_question_ids):
+            if q_id is None:
+                continue
+            score_idx = 4 + i
+            if score_idx >= len(row) or not row[score_idx].strip():
+                continue
+            try:
+                score = int(row[score_idx])
+            except ValueError:
+                continue
+            if 1 <= score <= 5:
+                db.add(
+                    ResponseAnswer(
+                        response_id=resp.id, question_id=q_id, score=score
+                    )
+                )
+
+        existing_responses.add(dup_key)
+        imported += 1
+
+    db.commit()
+    return RedirectResponse(
+        url=f"/admin?imported={imported}&skipped={skipped}", status_code=303
     )
 
 

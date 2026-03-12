@@ -152,11 +152,11 @@ def api_team_data(
             "overall": summary.overall_score if summary else 0,
             "responses": summary.response_count if summary else 0,
             "strengths": [
-                {"subcategory": s.subcategory, "avg": s.avg}
+                {"category": s.category, "avg": s.avg}
                 for s in (summary.strengths if summary else [])
             ],
             "improvements": [
-                {"subcategory": s.subcategory, "avg": s.avg}
+                {"category": s.category, "avg": s.avg}
                 for s in (summary.improvements if summary else [])
             ],
             "previous_overall": summary.previous_overall if summary else None,
