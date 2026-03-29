@@ -26,23 +26,60 @@
             <ul class="divide-y divide-gray-100">
                 {% for t in teams %}
                 <li class="stagger-item py-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <span class="font-medium text-gray-900">{{ t.name }}</span>
-                            {% if t.member_count %}
-                            <span class="ml-2 text-xs text-gray-400">({{ t.member_count }} members)</span>
-                            {% endif %}
+                    <!-- View mode -->
+                    <div id="team-view-{{ t.id }}">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <span class="font-medium text-gray-900">{{ t.name }}</span>
+                                {% if t.member_count %}
+                                <span class="ml-2 text-xs text-gray-400">({{ t.member_count }} members)</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="showEditForm({{ t.id }})"
+                                        class="text-xs text-brand-600 hover:text-brand-800 font-medium">Edit</button>
+                                {% set resp_count = team_response_counts.get(t.id, 0) %}
+                                <button type="button"
+                                        onclick="confirmDeleteTeam({{ t.id }}, '{{ t.name }}', {{ resp_count }})"
+                                        class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
+                                   id="link-{{ t.id }}"
+                                   class="flex-1 rounded-lg border-gray-200 border bg-gray-50 px-3 py-1.5 text-xs text-gray-600 font-mono">
+                            <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
+                                    class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                Copy Link
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
-                               id="link-{{ t.id }}"
-                               class="flex-1 rounded-lg border-gray-200 border bg-gray-50 px-3 py-1.5 text-xs text-gray-600 font-mono">
-                        <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                            Copy Link
-                        </button>
+
+                    <!-- Edit mode (hidden by default) -->
+                    <div id="team-edit-{{ t.id }}" class="hidden">
+                        <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
+                            <div class="flex flex-wrap gap-2">
+                                <input type="text" name="team_name" value="{{ t.name }}" required
+                                       class="flex-1 min-w-[150px] rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                                <input type="number" name="member_count" min="1" placeholder="Members"
+                                       value="{{ t.member_count or '' }}"
+                                       class="w-24 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit"
+                                        class="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-xs font-semibold hover:bg-brand-700 active:scale-[0.97] transition-all duration-200">
+                                    Save
+                                </button>
+                                <button type="button" onclick="hideEditForm({{ t.id }})"
+                                        class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 transition-all duration-200">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
+
+                    <!-- Hidden delete form -->
+                    <form id="delete-form-{{ t.id }}" method="POST" action="/admin/teams/{{ t.id }}/delete" class="hidden"></form>
                 </li>
                 {% endfor %}
             </ul>
@@ -69,21 +106,34 @@
             {% if rounds %}
             <ul class="divide-y divide-gray-100">
                 {% for r in rounds %}
-                <li class="stagger-item py-3 flex items-center justify-between rounded-lg px-2 -mx-2 hover:bg-gray-50 transition-colors duration-150">
-                    <div>
-                        <span class="font-medium text-gray-900">{{ r.name }}</span>
-                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
-                            {% if r.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
-                            {% if r.is_active %}Active{% else %}Closed{% endif %}
-                        </span>
+                <li class="stagger-item py-4 rounded-lg px-2 -mx-2 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <span class="font-medium text-gray-900">{{ r.name }}</span>
+                            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
+                                {% if r.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+                                {% if r.is_active %}Active{% else %}Closed{% endif %}
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <a href="/admin/export/{{ r.id }}" class="text-xs text-brand-600 hover:underline">Export CSV</a>
+                            <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
+                                <button type="submit" class="text-xs text-gray-500 hover:text-gray-700">
+                                    {% if r.is_active %}Close{% else %}Reopen{% endif %}
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <a href="/admin/export/{{ r.id }}" class="text-xs text-brand-600 hover:underline">Export CSV</a>
-                        <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
-                            <button type="submit" class="text-xs text-gray-500 hover:text-gray-700">
-                                {% if r.is_active %}Close{% else %}Reopen{% endif %}
-                            </button>
-                        </form>
+                    <!-- Engineering Survey Link -->
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs text-gray-400 shrink-0">Eng. Survey:</span>
+                        <input type="text" readonly value="{{ base_url }}/engineering/{{ r.engineering_token }}"
+                               id="eng-link-{{ r.id }}"
+                               class="flex-1 rounded-lg border-gray-200 border bg-gray-50 px-2 py-1 text-xs text-gray-600 font-mono">
+                        <button type="button" onclick="copyLink('eng-link-{{ r.id }}', this)"
+                                class="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            Copy
+                        </button>
                     </div>
                 </li>
                 {% endfor %}
@@ -91,6 +141,85 @@
             {% else %}
             <p class="text-gray-500 text-sm text-center py-4">No rounds yet. Create one above.</p>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Data Management -->
+<div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-8">
+    <div class="p-6 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-900">Data Management</h2>
+        <p class="text-sm text-gray-500 mt-1">Upload question CSVs, download data exports, or back up the database.</p>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Database Backup -->
+            <div class="border border-gray-200 rounded-xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xl">💾</span>
+                    <h3 class="font-semibold text-gray-900">Database Backup</h3>
+                </div>
+                <p class="text-xs text-gray-500 mb-4">Download the full SQLite database file with all teams, rounds, and responses.</p>
+                <a href="/admin/data/download-db"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Download maturity.db
+                </a>
+            </div>
+
+            <!-- Team Survey Questions -->
+            <div class="border border-gray-200 rounded-xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xl">📋</span>
+                    <h3 class="font-semibold text-gray-900">Team Survey Questions</h3>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Currently <strong>{{ team_q_count }}</strong> questions loaded.</p>
+                <p class="text-xs text-gray-400 mb-4">CSV format: Category, Subcategory, A, B, C, D, E</p>
+                <div class="flex flex-col gap-2">
+                    <a href="/admin/data/download-questions/team"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download CSV
+                    </a>
+                    <form method="POST" action="/admin/data/upload-questions/team" enctype="multipart/form-data"
+                          class="flex items-center gap-2">
+                        <input type="file" name="file" accept=".csv" required
+                               class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                        <button type="submit"
+                                onclick="return confirm('This will replace all team survey questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
+                                class="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-xs font-semibold hover:bg-brand-700 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Engineering Questions -->
+            <div class="border border-gray-200 rounded-xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-xl">🔧</span>
+                    <h3 class="font-semibold text-gray-900">Engineering Questions</h3>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Currently <strong>{{ eng_q_count }}</strong> questions loaded.</p>
+                <p class="text-xs text-gray-400 mb-4">CSV: Category, Subcategory, Area, Base…Expert</p>
+                <div class="flex flex-col gap-2">
+                    <a href="/admin/data/download-questions/engineering"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download CSV
+                    </a>
+                    <form method="POST" action="/admin/data/upload-questions/engineering" enctype="multipart/form-data"
+                          class="flex items-center gap-2">
+                        <input type="file" name="file" accept=".csv" required
+                               class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                        <button type="submit"
+                                onclick="return confirm('This will replace all engineering assessment questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
+                                class="px-3 py-1.5 bg-brand-600 text-white rounded-lg text-xs font-semibold hover:bg-brand-700 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -137,6 +266,26 @@
 
 {% block scripts %}
 <script>
+    function showEditForm(teamId) {
+        document.getElementById('team-view-' + teamId).classList.add('hidden');
+        document.getElementById('team-edit-' + teamId).classList.remove('hidden');
+    }
+
+    function hideEditForm(teamId) {
+        document.getElementById('team-edit-' + teamId).classList.add('hidden');
+        document.getElementById('team-view-' + teamId).classList.remove('hidden');
+    }
+
+    function confirmDeleteTeam(teamId, teamName, responseCount) {
+        let msg = 'Delete team "' + teamName + '"?';
+        if (responseCount > 0) {
+            msg += '\n\n⚠️ This team has ' + responseCount + ' response(s) that will also be permanently deleted.';
+        }
+        if (confirm(msg)) {
+            document.getElementById('delete-form-' + teamId).submit();
+        }
+    }
+
     function copyLink(inputId, btn) {
         const input = document.getElementById(inputId);
         navigator.clipboard.writeText(input.value).then(() => {

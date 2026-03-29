@@ -64,6 +64,121 @@ class ExecSummary:
     category_deltas: dict[str, float]  # category -> delta from previous round
 
 
+def get_team_maturity_overview(
+    db: Session, round_id: int
+) -> dict | None:
+    """Aggregate team maturity scores across ALL teams for a round.
+
+    Returns a dict mirroring the engineering stats structure:
+    overall_avg, response_count, category_scores, subcategory_scores,
+    strengths (top 3), improvements (bottom 3).
+    """
+    response_count = (
+        db.query(func.count(Response.id))
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+        )
+        .scalar()
+    ) or 0
+
+    if response_count == 0:
+        return None
+
+    # Category averages
+    category_rows = (
+        db.query(
+            Question.category,
+            func.avg(ResponseAnswer.score).label("avg_score"),
+        )
+        .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
+        .join(Response, Response.id == ResponseAnswer.response_id)
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
+        .group_by(Question.category)
+        .order_by(Question.category)
+        .all()
+    )
+
+    category_scores = [
+        {"category": row.category, "avg": round(row.avg_score, 2)}
+        for row in category_rows
+    ]
+
+    overall_avg = (
+        round(sum(c["avg"] for c in category_scores) / len(category_scores), 2)
+        if category_scores
+        else 0.0
+    )
+
+    # Subcategory scores for strengths/improvements
+    sub_rows = (
+        db.query(
+            Question.category,
+            Question.subcategory,
+            func.avg(ResponseAnswer.score).label("avg_score"),
+        )
+        .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
+        .join(Response, Response.id == ResponseAnswer.response_id)
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
+        .group_by(Question.category, Question.subcategory)
+        .order_by(func.avg(ResponseAnswer.score))
+        .all()
+    )
+
+    subcategory_scores = [
+        {
+            "category": row.category,
+            "subcategory": row.subcategory,
+            "avg": round(row.avg_score, 2),
+        }
+        for row in sub_rows
+    ]
+
+    strengths = subcategory_scores[-3:][::-1] if len(subcategory_scores) >= 3 else subcategory_scores[::-1]
+    improvements = subcategory_scores[:3]
+
+    # ── Previous round comparison ──
+    previous_round = (
+        db.query(AssessmentRound)
+        .filter(AssessmentRound.id < round_id)
+        .order_by(AssessmentRound.id.desc())
+        .first()
+    )
+
+    previous_overall: float | None = None
+    category_deltas: dict[str, float] = {}
+
+    if previous_round:
+        prev = get_team_maturity_overview(db, previous_round.id)
+        if prev:
+            previous_overall = prev["overall_avg"]
+            prev_cat_map = {c["category"]: c["avg"] for c in prev["category_scores"]}
+            for cat in category_scores:
+                if cat["category"] in prev_cat_map:
+                    category_deltas[cat["category"]] = round(
+                        cat["avg"] - prev_cat_map[cat["category"]], 2
+                    )
+
+    return {
+        "response_count": response_count,
+        "overall_avg": overall_avg,
+        "category_scores": category_scores,
+        "subcategory_scores": subcategory_scores,
+        "strengths": strengths,
+        "improvements": improvements,
+        "previous_overall": previous_overall,
+        "category_deltas": category_deltas,
+    }
+
+
 def get_team_round_stats(
     db: Session, team_id: int, round_id: int
 ) -> TeamRoundStats | None:
@@ -73,10 +188,14 @@ def get_team_round_stats(
     if not team or not rnd:
         return None
 
-    # Count responses
+    # Count responses (team survey only — exclude engineering)
     response_count = (
         db.query(func.count(Response.id))
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+        )
         .scalar()
     ) or 0
 
@@ -92,7 +211,7 @@ def get_team_round_stats(
             subcategory_scores=[],
         )
 
-    # Subcategory scores
+    # Subcategory scores (team survey only)
     subcategory_rows = (
         db.query(
             Question.category,
@@ -104,7 +223,12 @@ def get_team_round_stats(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
         .group_by(Question.category, Question.subcategory)
         .order_by(Question.category, Question.subcategory)
         .all()
@@ -122,7 +246,7 @@ def get_team_round_stats(
         for row in subcategory_rows
     ]
 
-    # Category scores (average of subcategory averages)
+    # Category scores (team survey only)
     category_rows = (
         db.query(
             Question.category,
@@ -131,7 +255,12 @@ def get_team_round_stats(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
         .group_by(Question.category)
         .order_by(Question.category)
         .all()
@@ -274,7 +403,12 @@ def get_statement_scores(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
         .group_by(Question.id)
         .order_by(Question.display_order)
         .all()

@@ -29,6 +29,10 @@ class Question(Base):
     """A single survey statement seeded from the CSV.
 
     Grouped by category -> subcategory, displayed in display_order.
+
+    Two assessment types:
+    - "team": Likert-scale statements (original Scrum Team Survey).
+    - "engineering": Rubric-based maturity questions with level descriptions.
     """
 
     __tablename__ = "questions"
@@ -38,6 +42,14 @@ class Question(Base):
     subcategory = Column(String(200), nullable=False)
     statement = Column(Text, nullable=False)
     display_order = Column(Integer, nullable=False, default=0)
+    assessment_type = Column(String(20), nullable=False, default="team", index=True)
+
+    # Rubric level descriptions (engineering assessment only)
+    level_1 = Column(Text, nullable=True)  # Base
+    level_2 = Column(Text, nullable=True)  # Beginner
+    level_3 = Column(Text, nullable=True)  # Intermediate
+    level_4 = Column(Text, nullable=True)  # Advanced
+    level_5 = Column(Text, nullable=True)  # Expert
 
     answers = relationship("ResponseAnswer", back_populates="question")
 
@@ -62,6 +74,9 @@ class AssessmentRound(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(200), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
+    engineering_token = Column(
+        String(50), nullable=False, unique=True, default=_generate_token
+    )
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
@@ -76,8 +91,9 @@ class Response(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     round_id = Column(Integer, ForeignKey("assessment_rounds.id"), nullable=False)
-    team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
+    team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)  # NULL for engineering
     respondent_name = Column(String(200), nullable=False)
+    assessment_type = Column(String(20), nullable=False, default="team")
     submitted_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )

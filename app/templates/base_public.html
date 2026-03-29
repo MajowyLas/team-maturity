@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
     <script>
         tailwind.config = {
@@ -36,12 +35,10 @@
                     boxShadow: {
                         'soft': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
                         'card': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03)',
-                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
                         'fade-in-up': 'fadeInUp 0.5s ease-out',
-                        'slide-down': 'slideDown 0.3s ease-out',
                     },
                     keyframes: {
                         fadeIn: {
@@ -52,10 +49,6 @@
                             '0%': { opacity: '0', transform: 'translateY(12px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
-                        slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-8px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
                     },
                 }
             }
@@ -63,43 +56,13 @@
     </script>
 </head>
 <body class="h-full font-sans">
-    <!-- Navigation -->
-    <nav class="bg-navy-900 shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-14">
-                <div class="flex items-center space-x-8">
-                    <a href="/" class="flex items-center space-x-2 group">
-                        <span class="text-xl group-hover:scale-110 transition-transform duration-200">📊</span>
-                        <span class="font-bold text-white text-lg tracking-tight">Team Maturity</span>
-                    </a>
-                    <div class="hidden sm:flex sm:space-x-1">
-                        <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
-                            Team Maturity
-                        </a>
-                        <a href="/engineering/dashboard/view" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
-                            Engineering Maturity
-                        </a>
-                        <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
-                            Admin
-                        </a>
-                    </div>
-                </div>
-                {% if auth_enabled %}
-                <a href="/logout" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200">
-                    Sign Out
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
+    <!-- Minimal header — no navigation -->
+    <div class="bg-navy-900 h-1"></div>
 
-    <!-- Main content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 animate-fade-in">
         {% block content %}{% endblock %}
     </main>
 
-    <script></script>
-    <script src="/static/charts.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

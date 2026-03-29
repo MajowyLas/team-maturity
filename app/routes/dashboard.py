@@ -7,11 +7,18 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import AssessmentRound, Question, Team
+from app.eng_statistics import (
+    MATURITY_DESCRIPTIONS,
+    MATURITY_LABELS,
+    get_area_details,
+    get_engineering_stats,
+)
 from app.statistics import (
     get_exec_summary,
     get_overview_cards,
     get_overview_trends,
     get_statement_scores,
+    get_team_maturity_overview,
     get_team_round_stats,
     get_team_trends,
 )
@@ -40,8 +47,10 @@ def dashboard_overview(
         selected_round = rounds[0]
 
     cards = []
+    overview_stats = None
     if selected_round:
         cards = get_overview_cards(db, selected_round.id)
+        overview_stats = get_team_maturity_overview(db, selected_round.id)
 
     overview_trends = get_overview_trends(db)
 
@@ -52,6 +61,7 @@ def dashboard_overview(
             "rounds": rounds,
             "selected_round": selected_round,
             "cards": cards,
+            "overview_stats": overview_stats,
             "overview_trends": overview_trends,
         },
     )
@@ -81,6 +91,7 @@ def team_dashboard(
     if not selected_round and rounds:
         selected_round = rounds[0]
 
+    # ── Team Maturity Survey data ──
     stats = None
     summary = None
     trends = {}
@@ -91,24 +102,42 @@ def team_dashboard(
         trends = get_team_trends(db, team_id)
         statement_scores = get_statement_scores(db, team_id, selected_round.id)
 
-    # Group statement scores: {category: {subcategory: [StatementScore, ...]}}
     grouped_statements: dict[str, dict[str, list]] = {}
     for s in statement_scores:
         grouped_statements.setdefault(s.category, {}).setdefault(
             s.subcategory, []
         ).append(s)
 
+    # ── Engineering Maturity data (filtered by this team) ──
+    eng_stats = None
+    eng_area_details = []
+    if selected_round:
+        eng_stats = get_engineering_stats(db, selected_round.id, team_id=team_id)
+        eng_area_details = get_area_details(db, selected_round.id, team_id=team_id)
+
+    grouped_eng_areas: dict[str, dict[str, list]] = {}
+    for a in eng_area_details:
+        grouped_eng_areas.setdefault(a["category"], {}).setdefault(
+            a["subcategory"], []
+        ).append(a)
+
     return templates.TemplateResponse(
-        "team_dashboard.html",
+        "team_view.html",
         {
             "request": request,
             "team": team,
             "rounds": rounds,
             "selected_round": selected_round,
+            # Team Maturity
             "stats": stats,
             "summary": summary,
             "trends": trends,
             "grouped_statements": grouped_statements,
+            # Engineering Maturity
+            "eng_stats": eng_stats,
+            "grouped_eng_areas": grouped_eng_areas,
+            "maturity_labels": MATURITY_LABELS,
+            "maturity_descriptions": MATURITY_DESCRIPTIONS,
         },
     )
 

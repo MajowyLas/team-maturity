@@ -18,19 +18,19 @@ if (typeof Chart !== 'undefined') {
  */
 const MATURITY_COLORS = {
     categories: [
-        'rgba(59, 130, 246, 0.7)',   // blue - Responsiveness
-        'rgba(16, 185, 129, 0.7)',   // green - Continuous Improvement
-        'rgba(245, 158, 11, 0.7)',   // amber - Stakeholders
+        'rgba(76, 182, 72, 0.7)',    // DFW green - Responsiveness
+        'rgba(59, 130, 246, 0.7)',   // DFW blue - Continuous Improvement
+        'rgba(234, 179, 8, 0.7)',    // yellow - Stakeholders
         'rgba(239, 68, 68, 0.7)',    // red - Team Effectiveness
-        'rgba(139, 92, 246, 0.7)',   // violet - Team Autonomy
+        'rgba(99, 102, 241, 0.7)',   // indigo - Team Autonomy
         'rgba(236, 72, 153, 0.7)',   // pink - Management Support
     ],
     categoryBorders: [
+        'rgb(76, 182, 72)',
         'rgb(59, 130, 246)',
-        'rgb(16, 185, 129)',
-        'rgb(245, 158, 11)',
+        'rgb(234, 179, 8)',
         'rgb(239, 68, 68)',
-        'rgb(139, 92, 246)',
+        'rgb(99, 102, 241)',
         'rgb(236, 72, 153)',
     ],
 };

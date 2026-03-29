@@ -1,18 +1,16 @@
 {% extends "base_public.html" %}
-{% block title %}Thank You -- Team Maturity Assessment{% endblock %}
+{% block title %}Thank You -- Engineering Delivery Assessment{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto text-center py-20">
     <div class="text-6xl mb-6" style="animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);">🎉</div>
     <h1 class="text-3xl font-bold text-gray-900 mb-4 animate-fade-in-up tracking-tight">Thank You!</h1>
-    <p class="text-gray-600 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">Your assessment has been recorded. You can close this page.</p>
-    {% if token %}
+    <p class="text-gray-600 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">Your engineering delivery assessment has been recorded. You can close this page.</p>
     <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
-        <a href="/survey/{{ token }}" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
+        <a href="/engineering/{{ token }}" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
             Submit Another Response
         </a>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 

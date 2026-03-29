@@ -25,7 +25,12 @@ def survey_form(token: str, request: Request, db: Session = Depends(get_db)):
         .order_by(AssessmentRound.created_at.desc())
         .all()
     )
-    questions = db.query(Question).order_by(Question.display_order).all()
+    questions = (
+        db.query(Question)
+        .filter(Question.assessment_type == "team")
+        .order_by(Question.display_order)
+        .all()
+    )
 
     # Group questions: {category: {subcategory: [question, ...]}}
     grouped: dict[str, dict[str, list]] = {}
@@ -70,8 +75,8 @@ async def submit_survey(token: str, request: Request, db: Session = Depends(get_
     db.add(response)
     db.flush()
 
-    # Collect all question answers from the form (fields named "q_{question_id}")
-    questions = db.query(Question).all()
+    # Collect team question answers from the form (fields named "q_{question_id}")
+    questions = db.query(Question).filter(Question.assessment_type == "team").all()
     for q in questions:
         score_str = form.get(f"q_{q.id}")
         if score_str:

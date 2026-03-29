@@ -2,16 +2,27 @@
 
 import csv
 import io
+import shutil
+import tempfile
 
-from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
+from fastapi import APIRouter, Depends, Form, Request, UploadFile, File
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import get_db, DB_PATH
 from app.models import AssessmentRound, Question, Response, ResponseAnswer, Team
+from app.seed import (
+    parse_team_csv,
+    parse_engineering_csv,
+    seed_questions,
+    seed_engineering_questions,
+    TEAM_CSV,
+    ENGINEERING_CSV,
+    DATA_DIR,
+)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
@@ -41,6 +52,18 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
         (row.round_id, row.team_id): row.cnt for row in participation_rows
     }
 
+    # Per-team total response count (for delete confirmation)
+    team_response_counts_rows = (
+        db.query(Response.team_id, func.count(Response.id).label("cnt"))
+        .group_by(Response.team_id)
+        .all()
+    )
+    team_response_counts = {row.team_id: row.cnt for row in team_response_counts_rows}
+
+    # Question counts for data management
+    team_q_count = db.query(Question).filter(Question.assessment_type == "team").count()
+    eng_q_count = db.query(Question).filter(Question.assessment_type == "engineering").count()
+
     # Build the base URL for survey links
     base_url = str(request.base_url).rstrip("/")
 
@@ -51,6 +74,9 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
             "teams": teams,
             "rounds": rounds,
             "participation": participation,
+            "team_response_counts": team_response_counts,
+            "team_q_count": team_q_count,
+            "eng_q_count": eng_q_count,
             "base_url": base_url,
         },
     )
@@ -95,6 +121,130 @@ def toggle_round(round_id: int, db: Session = Depends(get_db)):
         rnd.is_active = not rnd.is_active
         db.commit()
     return RedirectResponse(url="/admin", status_code=303)
+
+
+@router.post("/teams/{team_id}/edit")
+def edit_team(
+    team_id: int,
+    team_name: str = Form(...),
+    member_count: int | None = Form(None),
+    db: Session = Depends(get_db),
+):
+    """Rename a team or update its member count."""
+    team = db.get(Team, team_id)
+    if team:
+        name = team_name.strip()
+        if name:
+            team.name = name
+        team.member_count = member_count
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+@router.post("/teams/{team_id}/delete")
+def delete_team(team_id: int, db: Session = Depends(get_db)):
+    """Delete a team and all its responses."""
+    team = db.get(Team, team_id)
+    if team:
+        # Cascade: delete all responses (and their answers) for this team
+        responses = db.query(Response).filter(Response.team_id == team_id).all()
+        for resp in responses:
+            db.delete(resp)
+        db.delete(team)
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
+# ─── Data Management ────────────────────────────────────────────────────────
+
+
+@router.get("/data/download-db")
+def download_database():
+    """Download the SQLite database file."""
+    if not DB_PATH.exists():
+        return RedirectResponse(url="/admin", status_code=303)
+    return FileResponse(
+        path=str(DB_PATH),
+        media_type="application/x-sqlite3",
+        filename="maturity.db",
+    )
+
+
+@router.get("/data/download-questions/{assessment_type}")
+def download_questions_csv(assessment_type: str, db: Session = Depends(get_db)):
+    """Download questions as CSV (team or engineering)."""
+    if assessment_type not in ("team", "engineering"):
+        return RedirectResponse(url="/admin", status_code=303)
+
+    questions = (
+        db.query(Question)
+        .filter(Question.assessment_type == assessment_type)
+        .order_by(Question.display_order)
+        .all()
+    )
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    if assessment_type == "team":
+        writer.writerow(["Category", "Subcategory", "Statement"])
+        for q in questions:
+            writer.writerow([q.category, q.subcategory, q.statement])
+    else:
+        writer.writerow([
+            "Category", "Subcategory", "Area",
+            "Base", "Beginner", "Intermediate", "Advanced", "Expert",
+        ])
+        for q in questions:
+            writer.writerow([
+                q.category, q.subcategory, q.statement,
+                q.level_1 or "", q.level_2 or "", q.level_3 or "",
+                q.level_4 or "", q.level_5 or "",
+            ])
+
+    output.seek(0)
+    filename = f"{assessment_type}_questions.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.post("/data/upload-questions/{assessment_type}")
+async def upload_questions_csv(
+    assessment_type: str,
+    request: Request,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    """Upload a CSV to replace questions for an assessment type.
+
+    Saves the file to data/ and re-seeds questions from it (force=True).
+    """
+    if assessment_type not in ("team", "engineering"):
+        return RedirectResponse(url="/admin", status_code=303)
+
+    # Save uploaded CSV to data directory
+    target = TEAM_CSV if assessment_type == "team" else ENGINEERING_CSV
+    content = await file.read()
+
+    # Write to a temp file first, then move (atomic-ish)
+    with tempfile.NamedTemporaryFile(
+        mode="wb", dir=str(DATA_DIR), delete=False, suffix=".csv"
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    shutil.move(tmp_path, str(target))
+
+    # Re-seed questions from the new CSV
+    if assessment_type == "team":
+        count = seed_questions(db, force=True)
+    else:
+        count = seed_engineering_questions(db, force=True)
+
+    return RedirectResponse(url="/admin?upload_success=1&count=" + str(count), status_code=303)
 
 
 @router.get("/export/{round_id}")
@@ -205,4 +355,5 @@ def api_create_round(
         "id": rnd.id,
         "name": rnd.name,
         "is_active": rnd.is_active,
+        "engineering_token": rnd.engineering_token,
     }
