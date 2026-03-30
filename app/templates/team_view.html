@@ -5,7 +5,7 @@
 <!-- Header -->
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
     <div>
-        <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-accent-400 hover:underline mb-1 inline-block">&larr; Back to Overview</a>
+        <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Back to Overview</a>
         <h1 class="text-3xl font-bold text-hub-text tracking-tight">{{ team.name }}</h1>
         <p class="text-sm text-hub-muted mt-1">Combined assessment results — team maturity &amp; engineering maturity</p>
     </div>
@@ -39,7 +39,7 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Team Maturity</p>
         {% if summary %}
-        <p class="text-3xl font-bold {% if summary.overall_score >= 4.0 %}text-green-600{% elif summary.overall_score >= 3.0 %}text-yellow-600{% elif summary.overall_score >= 2.0 %}text-orange-600{% else %}text-red-600{% endif %}">
+        <p class="text-3xl font-bold {% if summary.overall_score >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">
             {{ "%.1f"|format(summary.overall_score) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
         </p>
         <p class="text-xs text-hub-faint mt-1">{{ summary.response_count }} responses</p>
@@ -53,7 +53,7 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Engineering Maturity</p>
         {% if eng_stats %}
-        <p class="text-3xl font-bold {% if eng_stats.overall_avg >= 4.0 %}text-emerald-600{% elif eng_stats.overall_avg >= 3.0 %}text-yellow-600{% elif eng_stats.overall_avg >= 2.0 %}text-orange-600{% else %}text-red-600{% endif %}">
+        <p class="text-3xl font-bold {% if eng_stats.overall_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">
             {{ "%.1f"|format(eng_stats.overall_avg) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
         </p>
         <p class="text-xs text-hub-faint mt-1">{{ eng_stats.response_count }} responses · {{ maturity_labels.get((eng_stats.overall_avg | round | int), "") }}</p>
@@ -67,12 +67,12 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Top Strength</p>
         {% if summary and summary.strengths %}
-        <p class="text-sm font-semibold text-green-400">{{ summary.strengths[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
+        <p class="text-sm font-semibold text-hub-text">{{ summary.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
         <p class="text-xs text-hub-faint">Team survey</p>
         {% elif eng_stats and eng_stats.strengths %}
-        <p class="text-sm font-semibold text-green-400">{{ eng_stats.strengths[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(eng_stats.strengths[0].avg) }}</p>
+        <p class="text-sm font-semibold text-hub-text">{{ eng_stats.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(eng_stats.strengths[0].avg) }}</p>
         <p class="text-xs text-hub-faint">Engineering</p>
         {% else %}
         <p class="text-2xl font-bold text-hub-faint">—</p>
@@ -83,12 +83,12 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Needs Improvement</p>
         {% if summary and summary.improvements %}
-        <p class="text-sm font-semibold text-orange-400">{{ summary.improvements[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
+        <p class="text-sm font-semibold text-hub-text">{{ summary.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
         <p class="text-xs text-hub-faint">Team survey</p>
         {% elif eng_stats and eng_stats.improvements %}
-        <p class="text-sm font-semibold text-orange-400">{{ eng_stats.improvements[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(eng_stats.improvements[0].avg) }}</p>
+        <p class="text-sm font-semibold text-hub-text">{{ eng_stats.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(eng_stats.improvements[0].avg) }}</p>
         <p class="text-xs text-hub-faint">Engineering</p>
         {% else %}
         <p class="text-2xl font-bold text-hub-faint">—</p>
@@ -99,13 +99,13 @@
 <!-- Strengths & Improvements side-by-side -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-base font-semibold text-emerald-400 mb-3">Strengths</h3>
+        <h3 class="text-base font-semibold text-hub-text mb-3">Strengths</h3>
         {% if summary and summary.strengths %}
         <p class="text-[10px] font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
         {% for s in summary.strengths %}
         <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-sm font-bold text-green-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-sm font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -114,19 +114,19 @@
         {% for s in eng_stats.strengths %}
         <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-sm font-bold text-green-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-sm font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
         {% endif %}
     </div>
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-base font-semibold text-orange-400 mb-3">Improvement Areas</h3>
+        <h3 class="text-base font-semibold text-hub-text mb-3">Improvement Areas</h3>
         {% if summary and summary.improvements %}
         <p class="text-[10px] font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
         {% for s in summary.improvements %}
         <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-sm font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-sm font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -135,7 +135,7 @@
         {% for s in eng_stats.improvements %}
         <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-sm font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-sm font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -181,63 +181,48 @@
     <!-- Detailed Statement Scores (collapsed) -->
     {% if grouped_statements %}
     <div>
-        <h3 class="text-lg font-semibold text-hub-text mb-4">Detailed Statement Scores</h3>
+        <h3 class="text-2xl font-bold text-hub-text mb-6">Detailed Statement Scores</h3>
         {% for category, subcategories in grouped_statements.items() %}
-        <div class="bg-hub-card border-2 border-hub-border mb-4 overflow-hidden">
-            <button type="button" onclick="toggleSection(this)"
-                    class="w-full flex items-center justify-between p-4 text-left hover:bg-hub-hover transition-all duration-200">
+        <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+            <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                    class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
                 <div class="flex items-center gap-3">
-                    <h4 class="text-sm font-bold text-hub-text">{{ category }}</h4>
+                    <h4 class="text-lg font-bold text-hub-text">{{ category }}</h4>
                     {% set all_avgs = [] %}
                     {% for stmts in subcategories.values() %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
                     {% if all_avgs %}
                     {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                        {% if cat_avg >= 4.0 %}border-2 border-green-500 text-green-600
-                        {% elif cat_avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
-                        {% elif cat_avg >= 2.0 %}border-2 border-orange-500 text-orange-600
-                        {% else %}border-2 border-red-500 text-red-600{% endif %}">
-                        {{ "%.1f"|format(cat_avg) }}
+                    <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                        <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                        <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
                     </span>
                     {% endif %}
                 </div>
-                <svg class="section-chevron w-4 h-4 text-hub-faint transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div class="section-content collapsed">
+            <div class="section-content">
                 {% for subcategory, statements in subcategories.items() %}
                 <div class="border-t border-hub-border">
-                    <div class="px-4 py-2 bg-hub-surface">
-                        <div class="flex items-center justify-between">
-                            <h5 class="text-xs font-semibold text-accent-400 uppercase tracking-wide">{{ subcategory }}</h5>
+                    <div class="px-5 py-3 bg-hub-surface">
+                        <div class="flex items-center gap-3">
+                            <h5 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h5>
                             {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
-                            <span class="text-xs font-bold
-                                {% if sub_avg >= 4.0 %}text-green-600
-                                {% elif sub_avg >= 3.0 %}text-yellow-600
-                                {% elif sub_avg >= 2.0 %}text-orange-600
-                                {% else %}text-red-600{% endif %}">
-                                avg {{ "%.1f"|format(sub_avg) }}
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(sub_avg) }}
                             </span>
                         </div>
                     </div>
                     {% for s in statements %}
-                    <div class="px-4 py-2 flex items-start gap-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
-                        <p class="flex-1 text-xs text-hub-text leading-relaxed">{{ s.statement }}</p>
-                        <div class="shrink-0 flex items-center gap-2">
-                            <div class="w-20 bg-hub-hover rounded-full h-2">
-                                <div class="h-2 rounded-full
-                                    {% if s.avg >= 4.0 %}bg-green-500
-                                    {% elif s.avg >= 3.0 %}bg-yellow-500
-                                    {% elif s.avg >= 2.0 %}bg-orange-500
-                                    {% else %}bg-red-500{% endif %}"
-                                    style="width: {{ (s.avg / 5 * 100) | int }}%"></div>
-                            </div>
-                            <span class="w-8 text-right text-xs font-bold
-                                {% if s.avg >= 4.0 %}text-green-600
-                                {% elif s.avg >= 3.0 %}text-yellow-600
-                                {% elif s.avg >= 2.0 %}text-orange-600
-                                {% else %}text-red-600{% endif %}">
+                    <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
+                            <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if s.avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
                                 {{ "%.1f"|format(s.avg) }}
                             </span>
                         </div>
@@ -281,54 +266,50 @@
     <!-- Detailed Area Scores (collapsed) -->
     {% if grouped_eng_areas %}
     <div>
-        <h3 class="text-lg font-semibold text-hub-text mb-4">Detailed Area Scores</h3>
+        <h3 class="text-2xl font-bold text-hub-text mb-6">Detailed Area Scores</h3>
         {% for category, subcategories in grouped_eng_areas.items() %}
-        <div class="bg-hub-card border-2 border-hub-border mb-4 overflow-hidden">
-            <button type="button" onclick="toggleSection(this)"
-                    class="w-full flex items-center justify-between p-4 text-left hover:bg-hub-hover transition-all duration-200">
+        <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+            <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                    class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
                 <div class="flex items-center gap-3">
-                    <h4 class="text-sm font-bold text-hub-text">{{ category }}</h4>
+                    <h4 class="text-lg font-bold text-hub-text">{{ category }}</h4>
                     {% set all_avgs = [] %}
                     {% for areas in subcategories.values() %}{% for a in areas %}{% if all_avgs.append(a.avg) %}{% endif %}{% endfor %}{% endfor %}
                     {% if all_avgs %}
                     {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                        {% if cat_avg >= 4.0 %}border-2 border-emerald-500 text-emerald-600
-                        {% elif cat_avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
-                        {% elif cat_avg >= 2.0 %}border-2 border-orange-500 text-orange-600
-                        {% else %}border-2 border-red-500 text-red-600{% endif %}">
-                        {{ "%.1f"|format(cat_avg) }} — {{ maturity_labels.get((cat_avg | round | int), "") }}
+                    <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                        <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                        <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
                     </span>
                     {% endif %}
                 </div>
-                <svg class="section-chevron w-4 h-4 text-hub-faint transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div class="section-content collapsed">
+            <div class="section-content">
                 {% for subcategory, areas in subcategories.items() %}
                 <div class="border-t border-hub-border">
-                    <div class="px-4 py-2 bg-hub-surface">
-                        <h5 class="text-xs font-semibold text-accent-400 uppercase tracking-wide">{{ subcategory }}</h5>
+                    <div class="px-5 py-3 bg-hub-surface">
+                        <div class="flex items-center gap-3">
+                            <h5 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h5>
+                            {% set sub_avg = (areas | map(attribute='avg') | sum) / (areas | length) %}
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(sub_avg) }}
+                            </span>
+                        </div>
                     </div>
                     {% for a in areas %}
-                    <div class="px-4 py-2.5 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <p class="text-xs font-semibold text-hub-text">{{ a.area }}</p>
+                    <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="flex-1 text-sm font-semibold text-hub-text">{{ a.area }}</p>
                             <div class="shrink-0 flex items-center gap-2">
-                                <div class="w-20 bg-hub-hover rounded-full h-2">
-                                    <div class="h-2 rounded-full
-                                        {% if a.avg >= 4.0 %}bg-emerald-500
-                                        {% elif a.avg >= 3.0 %}bg-yellow-500
-                                        {% elif a.avg >= 2.0 %}bg-orange-500
-                                        {% else %}bg-red-500{% endif %}"
-                                        style="width: {{ (a.avg / 5 * 100) | int }}%"></div>
-                                </div>
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold
-                                    {% if a.avg >= 4.0 %}border-2 border-emerald-500 text-emerald-600
-                                    {% elif a.avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
-                                    {% elif a.avg >= 2.0 %}border-2 border-orange-500 text-orange-600
-                                    {% else %}border-2 border-red-500 text-red-600{% endif %}">
+                                <span class="text-xs text-hub-muted">{{ a.level_label }}</span>
+                                <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                    {% if a.avg >= 3.0 %}border-hub-text text-hub-text
+                                    {% else %}border-accent-500 text-accent-500{% endif %}">
                                     {{ "%.1f"|format(a.avg) }}
                                 </span>
                             </div>
@@ -383,9 +364,13 @@
                         label: '{{ team.name }}',
                         data: values,
                         backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                        borderColor: '#FF0000',
+                        borderColor: '#000000',
                         borderWidth: 2,
                         pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
                     }]
                 },
                 options: {
@@ -412,7 +397,7 @@
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, borderRadius: 3, barThickness: 14 }]
+                datasets: [{ data: values, backgroundColor: '#FFFFFF', borderColor: '#000000', borderWidth: 2, borderRadius: 0, barThickness: 14 }]
             },
             options: {
                 indexAxis: 'y',
@@ -424,37 +409,20 @@
         });
     }
 
-    // Team Trend
+    // Trend Chart (Highlight on Hover)
     {
         const trendsData = {{ trends | tojson }};
         let roundLabels = [];
         const datasets = [];
-        let ci = 0;
         for (const [cat, points] of Object.entries(trendsData)) {
             if (points.length === 0) continue;
             if (roundLabels.length === 0) roundLabels = points.map(p => p.round_name);
-            datasets.push({
-                label: cat,
-                data: points.map(p => p.avg),
-                borderColor: teamBorders[ci % teamBorders.length],
-                tension: 0.3, fill: false,
-            });
-            ci++;
+            datasets.push({ label: cat, data: points.map(p => p.avg) });
         }
         if (roundLabels.length > 1) {
-            new Chart(document.getElementById('teamTrendChart'), {
-                type: 'line',
-                data: { labels: roundLabels, datasets: datasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Score' } } },
-                    plugins: { legend: { position: 'top' } }
-                }
-            });
+            createHighlightTrendChart('teamTrendChart', roundLabels, datasets);
         } else {
-            const el = document.getElementById('teamTrendChart');
-            if (el) el.parentElement.parentElement.style.display = 'none';
+            document.getElementById('teamTrendChart')?.closest('.bg-hub-card')?.style.setProperty('display', 'none');
         }
     }
 </script>
@@ -487,9 +455,13 @@
                         label: 'Engineering',
                         data: values,
                         backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                        borderColor: '#FF0000',
+                        borderColor: '#000000',
                         borderWidth: 2,
                         pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
                     }]
                 },
                 options: {
@@ -521,7 +493,7 @@
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, borderRadius: 6, barThickness: 24 }]
+                datasets: [{ data: values, backgroundColor: '#FFFFFF', borderColor: '#000000', borderWidth: 2, borderRadius: 0, barThickness: 24 }]
             },
             options: {
                 indexAxis: 'y',

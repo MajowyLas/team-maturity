@@ -5,7 +5,7 @@
 <!-- Header -->
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
     <div>
-        <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-accent-400 hover:underline mb-1 inline-block">&larr; Back to Overview</a>
+        <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Back to Overview</a>
         <h1 class="text-3xl font-bold text-hub-text tracking-tight">{{ team.name }}</h1>
     </div>
     {% if rounds %}
@@ -38,16 +38,14 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Overall Score</p>
         <p class="text-4xl font-bold
-            {% if summary.overall_score >= 4.0 %}text-green-600
-            {% elif summary.overall_score >= 3.0 %}text-yellow-600
-            {% elif summary.overall_score >= 2.0 %}text-orange-600
-            {% else %}text-red-600{% endif %}">
+            {% if summary.overall_score >= 3.0 %}text-hub-text
+            {% else %}text-accent-500{% endif %}">
             {{ "%.1f"|format(summary.overall_score) }}
         </p>
         <p class="text-xs text-hub-faint mt-1">out of 5.0</p>
         {% if summary.previous_overall is not none %}
         {% set delta = summary.overall_score - summary.previous_overall %}
-        <p class="text-sm mt-2 {% if delta > 0 %}text-green-600{% elif delta < 0 %}text-red-600{% else %}text-hub-muted{% endif %}">
+        <p class="text-sm mt-2 {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-muted{% endif %}">
             {% if delta > 0 %}&triangle;{% elif delta < 0 %}&nabla;{% else %}&mdash;{% endif %}
             {{ "%.2f"|format(delta|abs) }} vs previous
         </p>
@@ -63,16 +61,16 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
         {% if summary.strengths %}
-        <p class="text-lg font-semibold text-green-400">{{ summary.strengths[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-green-600">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
+        <p class="text-lg font-semibold text-hub-text">{{ summary.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
         {% endif %}
     </div>
 
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
         {% if summary.improvements %}
-        <p class="text-lg font-semibold text-orange-400">{{ summary.improvements[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
+        <p class="text-lg font-semibold text-hub-text">{{ summary.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
         {% endif %}
     </div>
 </div>
@@ -80,20 +78,20 @@
 <!-- Strengths & Improvements Detail -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-lg font-semibold text-emerald-400 mb-4">Top 3 Strengths</h3>
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Strengths</h3>
         {% for s in summary.strengths %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-lg font-bold text-green-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-lg font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
     </div>
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-lg font-semibold text-orange-400 mb-4">Top 3 Improvement Areas</h3>
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Improvement Areas</h3>
         {% for s in summary.improvements %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <span class="text-hub-text">{{ s.subcategory }}</span>
-            <span class="text-lg font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
+            <span class="text-lg font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
         </div>
         {% endfor %}
     </div>
@@ -135,8 +133,8 @@
     {% for category, subcategories in grouped_statements.items() %}
     <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
         <!-- Category header -->
-        <button type="button" onclick="toggleSection(this)"
-                class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+        <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
             <div class="flex items-center gap-3">
                 <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
                 {% set cat_scores = grouped_statements[category].values() | list %}
@@ -144,57 +142,41 @@
                 {% for stmts in cat_scores %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                <span class="px-2.5 py-0.5 text-sm font-black border-2
-                    {% if cat_avg >= 4.0 %}border-green-500 text-green-600
-                    {% elif cat_avg >= 3.0 %}border-yellow-500 text-yellow-600
-                    {% elif cat_avg >= 2.0 %}border-orange-500 text-orange-600
-                    {% else %}border-red-500 text-red-600{% endif %}">
-                    {{ "%.1f"|format(cat_avg) }}
+                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                    <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
                 </span>
                 {% endif %}
             </div>
-            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
 
-        <div class="section-content collapsed">
+        <div class="section-content">
             {% for subcategory, statements in subcategories.items() %}
             <div class="border-t border-hub-border">
                 <!-- Subcategory header -->
                 <div class="px-5 py-3 bg-hub-surface">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-sm font-semibold text-accent-400 uppercase tracking-wide">{{ subcategory }}</h4>
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
                         {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
-                        <span class="text-sm font-bold
-                            {% if sub_avg >= 4.0 %}text-green-600
-                            {% elif sub_avg >= 3.0 %}text-yellow-600
-                            {% elif sub_avg >= 2.0 %}text-orange-600
-                            {% else %}text-red-600{% endif %}">
-                            avg {{ "%.1f"|format(sub_avg) }}
+                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(sub_avg) }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Statements -->
                 {% for s in statements %}
-                <div class="px-5 py-3 flex items-start gap-4 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
-                    <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
-                    <div class="shrink-0 flex items-center gap-2">
-                        <!-- Score bar -->
-                        <div class="w-24 bg-hub-hover rounded-full h-2.5">
-                            <div class="h-2.5 rounded-full score-bar-animated
-                                {% if s.avg >= 4.0 %}bg-green-500
-                                {% elif s.avg >= 3.0 %}bg-yellow-500
-                                {% elif s.avg >= 2.0 %}bg-orange-500
-                                {% else %}bg-red-500{% endif %}"
-                                style="width: {{ (s.avg / 5 * 100) | int }}%"></div>
-                        </div>
-                        <span class="w-10 text-right text-sm font-bold
-                            {% if s.avg >= 4.0 %}text-green-600
-                            {% elif s.avg >= 3.0 %}text-yellow-600
-                            {% elif s.avg >= 2.0 %}text-orange-600
-                            {% else %}text-red-600{% endif %}">
+                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
+                        <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if s.avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
                             {{ "%.1f"|format(s.avg) }}
                         </span>
                     </div>
@@ -241,9 +223,13 @@
                         label: '{{ team.name }}',
                         data: catValues,
                         backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                        borderColor: '#FF0000',
+                        borderColor: '#000000',
                         borderWidth: 2,
                         pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
                     }]
                 },
                 options: {
@@ -294,9 +280,10 @@
                 labels: subLabels,
                 datasets: [{
                     data: subValues,
-                    backgroundColor: subColors,
-                    borderWidth: 0,
-                    borderRadius: 3,
+                    backgroundColor: '#FFFFFF',
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                    borderRadius: 0,
                     barThickness: 14,
                 }]
             },
@@ -310,49 +297,20 @@
         });
     }
 
-    // Trend Chart
+    // Trend Chart (Highlight on Hover)
     {
         const trendsData = {{ trends | tojson }};
-        const trendColors = [
-            'rgb(59,130,246)', 'rgb(16,185,129)', 'rgb(245,158,11)',
-            'rgb(239,68,68)', 'rgb(139,92,246)', 'rgb(236,72,153)',
-        ];
         let roundLabels = [];
-        const trendDatasets = [];
-        let colorIdx = 0;
-
+        const datasets = [];
         for (const [cat, points] of Object.entries(trendsData)) {
             if (points.length === 0) continue;
-            if (roundLabels.length === 0) {
-                roundLabels = points.map(p => p.round_name);
-            }
-            trendDatasets.push({
-                label: cat,
-                data: points.map(p => p.avg),
-                borderColor: trendColors[colorIdx % trendColors.length],
-                backgroundColor: trendColors[colorIdx % trendColors.length] + '33',
-                tension: 0.3,
-                fill: false,
-            });
-            colorIdx++;
+            if (roundLabels.length === 0) roundLabels = points.map(p => p.round_name);
+            datasets.push({ label: cat, data: points.map(p => p.avg) });
         }
-
         if (roundLabels.length > 1) {
-            new Chart(document.getElementById('trendChart'), {
-                type: 'line',
-                data: { labels: roundLabels, datasets: trendDatasets },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 5, title: { display: true, text: 'Score' } }
-                    },
-                    plugins: { legend: { position: 'top' } }
-                }
-            });
+            createHighlightTrendChart('trendChart', roundLabels, datasets);
         } else {
-            const trendCanvas = document.getElementById('trendChart');
-            if (trendCanvas) trendCanvas.parentElement.parentElement.style.display = 'none';
+            document.getElementById('trendChart')?.closest('.bg-hub-card')?.style.setProperty('display', 'none');
         }
     }
 </script>

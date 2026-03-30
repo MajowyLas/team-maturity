@@ -48,9 +48,17 @@ def dashboard_overview(
 
     cards = []
     overview_stats = None
+    statement_scores = []
     if selected_round:
         cards = get_overview_cards(db, selected_round.id)
         overview_stats = get_team_maturity_overview(db, selected_round.id)
+        statement_scores = get_statement_scores(db, None, selected_round.id)
+
+    grouped_statements: dict[str, dict[str, list]] = {}
+    for s in statement_scores:
+        grouped_statements.setdefault(s.category, {}).setdefault(
+            s.subcategory, []
+        ).append(s)
 
     overview_trends = get_overview_trends(db)
 
@@ -63,6 +71,7 @@ def dashboard_overview(
             "cards": cards,
             "overview_stats": overview_stats,
             "overview_trends": overview_trends,
+            "grouped_statements": grouped_statements,
         },
     )
 

@@ -23,6 +23,70 @@ from app.models import AssessmentRound, Question, Response, ResponseAnswer, Team
 router = APIRouter(prefix="/engineering", tags=["engineering"])
 templates = Jinja2Templates(directory="app/templates")
 
+# ─── Dashboard ───────────────────────────────────────────────────────────────
+# NOTE: Dashboard routes MUST be defined before /{token} wildcard routes,
+# otherwise FastAPI matches "dashboard" as a token value.
+
+
+@router.get("/dashboard/view")
+def engineering_dashboard(
+    request: Request,
+    round_id: int | None = Query(None),
+    team_id: int | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Engineering maturity dashboard — department-wide or filtered by team."""
+    rounds = (
+        db.query(AssessmentRound)
+        .order_by(AssessmentRound.created_at.desc())
+        .all()
+    )
+
+    selected_round = None
+    if round_id:
+        selected_round = db.get(AssessmentRound, round_id)
+    if not selected_round and rounds:
+        selected_round = rounds[0]
+
+    teams = db.query(Team).order_by(Team.name).all()
+    selected_team = db.get(Team, team_id) if team_id else None
+
+    stats = None
+    trends = {}
+    area_details = []
+
+    if selected_round:
+        stats = get_engineering_stats(db, selected_round.id, team_id=team_id)
+        trends = get_engineering_trends(db, team_id=team_id)
+        area_details = get_area_details(db, selected_round.id, team_id=team_id)
+
+    # Group area details: {category: {subcategory: [area, ...]}}
+    grouped_areas: dict[str, dict[str, list]] = {}
+    for a in area_details:
+        grouped_areas.setdefault(a["category"], {}).setdefault(
+            a["subcategory"], []
+        ).append(a)
+
+    base_url = str(request.base_url).rstrip("/")
+
+    return templates.TemplateResponse(
+        "engineering_dashboard.html",
+        {
+            "request": request,
+            "rounds": rounds,
+            "selected_round": selected_round,
+            "teams": teams,
+            "selected_team": selected_team,
+            "stats": stats,
+            "trends": trends,
+            "grouped_areas": grouped_areas,
+            "maturity_labels": MATURITY_LABELS,
+            "maturity_descriptions": MATURITY_DESCRIPTIONS,
+            "base_url": base_url,
+        },
+    )
+
+
 # ─── Survey (token-based) ────────────────────────────────────────────────────
 
 
@@ -137,64 +201,3 @@ def engineering_thanks(token: str, request: Request, db: Session = Depends(get_d
         {"request": request, "token": token, "round": rnd},
     )
 
-
-# ─── Dashboard ───────────────────────────────────────────────────────────────
-
-
-@router.get("/dashboard/view")
-def engineering_dashboard(
-    request: Request,
-    round_id: int | None = Query(None),
-    team_id: int | None = Query(None),
-    db: Session = Depends(get_db),
-):
-    """Engineering maturity dashboard — department-wide or filtered by team."""
-    rounds = (
-        db.query(AssessmentRound)
-        .order_by(AssessmentRound.created_at.desc())
-        .all()
-    )
-
-    selected_round = None
-    if round_id:
-        selected_round = db.get(AssessmentRound, round_id)
-    if not selected_round and rounds:
-        selected_round = rounds[0]
-
-    teams = db.query(Team).order_by(Team.name).all()
-    selected_team = db.get(Team, team_id) if team_id else None
-
-    stats = None
-    trends = {}
-    area_details = []
-
-    if selected_round:
-        stats = get_engineering_stats(db, selected_round.id, team_id=team_id)
-        trends = get_engineering_trends(db, team_id=team_id)
-        area_details = get_area_details(db, selected_round.id, team_id=team_id)
-
-    # Group area details: {category: {subcategory: [area, ...]}}
-    grouped_areas: dict[str, dict[str, list]] = {}
-    for a in area_details:
-        grouped_areas.setdefault(a["category"], {}).setdefault(
-            a["subcategory"], []
-        ).append(a)
-
-    base_url = str(request.base_url).rstrip("/")
-
-    return templates.TemplateResponse(
-        "engineering_dashboard.html",
-        {
-            "request": request,
-            "rounds": rounds,
-            "selected_round": selected_round,
-            "teams": teams,
-            "selected_team": selected_team,
-            "stats": stats,
-            "trends": trends,
-            "grouped_areas": grouped_areas,
-            "maturity_labels": MATURITY_LABELS,
-            "maturity_descriptions": MATURITY_DESCRIPTIONS,
-            "base_url": base_url,
-        },
-    )

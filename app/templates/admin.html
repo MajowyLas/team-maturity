@@ -37,7 +37,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <button type="button" onclick="showEditForm({{ t.id }})"
-                                        class="text-xs text-accent-400 hover:text-accent-300 font-medium">Edit</button>
+                                        class="text-xs text-hub-muted hover:text-hub-text font-medium">Edit</button>
                                 {% set resp_count = team_response_counts.get(t.id, 0) %}
                                 <button type="button"
                                         onclick="confirmDeleteTeam({{ t.id }}, '{{ t.name }}', {{ resp_count }})"
@@ -111,12 +111,12 @@
                         <div>
                             <span class="font-medium text-hub-text">{{ r.name }}</span>
                             <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
-                                {% if r.is_active %}border-emerald-500 text-emerald-600{% else %}border-hub-border text-hub-muted{% endif %}">
+                                {% if r.is_active %}border-hub-text text-hub-text{% else %}border-hub-border text-hub-muted{% endif %}">
                                 {% if r.is_active %}Active{% else %}Closed{% endif %}
                             </span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <a href="/admin/export/{{ r.id }}" class="text-xs text-accent-400 hover:underline">Export CSV</a>
+                            <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-hub-text hover:underline">Export CSV</a>
                             <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
                                 <button type="submit" class="text-xs text-hub-muted hover:text-hub-text">
                                     {% if r.is_active %}Close{% else %}Reopen{% endif %}
@@ -184,7 +184,7 @@
                     <form method="POST" action="/admin/data/upload-questions/team" enctype="multipart/form-data"
                           class="flex items-center gap-2">
                         <input type="file" name="file" accept=".csv" required
-                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
+                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-hub-muted hover:file:bg-hub-hover">
                         <button type="submit"
                                 onclick="return confirm('This will replace all team survey questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
                                 class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150 whitespace-nowrap">
@@ -211,7 +211,7 @@
                     <form method="POST" action="/admin/data/upload-questions/engineering" enctype="multipart/form-data"
                           class="flex items-center gap-2">
                         <input type="file" name="file" accept=".csv" required
-                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
+                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-hub-muted hover:file:bg-hub-hover">
                         <button type="submit"
                                 onclick="return confirm('This will replace all engineering assessment questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
                                 class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150 whitespace-nowrap">
@@ -291,10 +291,10 @@
         navigator.clipboard.writeText(input.value).then(() => {
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.add('bg-emerald-500/15', 'text-emerald-400', 'copy-success');
+            btn.classList.add('bg-hub-text/15', 'text-hub-text', 'copy-success');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.remove('bg-emerald-500/15', 'text-emerald-400', 'copy-success');
+                btn.classList.remove('bg-hub-text/15', 'text-hub-text', 'copy-success');
             }, 2000);
         });
     }

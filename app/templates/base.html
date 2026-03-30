@@ -10,6 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/trend-chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -26,8 +27,14 @@
                         },
                         accent: {
                             50: '#fff5f5', 100: '#ffe3e3', 200: '#ffc9c9',
-                            300: '#ffa8a8', 400: '#ff6b6b', 500: '#FF0000',
+                            300: '#ffa8a8', 400: '#CC0000', 500: '#FF0000',
                             600: '#e60000', 700: '#cc0000',
+                        },
+                        forest: {
+                            300: '#4a9c5e',
+                            400: '#2D7A3F',
+                            500: '#1a6b30',
+                            600: '#0A6622',
                         },
                         hub: {
                             bg: '#FFFFFF',
@@ -88,6 +95,7 @@
     </script>
 </head>
 <body class="h-full font-sans" style="background: #FFFFFF; color: #000000;">
+    {% block nav %}
     <!-- Navigation -->
     <nav style="border-bottom: 3px solid #000;" class="sticky top-0 z-50 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,6 +124,7 @@
             </div>
         </div>
     </nav>
+    {% endblock %}
 
     <!-- Main content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">

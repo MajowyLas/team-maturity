@@ -4,6 +4,7 @@
 {% block content %}
 <div class="flex items-center justify-between mb-8">
     <div>
+        <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
         <h1 class="text-3xl font-bold text-hub-text tracking-tight">Engineering Delivery Maturity</h1>
         <p class="text-sm text-hub-muted mt-1">
             {% if selected_team %}{{ selected_team.name }} — team view{% else %}Department-wide assessment results{% endif %}
@@ -51,7 +52,7 @@
 <!-- Maturity levels link -->
 <div class="mb-6 text-right">
     <button type="button" onclick="document.getElementById('maturityModal').classList.remove('hidden')"
-            class="text-xs text-accent-400 hover:text-accent-300 font-medium hover:underline">
+            class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
         What do the maturity levels mean?
     </button>
 </div>
@@ -61,17 +62,12 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
         <p class="text-4xl font-bold
-            {% if stats.overall_avg >= 4.0 %}text-emerald-600
-            {% elif stats.overall_avg >= 3.0 %}text-yellow-600
-            {% elif stats.overall_avg >= 2.0 %}text-orange-600
-            {% else %}text-red-600{% endif %}">
+            {% if stats.overall_avg >= 4.0 %}text-hub-text
+            {% elif stats.overall_avg >= 3.0 %}text-hub-muted
+            {% else %}text-accent-500{% endif %}">
             {{ "%.1f"|format(stats.overall_avg) }}
         </p>
-        <p class="text-xs font-semibold mt-1
-            {% if stats.overall_avg >= 4.0 %}text-emerald-500
-            {% elif stats.overall_avg >= 3.0 %}text-yellow-500
-            {% elif stats.overall_avg >= 2.0 %}text-orange-500
-            {% else %}text-red-500{% endif %}">
+        <p class="text-xs font-semibold mt-1 text-hub-text">
             {{ maturity_labels.get((stats.overall_avg | round | int), "") }}
         </p>
     </div>
@@ -85,16 +81,16 @@
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
         {% if stats.strengths %}
-        <p class="text-lg font-semibold text-emerald-400">{{ stats.strengths[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-emerald-600">{{ "%.1f"|format(stats.strengths[0].avg) }}</p>
+        <p class="text-lg font-semibold text-hub-text">{{ stats.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(stats.strengths[0].avg) }}</p>
         {% endif %}
     </div>
 
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
         {% if stats.improvements %}
-        <p class="text-lg font-semibold text-orange-400">{{ stats.improvements[0].subcategory }}</p>
-        <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(stats.improvements[0].avg) }}</p>
+        <p class="text-lg font-semibold text-hub-text">{{ stats.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(stats.improvements[0].avg) }}</p>
         {% endif %}
     </div>
 </div>
@@ -102,7 +98,7 @@
 <!-- Strengths & Improvements Detail -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-lg font-semibold text-emerald-400 mb-4">Top 3 Strengths</h3>
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Strengths</h3>
         {% for s in stats.strengths %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <div>
@@ -110,19 +106,16 @@
                 <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                    {% if s.avg >= 4 %}border-emerald-500 text-emerald-600
-                    {% elif s.avg >= 3 %}border-yellow-500 text-yellow-600
-                    {% else %}border-orange-500 text-orange-600{% endif %}">
+                <span class="text-xs font-medium text-hub-muted px-2 py-0.5">
                     {{ maturity_labels.get((s.avg | round | int), "") }}
                 </span>
-                <span class="text-lg font-bold text-emerald-600">{{ "%.1f"|format(s.avg) }}</span>
+                <span class="text-lg font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
             </div>
         </div>
         {% endfor %}
     </div>
     <div class="bg-hub-card border-2 border-hub-border p-6">
-        <h3 class="text-lg font-semibold text-orange-400 mb-4">Top 3 Improvement Areas</h3>
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Improvement Areas</h3>
         {% for s in stats.improvements %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
             <div>
@@ -130,14 +123,10 @@
                 <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                    {% if s.avg >= 4 %}border-emerald-500 text-emerald-600
-                    {% elif s.avg >= 3 %}border-yellow-500 text-yellow-600
-                    {% elif s.avg >= 2 %}border-orange-500 text-orange-600
-                    {% else %}border-red-500 text-red-600{% endif %}">
+                <span class="text-xs font-medium text-hub-muted px-2 py-0.5">
                     {{ maturity_labels.get((s.avg | round | int), "") }}
                 </span>
-                <span class="text-lg font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
+                <span class="text-lg font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
             </div>
         </div>
         {% endfor %}
@@ -178,64 +167,60 @@
     {% for category, subcategories in grouped_areas.items() %}
     <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
         <!-- Category header -->
-        <button type="button" onclick="toggleSection(this)"
-                class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+        <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
             <div class="flex items-center gap-3">
                 <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
                 {% set all_avgs = [] %}
                 {% for areas in subcategories.values() %}{% for a in areas %}{% if all_avgs.append(a.avg) %}{% endif %}{% endfor %}{% endfor %}
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                <span class="px-2.5 py-0.5 text-sm font-black border-2
-                    {% if cat_avg >= 4.0 %}border-emerald-500 text-emerald-600
-                    {% elif cat_avg >= 3.0 %}border-yellow-500 text-yellow-600
-                    {% elif cat_avg >= 2.0 %}border-orange-500 text-orange-600
-                    {% else %}border-red-500 text-red-600{% endif %}">
-                    {{ "%.1f"|format(cat_avg) }} — {{ maturity_labels.get((cat_avg | round | int), "") }}
+                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                    <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
                 </span>
                 {% endif %}
             </div>
-            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
 
-        <div class="section-content collapsed">
+        <div class="section-content">
             {% for subcategory, areas in subcategories.items() %}
             <div class="border-t border-hub-border">
+                <!-- Subcategory header -->
                 <div class="px-5 py-3 bg-hub-surface">
-                    <h4 class="text-sm font-semibold text-accent-400 uppercase tracking-wide">{{ subcategory }}</h4>
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
+                        {% set sub_avg = (areas | map(attribute='avg') | sum) / (areas | length) %}
+                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(sub_avg) }}
+                        </span>
+                    </div>
                 </div>
 
+                <!-- Areas -->
                 {% for a in areas %}
-                <div class="px-5 py-4 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
-                    <div class="flex items-start justify-between gap-4 mb-2">
-                        <p class="font-semibold text-hub-text">{{ a.area }}</p>
+                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-hub-text leading-relaxed">{{ a.area }}</p>
+                            {% if a.current_description %}
+                            <p class="text-xs text-hub-muted italic mt-1">Current: "{{ a.current_description }}"</p>
+                            {% endif %}
+                        </div>
                         <div class="shrink-0 flex items-center gap-2">
-                            <!-- Maturity bar -->
-                            <div class="w-32 bg-hub-hover rounded-full h-3 relative">
-                                <div class="h-3 rounded-full score-bar-animated
-                                    {% if a.avg >= 4.0 %}bg-emerald-500
-                                    {% elif a.avg >= 3.0 %}bg-yellow-500
-                                    {% elif a.avg >= 2.0 %}bg-orange-500
-                                    {% else %}bg-red-500{% endif %}"
-                                    style="width: {{ (a.avg / 5 * 100) | int }}%"></div>
-                            </div>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold
-                                {% if a.avg >= 4.0 %}border-emerald-500 text-emerald-600
-                                {% elif a.avg >= 3.0 %}border-yellow-500 text-yellow-600
-                                {% elif a.avg >= 2.0 %}border-orange-500 text-orange-600
-                                {% else %}border-red-500 text-red-600{% endif %}">
+                            <span class="text-xs text-hub-muted">{{ a.level_label }}</span>
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if a.avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
                                 {{ "%.1f"|format(a.avg) }}
-                            </span>
-                            <span class="text-xs font-medium text-hub-muted w-20">
-                                {{ a.level_label }}
                             </span>
                         </div>
                     </div>
-                    {% if a.current_description %}
-                    <p class="text-sm text-hub-muted italic ml-0">Current: "{{ a.current_description }}"</p>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -255,15 +240,15 @@
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-lg font-bold text-hub-text">Maturity Levels</h2>
             <button onclick="document.getElementById('maturityModal').classList.add('hidden')"
-                    class="text-hub-faint hover:text-hub-muted p-1">
+                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
         <div class="space-y-3">
-            {% set colors = {1: "border-red-500", 2: "border-orange-500", 3: "border-yellow-500", 4: "border-green-500", 5: "border-emerald-500"} %}
-            {% set dot_colors = {1: "bg-red-500", 2: "bg-orange-500", 3: "bg-yellow-500", 4: "bg-green-500", 5: "bg-emerald-500"} %}
+            {% set colors = {1: "border-accent-500", 2: "border-accent-400", 3: "border-hub-muted", 4: "border-hub-text", 5: "border-hub-text"} %}
+            {% set dot_colors = {1: "bg-accent-500", 2: "bg-accent-500", 3: "bg-black", 4: "bg-black", 5: "bg-black"} %}
             {% for level, desc in maturity_descriptions.items() %}
             <div class="border-2 p-3 {{ colors[level] }}">
                 <div class="flex items-center gap-2 mb-1">
@@ -304,10 +289,10 @@
         navigator.clipboard.writeText(input.value).then(() => {
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.add('bg-emerald-500/15', 'text-emerald-400');
+            btn.classList.add('bg-black/15', 'text-hub-text');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.remove('bg-emerald-500/15', 'text-emerald-400');
+                btn.classList.remove('bg-black/15', 'text-hub-text');
             }, 2000);
         });
     }
@@ -345,10 +330,13 @@
                         label: 'Engineering Maturity',
                         data: values,
                         backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                        borderColor: '#FF0000',
-                        borderWidth: 2.5,
+                        borderColor: '#000000',
+                        borderWidth: 2,
                         pointBackgroundColor: '#FF0000',
-                        pointRadius: 5,
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
                     }]
                 },
                 options: {
@@ -403,9 +391,10 @@
                 labels: labels,
                 datasets: [{
                     data: values,
-                    backgroundColor: colors,
-                    borderWidth: 0,
-                    borderRadius: 6,
+                    backgroundColor: '#FFFFFF',
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                    borderRadius: 0,
                     barThickness: 28,
                 }]
             },
@@ -431,64 +420,18 @@
         });
     }
 
-    // Trend Chart
+    // Trend Chart (Highlight on Hover)
     {% if trends and trends.round_names | length >= 2 %}
     {
         const trendsData = {{ trends | tojson }};
+        const maturityLabels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
         const datasets = [];
-        let colorIdx = 0;
-
         for (const [cat, scores] of Object.entries(trendsData.categories)) {
-            datasets.push({
-                label: cat,
-                data: scores,
-                borderColor: engineeringBorders[colorIdx % engineeringBorders.length],
-                backgroundColor: engineeringColors[colorIdx % engineeringColors.length] + '33',
-                tension: 0.3,
-                fill: false,
-                borderWidth: 2.5,
-                pointRadius: 5,
-            });
-            colorIdx++;
+            datasets.push({ label: cat, data: scores });
         }
-
-        new Chart(document.getElementById('trendChart'), {
-            type: 'line',
-            data: {
-                labels: trendsData.round_names,
-                datasets: datasets,
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 5,
-                        ticks: {
-                            stepSize: 1,
-                            callback: function(value) {
-                                const labels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
-                                return labels[value] || '';
-                            }
-                        },
-                        title: { display: true, text: 'Maturity Level' },
-                    },
-                },
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                const labels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
-                                const val = ctx.parsed.y;
-                                const lvl = labels[Math.round(val)] || '';
-                                return ctx.dataset.label + ': ' + val.toFixed(1) + ' (' + lvl + ')';
-                            }
-                        }
-                    }
-                },
-            },
+        createHighlightTrendChart('trendChart', trendsData.round_names, datasets, {
+            yLabel: 'Maturity Level',
+            yTickCallback: (v) => maturityLabels[v] || '',
         });
     }
     {% endif %}

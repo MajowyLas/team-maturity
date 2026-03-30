@@ -12,8 +12,8 @@
     <!-- ───── Stepper indicator ───── -->
     <div class="flex items-center justify-center mb-10" id="stepIndicator">
         <div class="flex items-center">
-            <span id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-accent-600 text-white">1</span>
-            <span class="text-xs ml-2 font-medium text-accent-400">Team</span>
+            <span id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white">1</span>
+            <span class="text-xs ml-2 font-medium text-hub-muted">Team</span>
         </div>
         <div class="w-16 h-0.5 bg-hub-border mx-3 step-line" id="line1"></div>
         <div class="flex items-center">
@@ -37,7 +37,7 @@
         <div class="space-y-2 mb-6" id="teamList">
             {% for t in teams %}
             <button type="button" onclick="selectTeam({{ t.id }}, '{{ t.token }}', this)"
-                    class="team-btn w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500/40 hover:bg-accent-500/5 hover:shadow-soft transition-all duration-200 flex items-center justify-between">
+                    class="team-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ t.name }}</span>
                     {% if t.member_count %}
@@ -54,7 +54,7 @@
         <div class="border-t border-hub-border pt-4">
             <button type="button" onclick="showNewTeamForm()"
                     id="newTeamToggle"
-                    class="text-sm text-accent-400 font-medium hover:underline">+ Create a new team</button>
+                    class="text-sm text-hub-muted font-medium hover:underline">+ Create a new team</button>
         </div>
         {% else %}
         <!-- No teams yet: prompt to create -->
@@ -82,7 +82,7 @@
                 <div id="teamError" class="hidden text-sm text-red-600"></div>
                 <button type="button" onclick="createTeam()"
                         id="createTeamBtn"
-                        class="w-full px-4 py-2.5 bg-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-accent-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="w-full px-4 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
                     Create Team
                 </button>
             </div>
@@ -99,10 +99,10 @@
             {% for r in rounds %}
             {% if r.is_active %}
             <button type="button" onclick="selectRound({{ r.id }}, '{{ r.engineering_token }}', this)"
-                    class="round-btn w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500/40 hover:bg-accent-500/5 hover:shadow-soft transition-all duration-200 flex items-center justify-between">
+                    class="round-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ r.name }}</span>
-                    <span class="ml-2 px-2 py-0.5 text-xs font-bold border-2 border-emerald-500 text-emerald-600 uppercase">Active</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs font-bold border-2 border-hub-text text-hub-text uppercase">Active</span>
                 </div>
                 <svg class="w-5 h-5 text-hub-faint check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -115,7 +115,7 @@
         <div class="border-t border-hub-border pt-4">
             <button type="button" onclick="showNewRoundForm()"
                     id="newRoundToggle"
-                    class="text-sm text-accent-400 font-medium hover:underline">+ Create a new session</button>
+                    class="text-sm text-hub-muted font-medium hover:underline">+ Create a new session</button>
         </div>
         {% else %}
         <div class="text-center py-4">
@@ -137,7 +137,7 @@
                 <div id="roundError" class="hidden text-sm text-red-600"></div>
                 <button type="button" onclick="createRound()"
                         id="createRoundBtn"
-                        class="w-full px-4 py-2.5 bg-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-accent-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="w-full px-4 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
                     Create Session
                 </button>
             </div>
@@ -153,7 +153,7 @@
             <!-- Team Maturity -->
             <button type="button" onclick="selectSurvey('team')"
                     id="surveyBtn-team"
-                    class="survey-btn text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500/40 hover:bg-accent-500/5 transition-all duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">📊</span>
                     <span class="font-semibold text-hub-text text-lg">Team Maturity</span>
@@ -164,7 +164,7 @@
             <!-- Engineering Maturity -->
             <button type="button" onclick="selectSurvey('engineering')"
                     id="surveyBtn-engineering"
-                    class="survey-btn text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500/40 hover:bg-accent-500/5 transition-all duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">🔧</span>
                     <span class="font-semibold text-hub-text text-lg">Engineering Maturity</span>
@@ -185,7 +185,7 @@
                            class="flex-1 rounded-lg border-hub-border border bg-hub-surface px-4 py-3 text-sm text-hub-text font-mono">
                     <button type="button" onclick="copyShareLink()"
                             id="copyBtn"
-                            class="px-5 py-3 bg-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-accent-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200 whitespace-nowrap">
+                            class="px-5 py-3 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200 whitespace-nowrap">
                         Copy Link
                     </button>
                 </div>
@@ -197,7 +197,7 @@
                 Go to Dashboard
             </a>
             <button type="button" onclick="resetFlow()"
-                    class="px-5 py-2.5 text-accent-400 text-sm font-medium hover:underline">
+                    class="px-5 py-2.5 text-hub-muted text-sm font-medium hover:underline">
                 Start over
             </button>
         </div>
@@ -221,12 +221,12 @@
         selectedTeamToken = token;
         // Highlight selected
         document.querySelectorAll('.team-btn').forEach(b => {
-            b.classList.remove('border-accent-500', 'bg-accent-500/10');
+            b.classList.remove('border-hub-text', 'bg-hub-hover');
             b.querySelector('.check-icon').classList.add('hidden');
         });
-        btn.classList.add('border-accent-500', 'bg-accent-500/10');
+        btn.classList.add('border-hub-text', 'bg-hub-hover');
         btn.querySelector('.check-icon').classList.remove('hidden');
-        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-accent-400');
+        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-hub-muted');
         // Move to step 2
         setTimeout(() => goToStep(2), 300);
     }
@@ -285,12 +285,12 @@
         selectedRoundId = roundId;
         selectedEngToken = engToken;
         document.querySelectorAll('.round-btn').forEach(b => {
-            b.classList.remove('border-accent-500', 'bg-accent-500/10');
+            b.classList.remove('border-hub-text', 'bg-hub-hover');
             b.querySelector('.check-icon').classList.add('hidden');
         });
-        btn.classList.add('border-accent-500', 'bg-accent-500/10');
+        btn.classList.add('border-hub-text', 'bg-hub-hover');
         btn.querySelector('.check-icon').classList.remove('hidden');
-        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-accent-400');
+        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-hub-muted');
         setTimeout(() => goToStep(3), 300);
     }
 
@@ -348,17 +348,17 @@
 
         // Highlight selected card
         document.querySelectorAll('.survey-btn').forEach(b => {
-            b.classList.remove('border-accent-500', 'bg-accent-500/10', 'shadow-soft');
+            b.classList.remove('border-hub-text', 'bg-hub-hover', 'shadow-soft');
         });
         const btn = document.getElementById('surveyBtn-' + type);
-        btn.classList.add('border-accent-500', 'bg-accent-500/10', 'shadow-soft');
+        btn.classList.add('border-hub-text', 'bg-hub-hover', 'shadow-soft');
 
         if (type === 'team') {
             link = base + '/survey/' + selectedTeamToken;
             summary = 'your team for the Team Maturity survey';
         } else {
             link = base + '/engineering/' + selectedEngToken;
-            summary = 'the engineering department for the Engineering Maturity assessment';
+            summary = 'engineers to conduct the Engineering Maturity assessment';
         }
 
         document.getElementById('surveyLinkOutput').value = link;
@@ -383,13 +383,13 @@
             const dot = document.getElementById('dot' + i);
             const label = document.getElementById('label' + i);
             if (i < step) {
-                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-accent-500 text-white';
+                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white';
                 dot.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
-                if (label) label.className = 'text-xs ml-2 font-medium text-accent-400';
+                if (label) label.className = 'text-xs ml-2 font-medium text-hub-muted';
             } else if (i === step) {
-                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-accent-600 text-white';
+                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white';
                 dot.textContent = i;
-                if (label) label.className = 'text-xs ml-2 font-medium text-accent-400';
+                if (label) label.className = 'text-xs ml-2 font-medium text-hub-muted';
             } else {
                 dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-hub-hover text-hub-faint';
                 dot.textContent = i;
@@ -397,8 +397,8 @@
             }
         }
         // Update lines
-        document.getElementById('line1').className = step > 1 ? 'w-16 h-0.5 bg-accent-500 mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
-        document.getElementById('line2').className = step > 2 ? 'w-16 h-0.5 bg-accent-500 mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
+        document.getElementById('line1').className = step > 1 ? 'w-16 h-0.5 bg-black mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
+        document.getElementById('line2').className = step > 2 ? 'w-16 h-0.5 bg-black mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
 
         // Show current step with entrance animation
         const panel = document.getElementById('step' + step);
@@ -409,7 +409,7 @@
         if (step === 3) {
             document.getElementById('linkSection').classList.add('hidden');
             document.querySelectorAll('.survey-btn').forEach(b => {
-                b.classList.remove('border-accent-500', 'bg-accent-500/10', 'shadow-soft');
+                b.classList.remove('border-hub-text', 'bg-hub-hover', 'shadow-soft');
             });
         }
     }
@@ -422,11 +422,11 @@
             const btn = document.getElementById('copyBtn');
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.replace('bg-accent-600', 'bg-emerald-600');
+            btn.classList.replace('bg-accent-600', 'bg-hub-text');
             btn.classList.add('copy-success');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.replace('bg-emerald-600', 'bg-accent-600');
+                btn.classList.replace('bg-hub-text', 'bg-accent-600');
                 btn.classList.remove('copy-success');
             }, 2000);
         });

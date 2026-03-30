@@ -26,12 +26,6 @@ input:focus, select:focus, textarea:focus {
     transition: border-color 0.15s ease;
 }
 
-.card-interactive:hover {
-    transform: none;
-    border-color: #FF0000;
-    box-shadow: none;
-}
-
 /* --- ACCORDION --- */
 .category-content {
     transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
@@ -77,12 +71,6 @@ input[type="radio"]:checked + div {
     animation: growWidth 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- HEATMAP --- */
-.heatmap-cell:hover {
-    transform: scale(1.05);
-    transition: transform 0.15s ease;
-}
-
 /* --- COPY BUTTON --- */
 .copy-success {
     animation: pulseOnce 0.3s ease-out;
@@ -91,8 +79,14 @@ input[type="radio"]:checked + div {
 /* --- STAGGER ENTRANCE --- */
 .stagger-item {
     opacity: 0;
-    animation: fadeInUp 0.3s ease-out forwards;
+    animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* --- SELECTED LEVEL ROW (engineering survey) --- */
+.peer:checked ~ div > span {
+    color: inherit !important;
+}
+
 
 .stagger-item:nth-child(1) { animation-delay: 0.03s; }
 .stagger-item:nth-child(2) { animation-delay: 0.06s; }
@@ -117,6 +111,11 @@ input[type="radio"]:checked + div {
 }
 
 /* --- KEYFRAMES --- */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
 @keyframes fadeInUp {
     0% { opacity: 0; transform: translateY(8px); }
     100% { opacity: 1; transform: translateY(0); }

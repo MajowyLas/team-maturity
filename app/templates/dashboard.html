@@ -4,6 +4,7 @@
 {% block content %}
 <div class="flex items-center justify-between mb-8">
     <div>
+        <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
         <h1 class="text-3xl font-bold text-hub-text tracking-tight">Team Maturity</h1>
         <p class="text-sm text-hub-muted mt-1">Team-wide assessment results</p>
     </div>
@@ -29,7 +30,7 @@
     <div class="text-5xl mb-4">📊</div>
     <h2 class="text-xl font-semibold text-hub-text mb-2">No Data Yet</h2>
     <p class="text-hub-muted mb-6">Once teams submit their assessments, results will appear here.</p>
-    <a href="/admin" class="text-accent-400 font-medium hover:underline">Set up teams and rounds</a>
+    <a href="/admin" class="text-hub-muted font-medium hover:underline hover:text-hub-text">Set up teams and rounds</a>
 </div>
 {% else %}
 
@@ -48,16 +49,14 @@
         <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
             <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
             <p class="text-4xl font-bold
-                {% if overview_stats.overall_avg >= 4.0 %}text-emerald-600
-                {% elif overview_stats.overall_avg >= 3.0 %}text-yellow-600
-                {% elif overview_stats.overall_avg >= 2.0 %}text-orange-600
-                {% else %}text-red-600{% endif %}">
+                {% if overview_stats.overall_avg >= 3.0 %}text-hub-text
+                {% else %}text-accent-500{% endif %}">
                 {{ "%.1f"|format(overview_stats.overall_avg) }}
             </p>
             {% if overview_stats.previous_overall is not none %}
             {% set delta = overview_stats.overall_avg - overview_stats.previous_overall %}
             <p class="text-xs mt-1 font-semibold
-                {% if delta > 0 %}text-emerald-500{% elif delta < 0 %}text-red-500{% else %}text-hub-faint{% endif %}">
+                {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
                 {% if delta > 0 %}▲ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}▼ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
                 <span class="font-normal text-hub-faint ml-0.5">vs prev</span>
             </p>
@@ -75,16 +74,16 @@
         <div class="bg-hub-card border-2 border-hub-border p-6">
             <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
             {% if overview_stats.strengths %}
-            <p class="text-lg font-semibold text-emerald-400">{{ overview_stats.strengths[0].subcategory }}</p>
-            <p class="text-2xl font-bold text-emerald-600">{{ "%.1f"|format(overview_stats.strengths[0].avg) }}</p>
+            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.strengths[0].subcategory }}</p>
+            <p class="text-3xl font-bold text-hub-text">{{ "%.1f"|format(overview_stats.strengths[0].avg) }}</p>
             {% endif %}
         </div>
 
         <div class="bg-hub-card border-2 border-hub-border p-6">
             <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
             {% if overview_stats.improvements %}
-            <p class="text-lg font-semibold text-orange-400">{{ overview_stats.improvements[0].subcategory }}</p>
-            <p class="text-2xl font-bold text-orange-600">{{ "%.1f"|format(overview_stats.improvements[0].avg) }}</p>
+            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.improvements[0].subcategory }}</p>
+            <p class="text-3xl font-bold text-accent-500">{{ "%.1f"|format(overview_stats.improvements[0].avg) }}</p>
             {% endif %}
         </div>
     </div>
@@ -97,7 +96,7 @@
                 <span class="font-normal text-hub-faint">— change vs previous round</span>
             </h3>
             <button type="button" onclick="document.getElementById('categoryModal').classList.remove('hidden')"
-                    class="text-xs text-accent-400 hover:text-accent-300 font-medium hover:underline">
+                    class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
                 What do these mean?
             </button>
         </div>
@@ -106,16 +105,14 @@
             <div class="text-center">
                 <p class="text-xs text-hub-muted truncate mb-1" title="{{ cat.category }}">{{ cat.category }}</p>
                 <p class="text-lg font-bold
-                    {% if cat.avg >= 4.0 %}text-emerald-600
-                    {% elif cat.avg >= 3.0 %}text-yellow-600
-                    {% elif cat.avg >= 2.0 %}text-orange-600
-                    {% else %}text-red-600{% endif %}">
+                    {% if cat.avg >= 3.0 %}text-hub-text
+                    {% else %}text-accent-500{% endif %}">
                     {{ "%.1f"|format(cat.avg) }}
                 </p>
                 {% if cat.category in overview_stats.category_deltas %}
                 {% set d = overview_stats.category_deltas[cat.category] %}
                 <p class="text-xs font-semibold
-                    {% if d > 0 %}text-emerald-500{% elif d < 0 %}text-red-500{% else %}text-hub-faint{% endif %}">
+                    {% if d > 0 %}text-hub-text{% elif d < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
                     {% if d > 0 %}▲ +{{ "%.2f"|format(d) }}{% elif d < 0 %}▼ {{ "%.2f"|format(d) }}{% else %}—{% endif %}
                 </p>
                 {% endif %}
@@ -139,26 +136,26 @@
         <!-- Left: Strengths + Improvements stacked -->
         <div class="space-y-4">
             <div class="bg-hub-card border-2 border-hub-border p-5">
-                <h3 class="text-base font-semibold text-emerald-400 mb-3">Top 3 Strengths</h3>
+                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Strengths</h3>
                 {% for s in overview_stats.strengths %}
                 <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
                     <div>
                         <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
                         <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
                     </div>
-                    <span class="text-base font-bold text-emerald-600">{{ "%.1f"|format(s.avg) }}</span>
+                    <span class="text-base font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
                 </div>
                 {% endfor %}
             </div>
             <div class="bg-hub-card border-2 border-hub-border p-5">
-                <h3 class="text-base font-semibold text-orange-400 mb-3">Top 3 Improvement Areas</h3>
+                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Improvement Areas</h3>
                 {% for s in overview_stats.improvements %}
                 <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
                     <div>
                         <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
                         <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
                     </div>
-                    <span class="text-base font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
+                    <span class="text-base font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
                 </div>
                 {% endfor %}
             </div>
@@ -185,6 +182,74 @@
 {% endif %}
 
 <!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2b: Detailed Statement Scores — collapsible per-statement breakdown
+     ═══════════════════════════════════════════════════════════════════════ -->
+{% if grouped_statements %}
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 class="text-lg font-bold text-hub-text">Detailed Statement Scores</h2>
+        <div class="flex-1 h-px bg-hub-border"></div>
+    </div>
+
+    {% for category, subcategories in grouped_statements.items() %}
+    <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+        <!-- Category header -->
+        <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
+                {% set all_avgs = [] %}
+                {% for stmts in subcategories.values() %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
+                {% if all_avgs %}
+                {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
+                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                </span>
+                {% endif %}
+            </div>
+            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div class="section-content">
+            {% for subcategory, statements in subcategories.items() %}
+            <div class="border-t border-hub-border">
+                <!-- Subcategory header -->
+                <div class="px-5 py-3 bg-hub-surface">
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
+                        {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
+                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(sub_avg) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Statements -->
+                {% for s in statements %}
+                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
+                        <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if s.avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(s.avg) }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════════════
      SECTION 3: Team Deep Dives — clickable cards linking to team view
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="mb-8">
@@ -193,68 +258,64 @@
         <div class="flex-1 h-px bg-hub-border"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
         {% for card in cards %}
         {% if card.response_count > 0 %}
         <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-accent-500 transition-all duration-150 overflow-hidden">
+           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 overflow-hidden">
 
-            <!-- Card Header -->
-            <div class="p-6 pb-4">
-                <div class="flex items-start justify-between mb-4">
-                    <h3 class="text-lg font-bold text-hub-text group-hover:text-accent-400 transition">{{ card.team_name }}</h3>
-                    <span class="text-xs font-bold text-hub-muted border-2 border-hub-border px-2 py-0.5 uppercase">{{ card.response_count }} response{{ 's' if card.response_count != 1 }}</span>
+            <!-- Header: Team name + response count -->
+            <div class="flex items-center justify-between px-4 pt-3 pb-2">
+                <h3 class="text-sm font-black text-hub-text uppercase tracking-wide group-hover:text-hub-text transition truncate">{{ card.team_name }}</h3>
+                <span class="text-[10px] font-bold text-hub-muted border border-hub-border px-1.5 py-0.5 uppercase shrink-0 ml-2">{{ card.response_count }} RESP</span>
+            </div>
+
+            <!-- Score + Category bars row -->
+            <div class="flex items-stretch px-4 pb-3 gap-3">
+                <!-- Large overall score -->
+                <div class="flex flex-col items-center justify-center shrink-0">
+                    <p class="text-3xl font-black leading-none
+                        {% if card.overall >= 3.0 %}text-hub-text
+                        {% else %}text-accent-500{% endif %}">
+                        {{ "%.1f"|format(card.overall) }}
+                    </p>
+                    <p class="text-[9px] font-bold text-hub-faint uppercase tracking-wider">OVERALL</p>
                 </div>
 
-                <!-- Overall Score -->
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="text-center">
-                        <p class="text-3xl font-bold
-                            {% if card.overall >= 4.0 %}text-green-600
-                            {% elif card.overall >= 3.0 %}text-yellow-600
-                            {% elif card.overall >= 2.0 %}text-orange-600
-                            {% else %}text-red-600{% endif %}">
-                            {{ "%.1f"|format(card.overall) }}
-                        </p>
-                        <p class="text-xs text-hub-faint">Overall</p>
-                    </div>
-
-                    <!-- Mini category bars -->
-                    <div class="flex-1 space-y-1.5">
-                        {% for cat in card.category_scores %}
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] text-hub-muted w-20 truncate" title="{{ cat.category }}">{{ cat.category }}</span>
-                            <div class="flex-1 bg-hub-hover rounded-full h-2">
-                                <div class="h-2 rounded-full score-bar-animated
-                                    {% if cat.avg >= 4.0 %}bg-green-500
-                                    {% elif cat.avg >= 3.0 %}bg-yellow-500
-                                    {% elif cat.avg >= 2.0 %}bg-orange-500
-                                    {% else %}bg-red-500{% endif %}"
-                                    style="width: {{ (cat.avg / 5 * 100) | int }}%"></div>
-                            </div>
-                            <span class="text-[10px] font-semibold text-hub-muted w-6 text-right">{{ "%.1f"|format(cat.avg) }}</span>
+                <!-- Mini category bars -->
+                <div class="flex-1 space-y-1 min-w-0">
+                    {% for cat in card.category_scores %}
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-bold text-hub-faint uppercase w-28 truncate" title="{{ cat.category }}">{{ cat.category }}</span>
+                        <div class="flex-1 bg-white border border-black h-3 p-[2px]">
+                            <div class="h-full score-bar-animated
+                                {% if cat.avg >= 3.0 %}bg-black
+                                {% else %}bg-accent-500{% endif %}"
+                                style="width: {{ (cat.avg / 5 * 100) | int }}%"></div>
                         </div>
-                        {% endfor %}
+                        <span class="text-[9px] font-bold w-5 text-right
+                            {% if cat.avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat.avg) }}</span>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Card Footer: Strength & Improvement -->
-            <div class="grid grid-cols-2 divide-x divide-hub-border border-t border-hub-border bg-hub-surface">
-                <div class="px-4 py-3">
-                    <p class="text-[10px] uppercase tracking-wide text-hub-faint mb-0.5">Strength</p>
+            <!-- Footer: Strength | Improve -->
+            <div class="grid grid-cols-2 divide-x divide-hub-border border-t-2 border-hub-border">
+                <div class="px-3 py-2">
+                    <p class="text-[9px] font-black uppercase tracking-wider text-hub-faint">STRENGTH</p>
                     {% if card.top_strength %}
-                    <p class="text-xs font-semibold text-green-400 truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }}</p>
-                    <p class="text-sm font-bold text-green-600">{{ "%.1f"|format(card.top_strength.avg) }}</p>
+                    <p class="text-[11px] font-semibold text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }}</p>
+                    <p class="text-sm font-black text-hub-text">{{ "%.1f"|format(card.top_strength.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
                 </div>
-                <div class="px-4 py-3">
-                    <p class="text-[10px] uppercase tracking-wide text-hub-faint mb-0.5">To Improve</p>
+                <div class="px-3 py-2">
+                    <p class="text-[9px] font-black uppercase tracking-wider text-hub-faint">IMPROVE</p>
                     {% if card.top_improvement %}
-                    <p class="text-xs font-semibold text-orange-400 truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }}</p>
-                    <p class="text-sm font-bold text-orange-600">{{ "%.1f"|format(card.top_improvement.avg) }}</p>
+                    <p class="text-[11px] font-semibold text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }}</p>
+                    <p class="text-sm font-black text-accent-500">{{ "%.1f"|format(card.top_improvement.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
@@ -290,7 +351,7 @@
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold text-hub-text">Category Descriptions</h2>
             <button onclick="document.getElementById('categoryModal').classList.add('hidden')"
-                    class="text-hub-faint hover:text-hub-muted p-1">
+                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -328,6 +389,14 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    function toggleSection(btn) {
+        const content = btn.nextElementSibling;
+        const chevron = btn.querySelector('.section-chevron');
+        content.classList.toggle('collapsed');
+        chevron.classList.toggle('rotate-180');
+    }
+</script>
 {% if overview_stats %}
 <script>
 {
@@ -347,10 +416,13 @@
                     label: 'Team Maturity',
                     data: values,
                     backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                    borderColor: '#FF0000',
-                    borderWidth: 2.5,
+                    borderColor: '#000000',
+                    borderWidth: 2,
                     pointBackgroundColor: '#FF0000',
-                    pointRadius: 4,
+                    pointBorderColor: '#000000',
+                    pointRadius: 6,
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 8,
                 }]
             },
             options: {
@@ -382,68 +454,11 @@
 <script>
 {
     const trendsData = {{ overview_trends | tojson }};
-    const teamColors = [
-        'rgb(59, 130, 246)',   // blue
-        'rgb(16, 185, 129)',   // green
-        'rgb(245, 158, 11)',   // amber
-        'rgb(239, 68, 68)',    // red
-        'rgb(139, 92, 246)',   // violet
-        'rgb(236, 72, 153)',   // pink
-        'rgb(20, 184, 166)',   // teal
-        'rgb(249, 115, 22)',   // orange
-    ];
-
-    const datasets = trendsData.teams.map((team, i) => ({
+    const datasets = trendsData.teams.map(team => ({
         label: team.name,
         data: team.scores,
-        borderColor: teamColors[i % teamColors.length],
-        backgroundColor: teamColors[i % teamColors.length] + '18',
-        tension: 0.3,
-        fill: false,
-        borderWidth: 2.5,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        spanGaps: true,
     }));
-
-    new Chart(document.getElementById('overviewTrendChart'), {
-        type: 'line',
-        data: {
-            labels: trendsData.round_names,
-            datasets: datasets,
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5,
-                    title: { display: true, text: 'Overall Score' },
-                },
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { usePointStyle: false, boxWidth: 14, boxHeight: 14, generateLabels(chart) {
-                        return chart.data.datasets.map((ds, i) => ({
-                            text: ds.label,
-                            fillStyle: ds.borderColor,
-                            strokeStyle: ds.borderColor,
-                            lineWidth: 0,
-                            datasetIndex: i,
-                            hidden: !chart.isDatasetVisible(i),
-                        }));
-                    }},
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2) ?? '—'}`,
-                    },
-                },
-            },
-        },
-    });
+    createHighlightTrendChart('overviewTrendChart', trendsData.round_names, datasets);
 }
 </script>
 {% endif %}

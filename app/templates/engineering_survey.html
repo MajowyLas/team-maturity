@@ -1,143 +1,133 @@
-{% extends "base_terminal.html" %}
-{% block title %}$ assess --engineering{% endblock %}
-{% block terminal_path %}~/engineering/assess{% endblock %}
+{% extends "base.html" %}
+{% block title %}Engineering Delivery Assessment{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <div class="flex items-center gap-2 mb-1">
-        <span class="text-term-green">$</span>
-        <h1 class="text-2xl font-bold text-term-green animate-glow tracking-tight">./run-assessment.sh</h1>
-        <span class="w-2 h-5 bg-term-green animate-blink"></span>
-    </div>
-    <p class="text-term-muted text-sm pl-5">
-        <span class="text-term-muted"># Pick the maturity level that best describes where we are today. Be honest.</span>
-    </p>
-</div>
-
-<!-- Draft recovery banner -->
-<div id="draftBanner" class="hidden mb-6 bg-term-surface border border-term-yellow/30 rounded-lg p-4 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-        <span class="text-term-yellow font-bold">[WARN]</span>
-        <p class="text-sm text-term-yellow">Unfinished session detected — <strong id="draftCount" class="text-term-text">0</strong> answers cached locally.</p>
-    </div>
-    <div class="flex gap-2 shrink-0 ml-4">
-        <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-term-greenDim text-white text-xs font-bold rounded hover:bg-term-green/30 border border-term-green/30 transition">restore</button>
-        <button type="button" id="discardDraft" class="px-3 py-1.5 text-term-muted text-xs font-medium hover:text-term-red transition">discard</button>
-    </div>
-</div>
-
-<form method="POST" action="/engineering/{{ token }}" id="surveyForm">
-    <!-- Session Info -->
-    <div class="bg-term-surface border border-term-border rounded-lg p-5 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-                <span class="text-term-green text-sm">></span>
-                <span class="text-sm font-semibold text-term-text">session.init()</span>
-            </div>
-            <span class="px-2.5 py-0.5 bg-term-greenBg border border-term-green/20 text-term-green rounded text-xs font-mono">{{ round.name }}</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-xs font-medium text-term-muted mb-1.5 uppercase tracking-wider">user.name</label>
-                <input type="text" name="respondent_name" required placeholder="jane_smith"
-                       class="w-full rounded-md bg-term-bg border border-term-border px-3 py-2.5 text-sm text-term-text font-mono placeholder:text-term-muted/40 focus:bg-term-hover">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-term-muted mb-1.5 uppercase tracking-wider">team.select()</label>
-                <select name="team_id" required class="w-full rounded-md bg-term-bg border border-term-border px-3 py-2.5 text-sm text-term-text font-mono focus:bg-term-hover">
-                    <option value="" disabled selected class="text-term-muted">// choose your squad</option>
-                    {% for t in teams %}
-                    <option value="{{ t.id }}">{{ t.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-black text-hub-text tracking-tight uppercase">Engineering Delivery Assessment</h1>
+        <p class="text-hub-muted text-sm mt-1">Pick the maturity level that best describes where we are today. Be honest.</p>
+        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
+            <span class="w-2 h-2 bg-accent-500"></span>
+            <span class="text-xs font-black text-hub-text uppercase">{{ round.name }}</span>
         </div>
     </div>
 
-    <!-- Progress bar — terminal style -->
-    <div class="bg-term-surface/95 backdrop-blur-sm border border-term-border rounded-lg p-4 mb-6 sticky top-0 z-10">
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-term-muted font-mono">
-                <span class="text-term-green">$</span> assess --progress
-            </span>
-            <span id="progressText" class="text-xs text-term-text font-mono">
-                [<span id="progressAscii" class="text-term-green">░░░░░░░░░░░░░░░░░░░░</span>] <span id="progressPct">0</span>% (<span id="progressCount">0</span>/{{ total_questions }})
-            </span>
+    <!-- Draft recovery banner -->
+    <div id="draftBanner" class="hidden mb-6 border-2 border-hub-border p-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="font-black text-hub-text">[DRAFT]</span>
+            <p class="text-sm text-hub-muted">Unfinished session detected — <strong id="draftCount" class="text-hub-text font-black">0</strong> answers cached locally.</p>
         </div>
-        <div id="progressStatus" class="mt-1 text-[10px] text-term-muted font-mono">STATUS: waiting for input...</div>
+        <div class="flex gap-2 shrink-0 ml-4">
+            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+            <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
+        </div>
     </div>
 
-    <!-- Questions by Category -->
-    {% for category, subcategories in grouped_questions.items() %}
-    <div class="bg-term-surface border border-term-border rounded-lg mb-5 overflow-hidden hover:border-term-green/20 transition-colors duration-300">
-        <button type="button" onclick="toggleCategory(this)"
-                class="w-full flex items-center justify-between p-5 text-left hover:bg-term-hover transition-all duration-200 group">
-            <div class="flex items-center gap-3">
-                <span class="text-term-green text-sm opacity-60 group-hover:opacity-100 transition-opacity">></span>
-                <h2 class="text-base font-bold text-term-text group-hover:text-term-green transition-colors">{{ category }}</h2>
-            </div>
-            <svg class="category-chevron w-4 h-4 text-term-muted transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </button>
-        <div class="category-content px-5 pb-5">
-            {% for subcategory, questions in subcategories.items() %}
-            <div class="mb-6 last:mb-0">
-                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-term-border/50">
-                    <span class="text-term-cyan text-[10px]">#</span>
-                    <h3 class="text-xs font-semibold text-term-cyan uppercase tracking-widest">{{ subcategory }}</h3>
+    <form method="POST" action="/engineering/{{ token }}" id="surveyForm">
+        <!-- Session Info -->
+        <div class="border-2 border-hub-border p-5 mb-6">
+            <h2 class="text-sm font-black text-hub-text mb-4 uppercase tracking-wide">About you</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
+                    <input type="text" name="respondent_name" required placeholder="e.g. Jane Smith"
+                           class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
                 </div>
-                {% for q in questions %}
-                <div class="question-block mb-4 last:mb-0">
-                    <p class="text-term-text text-sm mb-2 pl-1">
-                        <span class="text-term-muted mr-1">~</span>{{ q.statement }}
-                    </p>
-                    <div class="space-y-0 border border-term-border rounded overflow-hidden">
-                        {% set levels = [
-                            (1, "BASE", q.level_1, "text-term-red", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
-                            (2, "BEGN", q.level_2, "text-term-orange", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
-                            (3, "INTM", q.level_3, "text-term-yellow", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
-                            (4, "ADVN", q.level_4, "text-term-green", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
-                            (5, "XPRT", q.level_5, "text-term-cyan", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green")
-                        ] %}
-                        {% for score, label, description, label_color, bg_classes in levels %}
-                        {% if description %}
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                   class="sr-only peer" onchange="updateProgress()">
-                            <div class="flex items-center px-3 py-2 border-b border-term-border/30 last:border-b-0 {{ bg_classes }} peer-checked:border-l-[3px] transition-all duration-100">
-                                <span class="shrink-0 text-[10px] font-bold text-term-muted w-3 text-right mr-2 font-mono">{{ score }}</span>
-                                <span class="shrink-0 text-[10px] font-bold w-[3rem] font-mono {{ label_color }}">{{ label }}</span>
-                                <span class="shrink-0 text-term-border mx-2">|</span>
-                                <span class="text-xs text-term-muted leading-snug font-sans">{{ description }}</span>
-                            </div>
-                        </label>
-                        {% endif %}
+                <div>
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your team</label>
+                    <select name="team_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
+                        <option value="" disabled selected class="text-hub-faint">— choose your squad —</option>
+                        {% for t in teams %}
+                        <option value="{{ t.id }}">{{ t.name }}</option>
                         {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="bg-black text-white p-4 mb-6 sticky top-14 z-10">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold uppercase">Progress</span>
+                <span class="text-xs font-bold tabular-nums">
+                    <span id="progressCount">0</span> / {{ total_questions }}
+                </span>
+            </div>
+            <div class="relative w-full bg-white/20 h-2.5 overflow-hidden">
+                <div id="progressBar" class="h-2.5 bg-accent-500 transition-all duration-700 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Questions by Category -->
+        {% for category, subcategories in grouped_questions.items() %}
+        <div class="border-2 border-hub-border mb-5 overflow-hidden transition-colors duration-300">
+            <button type="button" onclick="toggleCategory(this)"
+                    class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <span class="w-1.5 h-7 bg-accent-500"></span>
+                    <h2 class="text-base font-black text-hub-text uppercase">{{ category }}</h2>
+                </div>
+                <svg class="category-chevron w-4 h-4 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div class="category-content px-5 pb-5">
+                {% for subcategory, questions in subcategories.items() %}
+                <div class="mb-6 last:mb-0">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b-2 border-hub-border">
+                        <h3 class="text-xs font-black text-hub-text uppercase tracking-widest">{{ subcategory }}</h3>
                     </div>
+                    {% for q in questions %}
+                    <div class="question-block mb-4 last:mb-0">
+                        <p class="text-hub-text text-sm mb-2 font-medium">{{ q.statement }}</p>
+                        <div class="space-y-0 border-2 border-hub-border overflow-hidden">
+                            {% set levels = [
+                                (1, "BASE", q.level_1, "text-hub-faint", "peer-checked:bg-black peer-checked:text-white"),
+                                (2, "BEGN", q.level_2, "text-hub-faint", "peer-checked:bg-black peer-checked:text-white"),
+                                (3, "INTM", q.level_3, "text-hub-muted", "peer-checked:bg-black peer-checked:text-white"),
+                                (4, "ADVN", q.level_4, "text-hub-muted", "peer-checked:bg-black peer-checked:text-white"),
+                                (5, "XPRT", q.level_5, "text-hub-text", "peer-checked:bg-black peer-checked:text-white")
+                            ] %}
+                            {% for score, label, description, label_color, bg_classes in levels %}
+                            {% if description %}
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
+                                       class="sr-only peer" onchange="updateProgress()">
+                                <div class="flex items-center px-3 py-2 border-b border-hub-hover last:border-b-0 hover:bg-hub-hover {{ bg_classes }} transition-all duration-100">
+                                    <span class="shrink-0 text-[10px] font-black text-hub-faint w-3 text-right mr-2">{{ score }}</span>
+                                    <span class="shrink-0 text-[10px] font-black w-[3rem] {{ label_color }}">{{ label }}</span>
+                                    <span class="shrink-0 text-hub-border mx-2">|</span>
+                                    <span class="text-xs text-hub-muted leading-snug">{{ description }}</span>
+                                </div>
+                            </label>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endfor %}
             </div>
-            {% endfor %}
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
 
-    <!-- Validation message -->
-    <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-term-red/10 border border-term-red/30 rounded-lg p-4 text-center text-sm text-term-red font-mono"></div>
+        <!-- Validation message -->
+        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg border-2 border-accent-500 bg-accent-50 p-4 text-center text-sm text-accent-600 font-bold"></div>
 
-    <!-- Submit -->
-    <div class="text-center py-6">
-        <button type="submit" id="submitBtn"
-                class="px-8 py-3 bg-term-greenDim text-white font-bold rounded-lg border border-term-green/30
-                       hover:bg-term-green/25 hover:border-term-green/50 hover:shadow-[0_0_20px_rgba(0,255,65,0.15)]
-                       focus:ring-2 focus:ring-term-green/30
-                       active:scale-[0.97] transition-all duration-200 font-mono text-sm">
-            <span class="text-term-green mr-1">$</span> git push --assessment
-        </button>
-        <p class="text-term-muted text-[10px] mt-2 font-mono">// submits your assessment to the mothership</p>
-    </div>
-</form>
+        <!-- Submit -->
+        <div class="text-center py-6">
+            <button type="submit" id="submitBtn"
+                    class="px-8 py-3 bg-black text-white font-black uppercase tracking-wide text-sm
+                           border-2 border-black hover:bg-accent-500 hover:border-accent-500
+                           active:scale-[0.97] transition-all duration-200">
+                Submit Assessment
+            </button>
+            <p class="text-hub-faint text-[10px] mt-2 font-medium uppercase">submits your assessment for this round</p>
+        </div>
+    </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -145,36 +135,26 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'eng_draft_{{ token }}';
 
-    // ─── Terminal Status Messages ───
     const STATUS_MSGS = [
-        { at: 0,   msg: 'STATUS: waiting for input...' },
-        { at: 1,   msg: 'STATUS: assessment initialized. scanning...' },
-        { at: 25,  msg: 'STATUS: 25% complete. acquiring signal...' },
-        { at: 50,  msg: 'STATUS: halfway there. keep pushing...' },
-        { at: 75,  msg: 'STATUS: 75% locked in. almost there...' },
-        { at: 90,  msg: 'STATUS: finalizing assessment matrix...' },
-        { at: 100, msg: 'STATUS: assessment complete. ready to deploy!' },
+        { at: 0,   msg: 'Waiting for input...' },
+        { at: 1,   msg: 'Assessment started. Keep going...' },
+        { at: 25,  msg: '25% complete. Acquiring signal...' },
+        { at: 50,  msg: 'Halfway there. Keep pushing...' },
+        { at: 75,  msg: '75% locked in. Almost there...' },
+        { at: 90,  msg: 'Finalizing assessment...' },
+        { at: 100, msg: 'Assessment complete. Ready to submit!' },
     ];
     let lastStatus = -1;
 
-    // ─── ASCII Progress Bar ───
-    function getAsciiBar(pct) {
-        const total = 20;
-        const filled = Math.round((pct / 100) * total);
-        return '█'.repeat(filled) + '░'.repeat(total - filled);
-    }
-
-    // ─── Progress ───
     function updateProgress() {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
 
-        // ASCII bar
-        document.getElementById('progressAscii').textContent = getAsciiBar(pct);
-        document.getElementById('progressPct').textContent = pct;
+        document.getElementById('progressBar').style.width = pct + '%';
+        const pctEl = document.getElementById('progressPct');
+        if (pctEl) pctEl.textContent = pct;
         document.getElementById('progressCount').textContent = answered;
 
-        // Status message
         let current = STATUS_MSGS[0];
         for (const m of STATUS_MSGS) {
             if (pct >= m.at) current = m;
@@ -182,20 +162,16 @@
         if (current.at !== lastStatus) {
             lastStatus = current.at;
             const statusEl = document.getElementById('progressStatus');
-            statusEl.style.opacity = '0';
-            setTimeout(() => {
-                statusEl.textContent = current.msg;
-                statusEl.style.opacity = '1';
-                if (pct === 100) statusEl.classList.add('text-term-green');
-            }, 150);
+            if (statusEl) {
+                statusEl.style.opacity = '0';
+                setTimeout(() => {
+                    statusEl.textContent = current.msg;
+                    statusEl.style.opacity = '1';
+                    if (pct === 100) statusEl.classList.add('text-accent-500');
+                }, 150);
+            }
         }
 
-        // Confetti at 100%
-        if (pct === 100 && lastStatus === 100) {
-            launchTerminalConfetti();
-        }
-
-        // Clear unanswered highlights
         document.querySelectorAll('.unanswered-highlight').forEach(q => {
             if (q.querySelector('input[type="radio"]:checked')) {
                 q.classList.remove('unanswered-highlight');
@@ -209,7 +185,6 @@
         scrollToNextUnanswered();
     }
 
-    // ─── Auto-scroll to next unanswered ───
     function scrollToNextUnanswered() {
         const allBlocks = document.querySelectorAll('#surveyForm .question-block');
         for (const block of allBlocks) {
@@ -236,12 +211,6 @@
         }, 300);
     }
 
-    // ─── 100% celebration (status only) ───
-    function launchTerminalConfetti() {
-        // No animation on survey — the ASCII bar + status message is enough
-    }
-
-    // ─── Autosave ───
     function saveDraft() {
         const data = {};
         document.querySelectorAll('#surveyForm input[type="radio"]:checked').forEach(r => {
@@ -288,7 +257,6 @@
         } catch(e) {}
     }
 
-    // ─── Smart Validation ───
     function validateBeforeSubmit(e) {
         document.querySelectorAll('.unanswered-highlight').forEach(el => {
             el.classList.remove('unanswered-highlight');
@@ -305,7 +273,7 @@
         if (unanswered.length > 0) {
             e.preventDefault();
             const msg = document.getElementById('validationMsg');
-            msg.innerHTML = `<span class="text-term-red font-bold">[ERROR]</span> ${unanswered.length} unanswered question${unanswered.length > 1 ? 's' : ''}. All fields required.`;
+            msg.textContent = `${unanswered.length} unanswered question${unanswered.length > 1 ? 's' : ''}. All fields required.`;
             msg.classList.remove('hidden');
 
             unanswered.forEach(q => q.classList.add('unanswered-highlight'));
@@ -326,7 +294,7 @@
         localStorage.removeItem(DRAFT_KEY);
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="inline-block animate-pulse">deploying assessment...</span>';
+        btn.innerHTML = 'Submitting...';
     }
 
     function toggleCategory(btn) {

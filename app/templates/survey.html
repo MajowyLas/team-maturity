@@ -1,114 +1,106 @@
-{% extends "base_cozy.html" %}
-{% block title %}Team Health Check{% endblock %}
+{% extends "base.html" %}
+{% block title %}Team Health Check — {{ team.name }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
     <!-- Header -->
     <div class="mb-10">
-        <h1 class="text-3xl font-extrabold text-dark-text mb-2 tracking-tight">Team Health Check</h1>
-        <p class="text-dark-muted text-sm">Rate how your team is doing — every role, every perspective matters.</p>
-        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-play-500/10 border border-play-500/20 rounded-full">
-            <span class="w-2 h-2 rounded-full bg-play-400 animate-pulse"></span>
-            <span class="text-xs font-semibold text-play-300">{{ team.name }}</span>
+        <h1 class="text-3xl font-black text-hub-text tracking-tight uppercase">Team Health Check</h1>
+        <p class="text-hub-muted text-sm mt-1">Rate how your team is doing — every role, every perspective matters.</p>
+        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
+            <span class="w-2 h-2 bg-accent-500"></span>
+            <span class="text-xs font-black text-hub-text uppercase">{{ team.name }}</span>
         </div>
     </div>
 
     <!-- Draft recovery -->
-    <div id="draftBanner" class="hidden mb-6 bg-pop-sky/5 border border-pop-sky/15 rounded-2xl p-4 flex items-center justify-between">
+    <div id="draftBanner" class="hidden mb-6 border-2 border-hub-border p-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
             <span class="text-lg">💾</span>
-            <p class="text-sm text-dark-muted">You have <strong id="draftCount" class="text-pop-sky">0</strong> saved answers. Pick up where you left off?</p>
+            <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-accent-500 font-black">0</strong> saved answers. Pick up where you left off?</p>
         </div>
         <div class="flex gap-2 shrink-0 ml-4">
-            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-pop-sky/20 text-pop-sky text-xs font-semibold rounded-lg hover:bg-pop-sky/30 border border-pop-sky/20 transition">Restore</button>
-            <button type="button" id="discardDraft" class="px-3 py-1.5 text-dark-faint text-xs font-medium hover:text-dark-muted transition">Discard</button>
+            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+            <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
         </div>
     </div>
 
     {% if not rounds %}
-    <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
-        <p class="text-dark-text font-medium">No active rounds right now.</p>
-        <p class="text-dark-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
+    <div class="border-2 border-hub-border p-8 text-center">
+        <p class="text-hub-text font-bold">No active rounds right now.</p>
+        <p class="text-hub-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
     </div>
     {% else %}
     <form method="POST" action="/survey/{{ team.token }}" id="surveyForm">
         <!-- Info card -->
-        <div class="bg-dark-card rounded-2xl border border-dark-border p-6 mb-6">
-            <h2 class="text-sm font-bold text-dark-text mb-4 flex items-center gap-2">
-                <span class="w-5 h-5 rounded-md bg-gradient-to-br from-play-500 to-pop-pink flex items-center justify-center text-white text-[10px]">?</span>
-                About you
-            </h2>
+        <div class="border-2 border-hub-border p-6 mb-6">
+            <h2 class="text-sm font-black text-hub-text mb-4 uppercase tracking-wide">About you</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-medium text-dark-muted mb-1.5">Round</label>
-                    <select name="round_id" required class="w-full rounded-xl bg-dark-surface border border-dark-border px-3 py-2.5 text-sm text-dark-text">
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Round</label>
+                    <select name="round_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
                         {% for r in rounds %}
                         <option value="{{ r.id }}">{{ r.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-dark-muted mb-1.5">Your name</label>
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
                     <input type="text" name="respondent_name" required placeholder="e.g. Anna M."
-                           class="w-full rounded-xl bg-dark-surface border border-dark-border px-3 py-2.5 text-sm text-dark-text placeholder:text-dark-faint">
+                           class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
                 </div>
             </div>
         </div>
 
         <!-- Progress -->
-        <div class="bg-dark-card/90 backdrop-blur-sm rounded-2xl border border-dark-border p-4 mb-6 sticky top-0 z-10">
+        <div class="bg-black text-white p-4 mb-6 sticky top-14 z-10">
             <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                    <span id="progressMood" class="text-base transition-all duration-300">📋</span>
-                    <span id="progressMsg" class="text-sm text-dark-muted transition-all duration-300">Ready when you are!</span>
-                </div>
-                <span id="progressText" class="text-xs text-dark-faint font-medium tabular-nums">0 / {{ total_questions }}</span>
+                <span class="text-sm font-bold uppercase">Progress</span>
+                <span id="progressText" class="text-xs font-bold tabular-nums">0 / {{ total_questions }}</span>
             </div>
-            <div class="relative w-full bg-dark-surface rounded-full h-2 overflow-hidden">
-                <div id="progressBar" class="h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%; background: linear-gradient(90deg, #a855f7, #f472b6, #38bdf8)"></div>
+            <div class="relative w-full bg-white/20 h-2.5 overflow-hidden">
+                <div id="progressBar" class="h-2.5 bg-accent-500 transition-all duration-700 ease-out" style="width: 0%"></div>
             </div>
         </div>
 
         <!-- Questions -->
-        {% set category_colors = ['play-400', 'pop-pink', 'pop-sky', 'pop-mint', 'pop-amber', 'pop-blue', 'pop-coral'] %}
         {% for category, subcategories in grouped_questions.items() %}
-        <div class="bg-dark-card rounded-2xl border border-dark-border mb-5 overflow-hidden hover:border-dark-border2 transition-colors duration-300">
+        <div class="border-2 border-hub-border mb-5 overflow-hidden transition-colors duration-300">
             <button type="button" onclick="toggleCategory(this)"
-                    class="w-full flex items-center justify-between p-5 text-left hover:bg-dark-hover transition-all duration-200 group">
+                    class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200 group">
                 <div class="flex items-center gap-3">
-                    <span class="w-1.5 h-7 rounded-full bg-{{ category_colors[loop.index0 % category_colors|length] }} opacity-60 group-hover:opacity-100 transition-opacity"></span>
-                    <h2 class="text-base font-bold text-dark-text">{{ category }}</h2>
+                    <span class="w-1.5 h-7 bg-accent-500"></span>
+                    <h2 class="text-base font-black text-hub-text uppercase">{{ category }}</h2>
                 </div>
-                <svg class="category-chevron w-4 h-4 text-dark-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="category-chevron w-4 h-4 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            {% set cat_idx = loop.index0 %}
             <div class="category-content px-5 pb-5">
                 {% for subcategory, questions in subcategories.items() %}
                 <div class="mb-6 last:mb-0">
-                    <h3 class="text-[11px] font-bold text-{{ category_colors[cat_idx % category_colors|length] }} uppercase tracking-widest mb-3 pb-2 border-b border-dark-border/50">
+                    <h3 class="text-[11px] font-black text-hub-text uppercase tracking-widest mb-3 pb-2 border-b-2 border-hub-border">
                         {{ subcategory }}
                     </h3>
                     {% for q in questions %}
                     <div class="question-block mb-5 last:mb-0">
-                        <p class="text-dark-text/80 text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
+                        <p class="text-hub-text text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] text-dark-faint w-14 shrink-0 text-right">disagree</span>
+                            <span class="text-[10px] text-hub-faint w-14 shrink-0 text-right font-bold uppercase">disagree</span>
                             {% for score in range(1, 6) %}
                             <label class="relative cursor-pointer">
                                 <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
                                        class="sr-only peer" onchange="updateProgress()">
-                                <div class="w-11 h-11 rounded-xl border-2 border-dark-border flex items-center justify-center
-                                            text-sm font-bold text-dark-faint
-                                            peer-checked:border-play-500 peer-checked:bg-play-500 peer-checked:text-white peer-checked:shadow-glow peer-checked:scale-110
-                                            hover:border-dark-border2 hover:bg-dark-hover
+                                <div class="w-9 h-9 border-2 border-hub-border flex items-center justify-center
+                                            text-sm font-black text-hub-faint
+                                            peer-checked:border-black peer-checked:bg-black peer-checked:text-white
+                                            hover:border-hub-text hover:bg-hub-hover
                                             active:scale-95 transition-all duration-150">
                                     {{ score }}
                                 </div>
                             </label>
                             {% endfor %}
-                            <span class="text-[10px] text-dark-faint w-14 shrink-0">agree</span>
+                            <span class="text-[10px] text-hub-faint w-14 shrink-0 font-bold uppercase">agree</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -119,18 +111,17 @@
         {% endfor %}
 
         <!-- Validation -->
-        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-pop-coral/10 border border-pop-coral/20 rounded-2xl p-4 text-center text-sm text-pop-coral font-medium"></div>
+        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg border-2 border-accent-500 bg-accent-50 p-4 text-center text-sm text-accent-600 font-bold"></div>
 
         <!-- Submit -->
         <div class="text-center py-8">
             <button type="submit" id="submitBtn"
-                    class="group px-10 py-4 bg-gradient-to-r from-play-500 via-pop-pink to-pop-sky text-white font-bold rounded-2xl shadow-glow
-                           hover:shadow-glow-hover hover:scale-[1.02] hover:brightness-110
-                           focus:ring-4 focus:ring-play-500/20
-                           active:scale-[0.97] transition-all duration-200 text-lg">
-                Pieroguje! <span class="inline-block group-hover:animate-bounce-soft">🥟</span>
+                    class="px-10 py-4 bg-black text-white font-black uppercase tracking-wide text-lg
+                           hover:bg-accent-500 active:scale-[0.97] transition-all duration-200
+                           border-2 border-black hover:border-accent-500">
+                Submit Assessment
             </button>
-            <p class="text-dark-faint text-xs mt-3">your perspective shapes the team</p>
+            <p class="text-hub-faint text-xs mt-3 font-medium">your perspective shapes the team</p>
         </div>
     </form>
     {% endif %}
@@ -149,7 +140,7 @@
         { at: 50,  mood: '🚀', msg: 'Halfway — you\'re on a roll!' },
         { at: 75,  mood: '💜', msg: 'Almost there, keep going!' },
         { at: 90,  mood: '🎯', msg: 'Just a few more!' },
-        { at: 100, mood: '🥟', msg: 'All done — approved!' },
+        { at: 100, mood: '🏁', msg: 'All done — ready to submit!' },
     ];
     let lastMilestone = -1;
 
@@ -166,14 +157,16 @@
             lastMilestone = current.at;
             const moodEl = document.getElementById('progressMood');
             const msgEl = document.getElementById('progressMsg');
-            moodEl.textContent = current.mood;
-            moodEl.style.transform = 'scale(1.4)';
-            setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
-            msgEl.style.opacity = '0';
-            setTimeout(() => { msgEl.textContent = current.msg; msgEl.style.opacity = '1'; }, 150);
+            if (moodEl) {
+                moodEl.textContent = current.mood;
+                moodEl.style.transform = 'scale(1.4)';
+                setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
+            }
+            if (msgEl) {
+                msgEl.style.opacity = '0';
+                setTimeout(() => { msgEl.textContent = current.msg; msgEl.style.opacity = '1'; }, 150);
+            }
         }
-
-        if (pct === 100 && lastMilestone === 100) launchConfetti();
 
         document.querySelectorAll('.unanswered-highlight').forEach(q => {
             if (q.querySelector('input[type="radio"]:checked')) q.classList.remove('unanswered-highlight');
@@ -195,7 +188,6 @@
                     const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
                     if (chevron) chevron.classList.add('rotate-180');
                 }
-                // Only scroll if the next question is below 70% of viewport
                 const rect = block.getBoundingClientRect();
                 const threshold = window.innerHeight * 0.85;
                 if (rect.top > threshold || rect.top < 0) {
@@ -209,31 +201,6 @@
         setTimeout(() => {
             document.getElementById('submitBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 300);
-    }
-
-    function launchConfetti() {
-        const colors = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#fbbf24', '#818cf8', '#fb7185'];
-        const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden';
-        document.body.appendChild(container);
-        for (let i = 0; i < 70; i++) {
-            const dot = document.createElement('div');
-            const size = Math.random() * 10 + 5;
-            const x = Math.random() * 100;
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const isRect = Math.random() > 0.6;
-            dot.style.cssText = `position:absolute;top:-20px;left:${x}%;width:${size}px;height:${isRect ? size*1.8 : size}px;background:${color};border-radius:${isRect ? '3px' : '50%'};opacity:0.85;`;
-            dot.animate([
-                { transform: 'translateY(0) rotate(0deg) scale(1)', opacity: 0.85 },
-                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random()*900-450}deg) scale(${Math.random()*0.4+0.6})`, opacity: 0 }
-            ], {
-                duration: Math.random() * 2500 + 2000,
-                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                delay: Math.random() * 600
-            });
-            container.appendChild(dot);
-        }
-        setTimeout(() => container.remove(), 4500);
     }
 
     function saveDraft() {
@@ -295,7 +262,7 @@
         localStorage.removeItem(DRAFT_KEY);
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '🥟 Sending...';
+        btn.innerHTML = 'Submitting...';
     }
 
     function toggleCategory(btn) {

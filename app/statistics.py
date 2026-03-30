@@ -384,14 +384,17 @@ def get_overview_cards(
 
 
 def get_statement_scores(
-    db: Session, team_id: int, round_id: int
+    db: Session, team_id: int | None, round_id: int
 ) -> list[StatementScore]:
-    """Return average score per individual statement for a team in a round.
+    """Return average score per individual statement for a round.
+
+    When *team_id* is provided, results are scoped to that team.
+    When *team_id* is ``None``, results are department-wide (all teams).
 
     Ordered by question display_order so they group naturally by
     category -> subcategory.
     """
-    rows = (
+    q = (
         db.query(
             Question.id,
             Question.category,
@@ -404,15 +407,14 @@ def get_statement_scores(
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
         .filter(
-            Response.team_id == team_id,
             Response.round_id == round_id,
             Response.assessment_type == "team",
             Question.assessment_type == "team",
         )
-        .group_by(Question.id)
-        .order_by(Question.display_order)
-        .all()
     )
+    if team_id is not None:
+        q = q.filter(Response.team_id == team_id)
+    rows = q.group_by(Question.id).order_by(Question.display_order).all()
 
     return [
         StatementScore(

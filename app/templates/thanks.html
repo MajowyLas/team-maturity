@@ -1,20 +1,21 @@
-{% extends "base_cozy.html" %}
+{% extends "base.html" %}
 {% block title %}Done! -- Team Health Check{% endblock %}
+{% block nav %}{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto text-center py-16">
-    <div class="text-5xl mb-5 animate-fade-in-up">✅</div>
+    <div class="text-5xl mb-5 animate-fade-in-up">&#x2714;</div>
 
-    <h1 class="text-3xl font-extrabold text-dark-text mb-3 tracking-tight animate-fade-in-up" style="animation-delay: 0.1s;">You're all set!</h1>
-    <p class="text-dark-muted mb-2 animate-fade-in-up text-sm" style="animation-delay: 0.2s;">Your input has been recorded. Every perspective makes the team stronger.</p>
-    <p class="text-dark-faint text-xs animate-fade-in-up" style="animation-delay: 0.3s;">You can close this page now.</p>
+    <h1 class="text-3xl font-black text-hub-text mb-3 tracking-tight uppercase animate-fade-in-up" style="animation-delay: 0.1s;">You're all set!</h1>
+    <p class="text-hub-muted mb-2 animate-fade-in-up text-sm" style="animation-delay: 0.2s;">Your input has been recorded. Every perspective makes the team stronger.</p>
+    <p class="text-hub-faint text-xs animate-fade-in-up" style="animation-delay: 0.3s;">You can close this page now.</p>
 
     {% if token %}
     <div class="animate-fade-in-up mt-8" style="animation-delay: 0.4s;">
         <a href="/survey/{{ token }}"
-           class="inline-block px-6 py-2.5 bg-dark-card border border-dark-border rounded-xl text-dark-text text-sm font-medium
-                  hover:border-play-500/30 hover:text-play-300 hover:shadow-glow
-                  active:scale-[0.97] transition-all duration-200">
+           class="inline-block px-6 py-2.5 bg-white border-2 border-hub-border text-hub-text text-sm font-bold uppercase tracking-wide
+                  hover:bg-black hover:text-white
+                  active:scale-[0.97] transition-all duration-150">
             Submit another response
         </a>
     </div>
@@ -39,21 +40,20 @@
         ctx.scale(dpr, dpr);
 
         const C = {
-            body: '#c084fc',
-            belly: '#e9d5ff',
+            body: '#000000',
+            belly: '#555555',
             eye: '#ffffff',
-            pupil: '#19191b',
-            cheek: '#f472b6',
-            feet: '#a855f7',
+            pupil: '#000000',
+            cheek: '#FF0000',
+            feet: '#333333',
         };
 
         function drawBlob(x, y, frame, facing, blinking) {
-            // Exaggerated bouncy walk
             const walkCycle = Math.sin(frame * 0.18);
             const bounce = facing === 'front'
-                ? Math.sin(frame * 0.08) * 2                      // gentle idle bob
-                : Math.abs(Math.sin(frame * 0.18)) * 8;           // BIG bounce when walking
-            const tilt = facing === 'front' ? 0 : walkCycle * 0.12; // lean into walk
+                ? Math.sin(frame * 0.08) * 2
+                : Math.abs(Math.sin(frame * 0.18)) * 8;
+            const tilt = facing === 'front' ? 0 : walkCycle * 0.12;
             const squishX = facing === 'front' ? 0 : Math.sin(frame * 0.18) * 1.5;
             const squishY = facing === 'front' ? 0 : -Math.abs(Math.sin(frame * 0.18)) * 1;
 
@@ -61,20 +61,20 @@
             ctx.translate(x, y - bounce);
             ctx.rotate(tilt);
 
-            // Shadow (stretches when high)
-            ctx.fillStyle = 'rgba(168, 85, 247, 0.07)';
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
             ctx.beginPath();
             ctx.ellipse(0, 24 + bounce * 0.5, 20 - bounce * 0.3, 5, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Feet — alternate stepping
+            // Feet
             const stepL = Math.sin(frame * 0.18) * (facing === 'front' ? 0 : 4);
             const stepR = Math.sin(frame * 0.18 + Math.PI) * (facing === 'front' ? 0 : 4);
             ctx.fillStyle = C.feet;
             ctx.beginPath(); ctx.ellipse(-8 + stepL, 20, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.ellipse(8 + stepR, 20, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill();
 
-            // Body — ROUND, not squeezed when facing front
+            // Body
             ctx.fillStyle = C.body;
             ctx.beginPath();
             ctx.ellipse(0, 0, 20 + squishX, 22 + squishY, 0, 0, Math.PI * 2);
@@ -89,21 +89,17 @@
             ctx.globalAlpha = 1;
 
             if (facing === 'front') {
-                // === FRONT FACE — big expressive eyes ===
                 const eyeY = -4;
                 [-8, 8].forEach(ex => {
-                    // Eye white
                     ctx.fillStyle = C.eye;
                     ctx.beginPath();
                     ctx.ellipse(ex, eyeY, 5.5, blinking ? 1.5 : 6.5, 0, 0, Math.PI * 2);
                     ctx.fill();
                     if (!blinking) {
-                        // Pupil
                         ctx.fillStyle = C.pupil;
                         ctx.beginPath();
                         ctx.ellipse(ex, eyeY + 1.5, 3, 4, 0, 0, Math.PI * 2);
                         ctx.fill();
-                        // Shine
                         ctx.fillStyle = '#ffffff';
                         ctx.beginPath();
                         ctx.arc(ex + 1.5, eyeY - 1.5, 1.5, 0, Math.PI * 2);
@@ -118,8 +114,8 @@
                 ctx.beginPath(); ctx.ellipse(14, 4, 5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
                 ctx.globalAlpha = 1;
 
-                // Cheeky smirk
-                ctx.strokeStyle = C.pupil;
+                // Smirk
+                ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.8;
                 ctx.beginPath();
                 ctx.arc(2, 5, 5, 0.1, Math.PI - 0.4);
@@ -134,14 +130,12 @@
                 ctx.moveTo(17, -2);
                 ctx.quadraticCurveTo(26 + wave * 4, -16 + Math.cos(frame * 0.2) * 6, 24, -26 + wave * 5);
                 ctx.stroke();
-                // Hand circle
                 ctx.fillStyle = C.belly;
                 ctx.beginPath();
                 ctx.arc(24, -26 + wave * 5, 4, 0, Math.PI * 2);
                 ctx.fill();
 
             } else {
-                // === SIDE FACE — walking right ===
                 const eyeX = 6;
                 ctx.fillStyle = C.eye;
                 ctx.beginPath();
@@ -156,7 +150,6 @@
                 ctx.arc(eyeX + 3, -6.5, 1.2, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Side cheek
                 ctx.fillStyle = C.cheek;
                 ctx.globalAlpha = 0.3;
                 ctx.beginPath();
@@ -164,8 +157,7 @@
                 ctx.fill();
                 ctx.globalAlpha = 1;
 
-                // Little smile
-                ctx.strokeStyle = C.pupil;
+                ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.arc(8, 4, 3.5, 0, Math.PI * 0.7);
@@ -176,7 +168,7 @@
         }
 
         function drawBubble(x, y, text) {
-            ctx.font = '600 13px Inter, system-ui, sans-serif';
+            ctx.font = '900 13px Inter, system-ui, sans-serif';
             const tw = ctx.measureText(text).width;
             const bx = x + 28;
             const by = y - 42;
@@ -184,27 +176,27 @@
             const bw = tw + pad * 2;
             const bh = 28;
 
-            // Bubble — white bg for max contrast
             ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.roundRect(bx - pad, by - bh / 2, bw, bh, 14);
+            ctx.rect(bx - pad, by - bh / 2, bw, bh);
             ctx.fill();
+            ctx.stroke();
 
-            // Tail pointing down-left toward blob
             ctx.beginPath();
             ctx.moveTo(bx + 2, by + bh / 2);
             ctx.lineTo(bx - 8, by + bh / 2 + 8);
             ctx.lineTo(bx + 12, by + bh / 2);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
 
-            // Text — dark
-            ctx.fillStyle = '#19191b';
+            ctx.fillStyle = '#000000';
             ctx.fillText(text, bx, by + 4);
         }
 
-        // One stop in the middle
         const stops = [
-            { at: 0.48, dur: 2200, msg: 'Papa! 👋' },
+            { at: 0.48, dur: 2200, msg: 'Papa! \u{1F44B}' },
         ];
         const totalRunDuration = 8000;
         const totalDuration = totalRunDuration + stops.reduce((s, p) => s + p.dur, 0);
@@ -218,7 +210,7 @@
             ctx.clearRect(0, 0, W * dpr, H * dpr);
 
             // Ground line
-            ctx.strokeStyle = 'rgba(168, 85, 247, 0.06)';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
             ctx.lineWidth = 1;
             ctx.setLineDash([6, 8]);
             ctx.beginPath();
@@ -227,7 +219,6 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Calculate run position vs pauses
             let runElapsed = elapsed;
             let isPaused = false;
             let pauseElapsed = 0;
@@ -261,7 +252,6 @@
 
             drawBlob(blobX, blobY, frame, facing, blinking);
 
-            // Speech bubble
             if (isPaused && currentStop && pauseElapsed > 400) {
                 const alpha = Math.min((pauseElapsed - 400) / 250, 1);
                 ctx.globalAlpha = alpha;
