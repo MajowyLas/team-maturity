@@ -85,22 +85,24 @@
                     {% for q in questions %}
                     <div class="question-block mb-5 last:mb-0">
                         <p class="text-hub-text text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-xs text-hub-faint w-14 shrink-0 text-right font-bold uppercase">disagree</span>
-                            {% for score in range(1, 6) %}
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                       class="sr-only peer" onchange="updateProgress()">
-                                <div class="w-9 h-9 border-2 border-hub-border flex items-center justify-center
-                                            text-sm font-black text-hub-faint
-                                            peer-checked:border-black peer-checked:bg-black peer-checked:text-white
-                                            hover:border-hub-text hover:bg-hub-hover
-                                            active:scale-95 transition-all duration-150">
-                                    {{ score }}
-                                </div>
-                            </label>
-                            {% endfor %}
-                            <span class="text-xs text-hub-faint w-14 shrink-0 font-bold uppercase">agree</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-hub-faint shrink-0 text-right font-bold uppercase">disagree</span>
+                            <div class="flex items-center gap-2">
+                                {% for score in range(1, 6) %}
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
+                                           class="sr-only peer" onchange="updateProgress()">
+                                    <div class="w-10 h-10 border-2 border-hub-border flex items-center justify-center
+                                                text-sm font-black text-hub-faint
+                                                peer-checked:border-black peer-checked:bg-black peer-checked:text-white
+                                                hover:border-hub-text hover:bg-hub-hover
+                                                active:scale-95 transition-all duration-150">
+                                        {{ score }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <span class="text-xs text-hub-faint shrink-0 font-bold uppercase">agree</span>
                         </div>
                     </div>
                     {% endfor %}
