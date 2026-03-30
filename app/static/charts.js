@@ -8,8 +8,9 @@
 if (typeof Chart !== 'undefined') {
     Chart.defaults.font.family = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
     Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#6b7280';
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.color = '#000000';
+    Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
+    Chart.defaults.plugins.tooltip.cornerRadius = 0;
     Chart.defaults.plugins.tooltip.padding = 10;
 }
 

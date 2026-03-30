@@ -11,7 +11,7 @@
     <div class="flex items-center space-x-2">
         <label class="text-sm text-hub-muted">Round:</label>
         <select id="roundSelector" onchange="window.location='/dashboard?round_id='+this.value"
-                class="rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500">
+                class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-black">
             {% for r in rounds %}
             <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
                 {{ r.name }}{% if r.is_active %} (Active){% endif %}
@@ -25,7 +25,7 @@
 {% set has_data = cards | selectattr("response_count", "gt", 0) | list | length > 0 %}
 
 {% if not cards or not has_data %}
-<div class="bg-hub-card rounded-2xl shadow-card border border-hub-border p-12 text-center animate-fade-in-up">
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
     <div class="text-5xl mb-4">📊</div>
     <h2 class="text-xl font-semibold text-hub-text mb-2">No Data Yet</h2>
     <p class="text-hub-muted mb-6">Once teams submit their assessments, results will appear here.</p>
@@ -45,7 +45,7 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 text-center hover:shadow-card transition-shadow duration-200">
+        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
             <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
             <p class="text-4xl font-bold
                 {% if overview_stats.overall_avg >= 4.0 %}text-emerald-600
@@ -66,13 +66,13 @@
             {% endif %}
         </div>
 
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 text-center hover:shadow-card transition-shadow duration-200">
+        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
             <p class="text-sm font-medium text-hub-muted mb-1">Responses</p>
             <p class="text-4xl font-bold text-hub-text">{{ overview_stats.response_count }}</p>
             <p class="text-xs text-hub-faint mt-1">participants</p>
         </div>
 
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 hover:shadow-card transition-shadow duration-200">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
             {% if overview_stats.strengths %}
             <p class="text-lg font-semibold text-emerald-400">{{ overview_stats.strengths[0].subcategory }}</p>
@@ -80,7 +80,7 @@
             {% endif %}
         </div>
 
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 hover:shadow-card transition-shadow duration-200">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
             {% if overview_stats.improvements %}
             <p class="text-lg font-semibold text-orange-400">{{ overview_stats.improvements[0].subcategory }}</p>
@@ -91,7 +91,7 @@
 
     <!-- Category Scores with Deltas -->
     {% if overview_stats.category_deltas %}
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5">
+    <div class="bg-hub-card border-2 border-hub-border p-5">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-semibold text-hub-text">Category Scores
                 <span class="font-normal text-hub-faint">— change vs previous round</span>
@@ -138,7 +138,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <!-- Left: Strengths + Improvements stacked -->
         <div class="space-y-4">
-            <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5">
+            <div class="bg-hub-card border-2 border-hub-border p-5">
                 <h3 class="text-base font-semibold text-emerald-400 mb-3">Top 3 Strengths</h3>
                 {% for s in overview_stats.strengths %}
                 <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
@@ -150,7 +150,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5">
+            <div class="bg-hub-card border-2 border-hub-border p-5">
                 <h3 class="text-base font-semibold text-orange-400 mb-3">Top 3 Improvement Areas</h3>
                 {% for s in overview_stats.improvements %}
                 <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
@@ -164,7 +164,7 @@
             </div>
         </div>
         <!-- Right: Category Radar -->
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <h3 class="text-base font-semibold text-hub-text mb-3">Category Overview</h3>
             <div style="height: 340px; display: flex; align-items: center; justify-content: center;">
                 <canvas id="overviewRadarChart"></canvas>
@@ -174,7 +174,7 @@
 
     <!-- Maturity Trends -->
     {% if overview_trends and overview_trends.round_names | length >= 2 %}
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 animate-fade-in">
+    <div class="bg-hub-card border-2 border-hub-border p-6 animate-fade-in">
         <h3 class="text-base font-semibold text-hub-text mb-4">Maturity Trends</h3>
         <div style="height: 300px;">
             <canvas id="overviewTrendChart"></canvas>
@@ -197,13 +197,13 @@
         {% for card in cards %}
         {% if card.response_count > 0 %}
         <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-           class="stagger-item group block bg-hub-card rounded-2xl shadow-soft border border-hub-border hover:shadow-card-hover hover:border-accent-500/30 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-accent-500 transition-all duration-150 overflow-hidden">
 
             <!-- Card Header -->
             <div class="p-6 pb-4">
                 <div class="flex items-start justify-between mb-4">
                     <h3 class="text-lg font-bold text-hub-text group-hover:text-accent-400 transition">{{ card.team_name }}</h3>
-                    <span class="text-xs text-hub-faint bg-hub-hover px-2 py-1 rounded-full">{{ card.response_count }} response{{ 's' if card.response_count != 1 }}</span>
+                    <span class="text-xs font-bold text-hub-muted border-2 border-hub-border px-2 py-0.5 uppercase">{{ card.response_count }} response{{ 's' if card.response_count != 1 }}</span>
                 </div>
 
                 <!-- Overall Score -->
@@ -240,7 +240,7 @@
             </div>
 
             <!-- Card Footer: Strength & Improvement -->
-            <div class="grid grid-cols-2 divide-x divide-hub-border border-t border-hub-border bg-hub-surface group-hover:bg-accent-500/5 transition-colors duration-200">
+            <div class="grid grid-cols-2 divide-x divide-hub-border border-t border-hub-border bg-hub-surface">
                 <div class="px-4 py-3">
                     <p class="text-[10px] uppercase tracking-wide text-hub-faint mb-0.5">Strength</p>
                     {% if card.top_strength %}
@@ -268,11 +268,11 @@
     <!-- Teams with no responses yet -->
     {% set pending_teams = cards | selectattr("response_count", "eq", 0) | list %}
     {% if pending_teams %}
-    <div class="bg-hub-surface/50 rounded-xl border border-dashed border-hub-border2 p-6">
+    <div class="border-2 border-dashed border-hub-border p-6">
         <h3 class="text-sm font-semibold text-hub-muted uppercase tracking-wide mb-3">Awaiting Responses</h3>
         <div class="flex flex-wrap gap-2">
             {% for card in pending_teams %}
-            <span class="stagger-item inline-block px-3 py-1.5 bg-hub-card border border-hub-border rounded-lg text-sm text-hub-muted">
+            <span class="stagger-item inline-block px-3 py-1.5 bg-hub-card border-2 border-hub-border rounded-lg text-sm text-hub-muted">
                 {{ card.team_name }}
             </span>
             {% endfor %}
@@ -285,8 +285,8 @@
 
 <!-- Category Descriptions Modal -->
 <div id="categoryModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('categoryModal').classList.add('hidden')"></div>
-    <div class="relative bg-hub-card rounded-2xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6">
+    <div class="absolute inset-0 bg-black/70" onclick="document.getElementById('categoryModal').classList.add('hidden')"></div>
+    <div class="relative bg-white border-3 border-hub-border max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" style="border-width: 3px;">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-bold text-hub-text">Category Descriptions</h2>
             <button onclick="document.getElementById('categoryModal').classList.add('hidden')"
@@ -346,10 +346,10 @@
                 datasets: [{
                     label: 'Team Maturity',
                     data: values,
-                    backgroundColor: 'rgba(168, 85, 247, 0.12)',
-                    borderColor: 'rgba(168, 85, 247, 1)',
+                    backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                    borderColor: '#FF0000',
                     borderWidth: 2.5,
-                    pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+                    pointBackgroundColor: '#FF0000',
                     pointRadius: 4,
                 }]
             },
@@ -363,12 +363,12 @@
                         ticks: {
                             stepSize: 1,
                             backdropColor: 'transparent',
-                            color: '#5d6179',
-                            font: { size: 10 },
+                            color: '#888',
+                            font: { size: 10, weight: 'bold' },
                         },
-                        grid: { color: 'rgba(42, 46, 63, 0.6)' },
-                        angleLines: { color: 'rgba(42, 46, 63, 0.4)' },
-                        pointLabels: { color: '#8b8fa3', font: { size: 10, weight: '500' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.12)' },
+                        angleLines: { color: 'rgba(0, 0, 0, 0.12)' },
+                        pointLabels: { color: '#000', font: { size: 10, weight: '700' } },
                     }
                 },
                 plugins: { legend: { display: false } }
@@ -378,7 +378,7 @@
 }
 </script>
 {% endif %}
-{% if overview_trends and overview_trends.round_names | length >= 2 %}
+{% if overview_stats and overview_trends and overview_trends.round_names | length >= 2 %}
 <script>
 {
     const trendsData = {{ overview_trends | tojson }};

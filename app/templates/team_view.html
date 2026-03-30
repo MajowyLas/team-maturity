@@ -14,7 +14,7 @@
         <label class="text-sm text-hub-muted">Round:</label>
         <select id="roundSelector"
                 onchange="window.location='/dashboard/team/{{ team.id }}?round_id='+this.value"
-                class="rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm">
+                class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
             {% for r in rounds %}
             <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
                 {{ r.name }}
@@ -26,7 +26,7 @@
 </div>
 
 {% if (not stats or stats.response_count == 0) and not eng_stats %}
-<div class="bg-hub-card rounded-xl shadow-sm border border-hub-border p-12 text-center">
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center">
     <div class="text-5xl mb-4">🔍</div>
     <h2 class="text-xl font-semibold text-hub-text mb-2">No Responses Yet</h2>
     <p class="text-hub-muted">This team has no submissions for the selected round in either survey.</p>
@@ -36,7 +36,7 @@
 <!-- ═══════ COMBINED SUMMARY ═══════ -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <!-- Team Maturity Score -->
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Team Maturity</p>
         {% if summary %}
         <p class="text-3xl font-bold {% if summary.overall_score >= 4.0 %}text-green-600{% elif summary.overall_score >= 3.0 %}text-yellow-600{% elif summary.overall_score >= 2.0 %}text-orange-600{% else %}text-red-600{% endif %}">
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Engineering Maturity Score -->
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Engineering Maturity</p>
         {% if eng_stats %}
         <p class="text-3xl font-bold {% if eng_stats.overall_avg >= 4.0 %}text-emerald-600{% elif eng_stats.overall_avg >= 3.0 %}text-yellow-600{% elif eng_stats.overall_avg >= 2.0 %}text-orange-600{% else %}text-red-600{% endif %}">
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Top Strength (from either) -->
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Top Strength</p>
         {% if summary and summary.strengths %}
         <p class="text-sm font-semibold text-green-400">{{ summary.strengths[0].subcategory }}</p>
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Needs Improvement (from either) -->
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-5 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
         <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Needs Improvement</p>
         {% if summary and summary.improvements %}
         <p class="text-sm font-semibold text-orange-400">{{ summary.improvements[0].subcategory }}</p>
@@ -98,7 +98,7 @@
 
 <!-- Strengths & Improvements side-by-side -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-base font-semibold text-emerald-400 mb-3">Strengths</h3>
         {% if summary and summary.strengths %}
         <p class="text-[10px] font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
@@ -119,7 +119,7 @@
         {% endfor %}
         {% endif %}
     </div>
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-base font-semibold text-orange-400 mb-3">Improvement Areas</h3>
         {% if summary and summary.improvements %}
         <p class="text-[10px] font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
@@ -153,13 +153,13 @@
 
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <h3 class="text-sm font-semibold text-hub-text mb-4">Category Radar</h3>
             <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
                 <canvas id="teamRadarChart"></canvas>
             </div>
         </div>
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <h3 class="text-sm font-semibold text-hub-text mb-4">Subcategory Breakdown</h3>
             {% set sub_count = stats.subcategory_scores | length %}
             <div style="height: {{ [250, sub_count * 28] | max }}px;">
@@ -170,7 +170,7 @@
 
     <!-- Trend Chart -->
     {% if trends %}
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 mb-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6 mb-6">
         <h3 class="text-sm font-semibold text-hub-text mb-4">Trends Across Rounds</h3>
         <div style="height: 300px;">
             <canvas id="teamTrendChart"></canvas>
@@ -183,7 +183,7 @@
     <div>
         <h3 class="text-lg font-semibold text-hub-text mb-4">Detailed Statement Scores</h3>
         {% for category, subcategories in grouped_statements.items() %}
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border mb-4 overflow-hidden hover:shadow-card transition-shadow duration-300">
+        <div class="bg-hub-card border-2 border-hub-border mb-4 overflow-hidden">
             <button type="button" onclick="toggleSection(this)"
                     class="w-full flex items-center justify-between p-4 text-left hover:bg-hub-hover transition-all duration-200">
                 <div class="flex items-center gap-3">
@@ -193,10 +193,10 @@
                     {% if all_avgs %}
                     {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
                     <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                        {% if cat_avg >= 4.0 %}bg-green-100 text-green-700
-                        {% elif cat_avg >= 3.0 %}bg-yellow-100 text-yellow-700
-                        {% elif cat_avg >= 2.0 %}bg-orange-100 text-orange-700
-                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {% if cat_avg >= 4.0 %}border-2 border-green-500 text-green-600
+                        {% elif cat_avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
+                        {% elif cat_avg >= 2.0 %}border-2 border-orange-500 text-orange-600
+                        {% else %}border-2 border-red-500 text-red-600{% endif %}">
                         {{ "%.1f"|format(cat_avg) }}
                     </span>
                     {% endif %}
@@ -264,13 +264,13 @@
 
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <h3 class="text-sm font-semibold text-hub-text mb-4">Category Radar</h3>
             <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
                 <canvas id="engRadarChart"></canvas>
             </div>
         </div>
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
             <h3 class="text-sm font-semibold text-hub-text mb-4">Category Scores</h3>
             <div style="height: 300px;">
                 <canvas id="engBarChart"></canvas>
@@ -283,7 +283,7 @@
     <div>
         <h3 class="text-lg font-semibold text-hub-text mb-4">Detailed Area Scores</h3>
         {% for category, subcategories in grouped_eng_areas.items() %}
-        <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border mb-4 overflow-hidden hover:shadow-card transition-shadow duration-300">
+        <div class="bg-hub-card border-2 border-hub-border mb-4 overflow-hidden">
             <button type="button" onclick="toggleSection(this)"
                     class="w-full flex items-center justify-between p-4 text-left hover:bg-hub-hover transition-all duration-200">
                 <div class="flex items-center gap-3">
@@ -293,10 +293,10 @@
                     {% if all_avgs %}
                     {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
                     <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                        {% if cat_avg >= 4.0 %}bg-emerald-100 text-emerald-700
-                        {% elif cat_avg >= 3.0 %}bg-yellow-100 text-yellow-700
-                        {% elif cat_avg >= 2.0 %}bg-orange-100 text-orange-700
-                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {% if cat_avg >= 4.0 %}border-2 border-emerald-500 text-emerald-600
+                        {% elif cat_avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
+                        {% elif cat_avg >= 2.0 %}border-2 border-orange-500 text-orange-600
+                        {% else %}border-2 border-red-500 text-red-600{% endif %}">
                         {{ "%.1f"|format(cat_avg) }} — {{ maturity_labels.get((cat_avg | round | int), "") }}
                     </span>
                     {% endif %}
@@ -325,10 +325,10 @@
                                         style="width: {{ (a.avg / 5 * 100) | int }}%"></div>
                                 </div>
                                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold
-                                    {% if a.avg >= 4.0 %}bg-emerald-100 text-emerald-700
-                                    {% elif a.avg >= 3.0 %}bg-yellow-100 text-yellow-700
-                                    {% elif a.avg >= 2.0 %}bg-orange-100 text-orange-700
-                                    {% else %}bg-red-100 text-red-700{% endif %}">
+                                    {% if a.avg >= 4.0 %}border-2 border-emerald-500 text-emerald-600
+                                    {% elif a.avg >= 3.0 %}border-2 border-yellow-500 text-yellow-600
+                                    {% elif a.avg >= 2.0 %}border-2 border-orange-500 text-orange-600
+                                    {% else %}border-2 border-red-500 text-red-600{% endif %}">
                                     {{ "%.1f"|format(a.avg) }}
                                 </span>
                             </div>
@@ -382,10 +382,10 @@
                     datasets: [{
                         label: '{{ team.name }}',
                         data: values,
-                        backgroundColor: 'rgba(168, 85, 247, 0.15)',
-                        borderColor: 'rgba(168, 85, 247, 1)',
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#FF0000',
                         borderWidth: 2,
-                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+                        pointBackgroundColor: '#FF0000',
                     }]
                 },
                 options: {
@@ -486,10 +486,10 @@
                     datasets: [{
                         label: 'Engineering',
                         data: values,
-                        backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                        borderColor: 'rgba(139, 92, 246, 1)',
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#FF0000',
                         borderWidth: 2,
-                        pointBackgroundColor: 'rgba(139, 92, 246, 1)',
+                        pointBackgroundColor: '#FF0000',
                     }]
                 },
                 options: {

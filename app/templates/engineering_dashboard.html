@@ -14,7 +14,7 @@
         <div class="flex items-center space-x-2">
             <label class="text-sm text-hub-muted">Round:</label>
             <select id="roundSelector" onchange="updateDashboardUrl()"
-                    class="rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500">
+                    class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
                 {% for r in rounds %}
                 <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
                     {{ r.name }}{% if r.is_active %} (Active){% endif %}
@@ -27,7 +27,7 @@
         <div class="flex items-center space-x-2">
             <label class="text-sm text-hub-muted">Team:</label>
             <select id="teamSelector" onchange="updateDashboardUrl()"
-                    class="rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500">
+                    class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
                 <option value="">All (Department)</option>
                 {% for t in teams %}
                 <option value="{{ t.id }}" {% if selected_team and t.id == selected_team.id %}selected{% endif %}>
@@ -41,7 +41,7 @@
 </div>
 
 {% if not stats %}
-<div class="bg-hub-card rounded-2xl shadow-card border border-hub-border p-12 text-center animate-fade-in-up">
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
     <div class="text-5xl mb-4">🔧</div>
     <h2 class="text-xl font-semibold text-hub-text mb-2">No Responses Yet</h2>
     <p class="text-hub-muted mb-4">Use the landing page to generate and share the engineering assessment link.</p>
@@ -58,7 +58,7 @@
 
 <!-- Summary Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 text-center hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
         <p class="text-4xl font-bold
             {% if stats.overall_avg >= 4.0 %}text-emerald-600
@@ -76,13 +76,13 @@
         </p>
     </div>
 
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 text-center hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Responses</p>
         <p class="text-4xl font-bold text-hub-text">{{ stats.response_count }}</p>
         <p class="text-xs text-hub-faint mt-1">participants</p>
     </div>
 
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
         {% if stats.strengths %}
         <p class="text-lg font-semibold text-emerald-400">{{ stats.strengths[0].subcategory }}</p>
@@ -90,7 +90,7 @@
         {% endif %}
     </div>
 
-    <div class="stagger-item bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 hover:shadow-card transition-shadow duration-200">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
         <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
         {% if stats.improvements %}
         <p class="text-lg font-semibold text-orange-400">{{ stats.improvements[0].subcategory }}</p>
@@ -101,7 +101,7 @@
 
 <!-- Strengths & Improvements Detail -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-lg font-semibold text-emerald-400 mb-4">Top 3 Strengths</h3>
         {% for s in stats.strengths %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
@@ -111,9 +111,9 @@
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                    {% if s.avg >= 4 %}bg-emerald-500/15 text-emerald-400
-                    {% elif s.avg >= 3 %}bg-yellow-500/15 text-yellow-400
-                    {% else %}bg-orange-500/15 text-orange-400{% endif %}">
+                    {% if s.avg >= 4 %}border-emerald-500 text-emerald-600
+                    {% elif s.avg >= 3 %}border-yellow-500 text-yellow-600
+                    {% else %}border-orange-500 text-orange-600{% endif %}">
                     {{ maturity_labels.get((s.avg | round | int), "") }}
                 </span>
                 <span class="text-lg font-bold text-emerald-600">{{ "%.1f"|format(s.avg) }}</span>
@@ -121,7 +121,7 @@
         </div>
         {% endfor %}
     </div>
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-lg font-semibold text-orange-400 mb-4">Top 3 Improvement Areas</h3>
         {% for s in stats.improvements %}
         <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
@@ -131,10 +131,10 @@
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                    {% if s.avg >= 4 %}bg-emerald-500/15 text-emerald-400
-                    {% elif s.avg >= 3 %}bg-yellow-500/15 text-yellow-400
-                    {% elif s.avg >= 2 %}bg-orange-500/15 text-orange-400
-                    {% else %}bg-red-500/15 text-red-400{% endif %}">
+                    {% if s.avg >= 4 %}border-emerald-500 text-emerald-600
+                    {% elif s.avg >= 3 %}border-yellow-500 text-yellow-600
+                    {% elif s.avg >= 2 %}border-orange-500 text-orange-600
+                    {% else %}border-red-500 text-red-600{% endif %}">
                     {{ maturity_labels.get((s.avg | round | int), "") }}
                 </span>
                 <span class="text-lg font-bold text-orange-600">{{ "%.1f"|format(s.avg) }}</span>
@@ -146,13 +146,13 @@
 
 <!-- Charts -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-lg font-semibold text-hub-text mb-4">Category Radar</h3>
         <div style="height: 350px; display: flex; align-items: center; justify-content: center;">
             <canvas id="radarChart"></canvas>
         </div>
     </div>
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-lg font-semibold text-hub-text mb-4">Category Scores</h3>
         <div style="height: 350px;">
             <canvas id="categoryBarChart"></canvas>
@@ -162,7 +162,7 @@
 
 <!-- Trend Chart -->
 {% if trends and trends.round_names | length >= 2 %}
-<div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border p-6 mb-8">
+<div class="bg-hub-card border-2 border-hub-border p-6 mb-8">
     <h3 class="text-lg font-semibold text-hub-text mb-4">Maturity Trends Across Rounds</h3>
     <div style="height: 350px;">
         <canvas id="trendChart"></canvas>
@@ -176,7 +176,7 @@
     <h2 class="text-2xl font-bold text-hub-text mb-6">Detailed Area Scores</h2>
 
     {% for category, subcategories in grouped_areas.items() %}
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border mb-6 overflow-hidden hover:shadow-card transition-shadow duration-300">
+    <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
         <!-- Category header -->
         <button type="button" onclick="toggleSection(this)"
                 class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
@@ -186,11 +186,11 @@
                 {% for areas in subcategories.values() %}{% for a in areas %}{% if all_avgs.append(a.avg) %}{% endif %}{% endfor %}{% endfor %}
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                <span class="px-2.5 py-0.5 rounded-full text-sm font-semibold
-                    {% if cat_avg >= 4.0 %}bg-emerald-500/15 text-emerald-400
-                    {% elif cat_avg >= 3.0 %}bg-yellow-500/15 text-yellow-400
-                    {% elif cat_avg >= 2.0 %}bg-orange-500/15 text-orange-400
-                    {% else %}bg-red-500/15 text-red-400{% endif %}">
+                <span class="px-2.5 py-0.5 text-sm font-black border-2
+                    {% if cat_avg >= 4.0 %}border-emerald-500 text-emerald-600
+                    {% elif cat_avg >= 3.0 %}border-yellow-500 text-yellow-600
+                    {% elif cat_avg >= 2.0 %}border-orange-500 text-orange-600
+                    {% else %}border-red-500 text-red-600{% endif %}">
                     {{ "%.1f"|format(cat_avg) }} — {{ maturity_labels.get((cat_avg | round | int), "") }}
                 </span>
                 {% endif %}
@@ -222,10 +222,10 @@
                                     style="width: {{ (a.avg / 5 * 100) | int }}%"></div>
                             </div>
                             <span class="px-2 py-0.5 rounded-full text-xs font-bold
-                                {% if a.avg >= 4.0 %}bg-emerald-500/15 text-emerald-400
-                                {% elif a.avg >= 3.0 %}bg-yellow-500/15 text-yellow-400
-                                {% elif a.avg >= 2.0 %}bg-orange-500/15 text-orange-400
-                                {% else %}bg-red-500/15 text-red-400{% endif %}">
+                                {% if a.avg >= 4.0 %}border-emerald-500 text-emerald-600
+                                {% elif a.avg >= 3.0 %}border-yellow-500 text-yellow-600
+                                {% elif a.avg >= 2.0 %}border-orange-500 text-orange-600
+                                {% else %}border-red-500 text-red-600{% endif %}">
                                 {{ "%.1f"|format(a.avg) }}
                             </span>
                             <span class="text-xs font-medium text-hub-muted w-20">
@@ -250,8 +250,8 @@
 
 <!-- Maturity Levels Modal -->
 <div id="maturityModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('maturityModal').classList.add('hidden')"></div>
-    <div class="relative bg-hub-card rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+    <div class="absolute inset-0 bg-black/70" onclick="document.getElementById('maturityModal').classList.add('hidden')"></div>
+    <div class="relative bg-white max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6" style="border: 3px solid #000;">
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-lg font-bold text-hub-text">Maturity Levels</h2>
             <button onclick="document.getElementById('maturityModal').classList.add('hidden')"
@@ -262,10 +262,10 @@
             </button>
         </div>
         <div class="space-y-3">
-            {% set colors = {1: "border-red-500/30 bg-red-500/10", 2: "border-orange-500/30 bg-orange-500/10", 3: "border-yellow-500/30 bg-yellow-500/10", 4: "border-green-500/30 bg-green-500/10", 5: "border-emerald-500/30 bg-emerald-500/10"} %}
+            {% set colors = {1: "border-red-500", 2: "border-orange-500", 3: "border-yellow-500", 4: "border-green-500", 5: "border-emerald-500"} %}
             {% set dot_colors = {1: "bg-red-500", 2: "bg-orange-500", 3: "bg-yellow-500", 4: "bg-green-500", 5: "bg-emerald-500"} %}
             {% for level, desc in maturity_descriptions.items() %}
-            <div class="rounded-lg border p-3 {{ colors[level] }}">
+            <div class="border-2 p-3 {{ colors[level] }}">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="flex items-center justify-center w-5 h-5 rounded-full {{ dot_colors[level] }} text-white text-xs font-bold">{{ level }}</span>
                     <span class="text-sm font-bold text-hub-text">{{ desc.name }}</span>
@@ -344,10 +344,10 @@
                     datasets: [{
                         label: 'Engineering Maturity',
                         data: values,
-                        backgroundColor: 'rgba(168, 85, 247, 0.15)',
-                        borderColor: 'rgba(168, 85, 247, 1)',
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#FF0000',
                         borderWidth: 2.5,
-                        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
+                        pointBackgroundColor: '#FF0000',
                         pointRadius: 5,
                     }]
                 },
@@ -361,7 +361,7 @@
                             ticks: {
                                 stepSize: 1,
                                 backdropColor: 'transparent',
-                                color: '#5d6179',
+                                color: '#888',
                                 font: { size: 10 },
                                 callback: function(value) {
                                     return value || '';
@@ -369,13 +369,13 @@
                                 z: 1,
                             },
                             grid: {
-                                color: 'rgba(42, 46, 63, 0.6)',
+                                color: 'rgba(0, 0, 0, 0.12)',
                             },
                             angleLines: {
-                                color: 'rgba(42, 46, 63, 0.4)',
+                                color: 'rgba(0, 0, 0, 0.12)',
                             },
                             pointLabels: {
-                                color: '#8b8fa3',
+                                color: '#000',
                                 font: { size: 12, weight: '500' },
                             },
                         }

@@ -6,7 +6,7 @@
     <title>{% block title %}Team Maturity Assessment{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
@@ -25,35 +25,43 @@
                             900: '#14532d',
                         },
                         accent: {
-                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff',
-                            300: '#d8b4fe', 400: '#c084fc', 500: '#a855f7',
-                            600: '#9333ea', 700: '#7e22ce',
-                        },
-                        navy: {
-                            800: '#1e3a5f', 900: '#0f2440',
+                            50: '#fff5f5', 100: '#ffe3e3', 200: '#ffc9c9',
+                            300: '#ffa8a8', 400: '#ff6b6b', 500: '#FF0000',
+                            600: '#e60000', 700: '#cc0000',
                         },
                         hub: {
-                            bg: '#0f1117',
-                            surface: '#161922',
-                            card: '#1a1d2e',
-                            hover: '#232738',
-                            border: '#2a2e3f',
-                            border2: '#363b50',
-                            text: '#e4e5e9',
-                            muted: '#8b8fa3',
-                            faint: '#5d6179',
+                            bg: '#FFFFFF',
+                            surface: '#FFFFFF',
+                            card: '#FFFFFF',
+                            hover: '#F5F5F5',
+                            border: '#000000',
+                            border2: '#000000',
+                            text: '#000000',
+                            muted: '#555555',
+                            faint: '#888888',
                         },
                     },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '0px',
+                        DEFAULT: '0px',
+                        'md': '0px',
+                        'lg': '0px',
+                        'xl': '0px',
+                        '2xl': '0px',
+                        '3xl': '0px',
+                        'full': '0px',
+                    },
                     boxShadow: {
-                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.15)',
-                        'glow': '0 0 20px rgb(168 85 247 / 0.08)',
+                        'soft': 'none',
+                        'card': 'none',
+                        'card-hover': 'none',
+                        'glow': 'none',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'fade-in-up': 'fadeInUp 0.5s ease-out',
-                        'slide-down': 'slideDown 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'fade-in-up': 'fadeInUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.2s ease-out',
                     },
                     keyframes: {
                         fadeIn: {
@@ -61,11 +69,11 @@
                             '100%': { opacity: '1' },
                         },
                         fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(12px)' },
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-8px)' },
+                            '0%': { opacity: '0', transform: 'translateY(-4px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                     },
@@ -74,35 +82,34 @@
         }
     </script>
     <script>
-        // Apply dark theme to Chart.js defaults
-        Chart.defaults.color = '#8b8fa3';
-        Chart.defaults.borderColor = 'rgba(42, 46, 63, 0.5)';
+        // Chart.js defaults — white brutal
+        Chart.defaults.color = '#000000';
+        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
     </script>
 </head>
-<body class="h-full font-sans" style="background: #0f1117; color: #e4e5e9;">
+<body class="h-full font-sans" style="background: #FFFFFF; color: #000000;">
     <!-- Navigation -->
-    <nav class="bg-hub-surface border-b border-hub-border sticky top-0 z-50">
+    <nav style="border-bottom: 3px solid #000;" class="sticky top-0 z-50 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-14">
                 <div class="flex items-center space-x-8">
-                    <a href="/" class="flex items-center space-x-2 group">
-                        <span class="text-xl group-hover:scale-110 transition-transform duration-200">📊</span>
-                        <span class="font-bold text-white text-lg tracking-tight">Team Maturity</span>
+                    <a href="/" class="flex items-center space-x-2">
+                        <span class="font-black text-lg tracking-tight uppercase">Maturity_</span>
                     </a>
                     <div class="hidden sm:flex sm:space-x-1">
-                        <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
-                            Team Maturity
+                        <a href="/dashboard" class="px-3 py-2 text-sm font-bold text-hub-muted hover:text-black uppercase tracking-wide transition-colors duration-150">
+                            Team
                         </a>
-                        <a href="/engineering/dashboard/view" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
-                            Engineering Maturity
+                        <a href="/engineering/dashboard/view" class="px-3 py-2 text-sm font-bold text-hub-muted hover:text-black uppercase tracking-wide transition-colors duration-150">
+                            Engineering
                         </a>
-                        <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
+                        <a href="/admin" class="px-3 py-2 text-sm font-bold text-hub-muted hover:text-black uppercase tracking-wide transition-colors duration-150">
                             Admin
                         </a>
                     </div>
                 </div>
                 {% if auth_enabled %}
-                <a href="/logout" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200">
+                <a href="/logout" class="px-3 py-2 text-sm font-bold text-hub-faint hover:text-accent-500 uppercase tracking-wide transition-colors duration-150">
                     Sign Out
                 </a>
                 {% endif %}

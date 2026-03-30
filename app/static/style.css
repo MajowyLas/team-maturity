@@ -1,8 +1,8 @@
-/* ===== Team Maturity Assessment — Custom Styles ===== */
+/* ===== Team Maturity Assessment — White Brutal Styles ===== */
 
 /* --- GLOBAL TRANSITIONS --- */
 button, a, input, select, textarea {
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 button:active:not(:disabled),
@@ -10,35 +10,35 @@ a.btn-press:active {
     transform: scale(0.97);
 }
 
-/* --- FOCUS RINGS --- */
+/* --- FOCUS RINGS (brutal: black outline) --- */
 input:focus, select:focus, textarea:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
-    border-color: #a855f7;
+    box-shadow: 0 0 0 2px #000;
+    border-color: #000;
 }
 
-/* --- CARD SYSTEM --- */
+/* --- CARD SYSTEM (brutal: flat, bordered) --- */
 .card {
-    background: #1a1d2e;
-    border-radius: 0.875rem;
-    border: 1px solid #2a2e3f;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    background: #FFF;
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: none;
+    transition: border-color 0.15s ease;
 }
 
 .card-interactive:hover {
-    transform: translateY(-2px);
-    border-color: #363b50;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.15);
+    transform: none;
+    border-color: #FF0000;
+    box-shadow: none;
 }
 
 /* --- ACCORDION --- */
 .category-content {
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
 }
 
 .category-chevron, .section-chevron {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* CSS-based collapse for smooth accordion (team_dashboard) */
@@ -46,7 +46,7 @@ input:focus, select:focus, textarea:focus {
     max-height: 2000px;
     opacity: 1;
     overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
 }
 
 .section-content.collapsed {
@@ -56,7 +56,7 @@ input:focus, select:focus, textarea:focus {
 
 /* --- RADIO BUTTONS (Survey) --- */
 input[type="radio"]:focus + div {
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    box-shadow: 0 0 0 2px #000;
 }
 
 input[type="radio"]:checked + div {
@@ -91,39 +91,39 @@ input[type="radio"]:checked + div {
 /* --- STAGGER ENTRANCE --- */
 .stagger-item {
     opacity: 0;
-    animation: fadeInUp 0.4s ease-out forwards;
+    animation: fadeInUp 0.3s ease-out forwards;
 }
 
-.stagger-item:nth-child(1) { animation-delay: 0.05s; }
-.stagger-item:nth-child(2) { animation-delay: 0.1s; }
-.stagger-item:nth-child(3) { animation-delay: 0.15s; }
-.stagger-item:nth-child(4) { animation-delay: 0.2s; }
-.stagger-item:nth-child(5) { animation-delay: 0.25s; }
-.stagger-item:nth-child(6) { animation-delay: 0.3s; }
-.stagger-item:nth-child(7) { animation-delay: 0.35s; }
-.stagger-item:nth-child(8) { animation-delay: 0.4s; }
+.stagger-item:nth-child(1) { animation-delay: 0.03s; }
+.stagger-item:nth-child(2) { animation-delay: 0.06s; }
+.stagger-item:nth-child(3) { animation-delay: 0.09s; }
+.stagger-item:nth-child(4) { animation-delay: 0.12s; }
+.stagger-item:nth-child(5) { animation-delay: 0.15s; }
+.stagger-item:nth-child(6) { animation-delay: 0.18s; }
+.stagger-item:nth-child(7) { animation-delay: 0.21s; }
+.stagger-item:nth-child(8) { animation-delay: 0.24s; }
 
 /* --- STEPPER --- */
 .step-panel {
-    animation: fadeInUp 0.4s ease-out;
+    animation: fadeInUp 0.3s ease-out;
 }
 
 .step-dot {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .step-line {
-    transition: background-color 0.5s ease;
+    transition: background-color 0.3s ease;
 }
 
 /* --- KEYFRAMES --- */
 @keyframes fadeInUp {
-    0% { opacity: 0; transform: translateY(12px); }
+    0% { opacity: 0; transform: translateY(8px); }
     100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-    0% { transform: scale(0.9); }
+    0% { transform: scale(0.95); }
     100% { transform: scale(1); }
 }
 
@@ -134,17 +134,17 @@ input[type="radio"]:checked + div {
 
 @keyframes popIn {
     0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.15); }
+    70% { transform: scale(1.1); }
     100% { transform: scale(1); opacity: 1; }
 }
 
 /* --- UNANSWERED QUESTION HIGHLIGHT --- */
 .unanswered-highlight {
-    border-left: 3px solid #ef4444;
-    background: rgba(239, 68, 68, 0.08);
-    border-radius: 0.5rem;
+    border-left: 3px solid #FF0000;
+    background: rgba(255, 0, 0, 0.04);
+    border-radius: 0;
     padding: 0.5rem 0.75rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 /* Clear highlight when user answers */
@@ -153,18 +153,18 @@ input[type="radio"]:checked + div {
     background: transparent;
 }
 
-/* --- TYPOGRAPHY --- */
-h1 { letter-spacing: -0.025em; }
-h2 { letter-spacing: -0.02em; }
-h3 { letter-spacing: -0.01em; }
+/* --- TYPOGRAPHY (Brutal: tighter, heavier) --- */
+h1 { letter-spacing: -0.03em; font-weight: 900; }
+h2 { letter-spacing: -0.02em; font-weight: 900; }
+h3 { letter-spacing: -0.01em; font-weight: 700; }
 
-p, li, td { line-height: 1.65; }
+p, li, td { line-height: 1.6; }
 
-/* --- SCROLLBAR --- */
+/* --- SCROLLBAR (brutal: stark) --- */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0f1117; }
-::-webkit-scrollbar-thumb { background: #2a2e3f; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #363b50; }
+::-webkit-scrollbar-track { background: #FFF; }
+::-webkit-scrollbar-thumb { background: #000; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #333; }
 
 /* --- REDUCED MOTION (a11y) --- */
 @media (prefers-reduced-motion: reduce) {
@@ -180,8 +180,7 @@ p, li, td { line-height: 1.65; }
 @media print {
     nav { display: none; }
     .no-print { display: none; }
-    body { background: white; color: #111; }
-    .shadow-sm, .shadow-soft, .shadow-card { box-shadow: none; }
+    body { background: white; color: #000; }
     .stagger-item { animation: none; opacity: 1; }
     .animate-fade-in { animation: none; }
 }

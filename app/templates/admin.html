@@ -6,7 +6,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
     <!-- Teams + Survey Links -->
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border">
+    <div class="bg-hub-card border-2 border-hub-border">
         <div class="p-6 border-b border-hub-border">
             <h2 class="text-lg font-semibold text-hub-text">Teams & Survey Links</h2>
             <p class="text-sm text-hub-muted mt-1">Each team has a unique survey link. Copy and share with the team.</p>
@@ -14,11 +14,11 @@
         <div class="p-6">
             <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 mb-4">
                 <input type="text" name="team_name" required placeholder="New team name..."
-                       class="flex-1 min-w-[150px] rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                       class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                 <input type="number" name="member_count" min="1" placeholder="Members"
-                       class="w-24 rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                       class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                 <button type="submit"
-                        class="px-4 py-2.5 bg-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-accent-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
                     Add Team
                 </button>
             </form>
@@ -47,9 +47,9 @@
                         <div class="flex items-center gap-2">
                             <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
                                    id="link-{{ t.id }}"
-                                   class="flex-1 rounded-lg border-hub-border border bg-hub-surface px-3 py-1.5 text-xs text-hub-muted font-mono">
+                                   class="flex-1 border-2 border-hub-border bg-hub-surface px-3 py-1.5 text-xs text-hub-muted font-mono">
                             <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                    class="px-3 py-1.5 bg-hub-hover text-hub-muted rounded-lg text-xs font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                    class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
                                 Copy Link
                             </button>
                         </div>
@@ -60,18 +60,18 @@
                         <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
                             <div class="flex flex-wrap gap-2">
                                 <input type="text" name="team_name" value="{{ t.name }}" required
-                                       class="flex-1 min-w-[150px] rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                                       class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                                 <input type="number" name="member_count" min="1" placeholder="Members"
                                        value="{{ t.member_count or '' }}"
-                                       class="w-24 rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                                       class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                             </div>
                             <div class="flex gap-2">
                                 <button type="submit"
-                                        class="px-3 py-1.5 bg-accent-600 text-white rounded-lg text-xs font-semibold hover:bg-accent-700 active:scale-[0.97] transition-all duration-200">
+                                        class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
                                     Save
                                 </button>
                                 <button type="button" onclick="hideEditForm({{ t.id }})"
-                                        class="px-3 py-1.5 bg-hub-hover text-hub-muted rounded-lg text-xs font-medium hover:bg-hub-border transition-all duration-200">
+                                        class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover transition-all duration-200">
                                     Cancel
                                 </button>
                             </div>
@@ -90,16 +90,16 @@
     </div>
 
     <!-- Assessment Rounds -->
-    <div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border">
+    <div class="bg-hub-card border-2 border-hub-border">
         <div class="p-6 border-b border-hub-border">
             <h2 class="text-lg font-semibold text-hub-text">Assessment Rounds</h2>
         </div>
         <div class="p-6">
             <form method="POST" action="/admin/rounds" class="flex gap-2 mb-4">
                 <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
-                       class="flex-1 rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                       class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                 <button type="submit"
-                        class="px-4 py-2.5 bg-accent-600 text-white rounded-xl text-sm font-semibold hover:bg-accent-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
                     Create Round
                 </button>
             </form>
@@ -110,8 +110,8 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <span class="font-medium text-hub-text">{{ r.name }}</span>
-                            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
-                                {% if r.is_active %}bg-emerald-500/15 text-emerald-400{% else %}bg-hub-hover text-hub-muted{% endif %}">
+                            <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
+                                {% if r.is_active %}border-emerald-500 text-emerald-600{% else %}border-hub-border text-hub-muted{% endif %}">
                                 {% if r.is_active %}Active{% else %}Closed{% endif %}
                             </span>
                         </div>
@@ -129,9 +129,9 @@
                         <span class="text-xs text-hub-faint shrink-0">Eng. Survey:</span>
                         <input type="text" readonly value="{{ base_url }}/engineering/{{ r.engineering_token }}"
                                id="eng-link-{{ r.id }}"
-                               class="flex-1 rounded-lg border-hub-border border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
+                               class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
                         <button type="button" onclick="copyLink('eng-link-{{ r.id }}', this)"
-                                class="px-2 py-1 bg-hub-hover text-hub-muted rounded-lg text-xs font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
                             Copy
                         </button>
                     </div>
@@ -146,7 +146,7 @@
 </div>
 
 <!-- Data Management -->
-<div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border mb-8">
+<div class="bg-hub-card border-2 border-hub-border mb-8">
     <div class="p-6 border-b border-hub-border">
         <h2 class="text-lg font-semibold text-hub-text">Data Management</h2>
         <p class="text-sm text-hub-muted mt-1">Upload question CSVs, download data exports, or back up the database.</p>
@@ -154,7 +154,7 @@
     <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Database Backup -->
-            <div class="border border-hub-border rounded-xl p-5">
+            <div class="border-2 border-hub-border p-5">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-xl">💾</span>
                     <h3 class="font-semibold text-hub-text">Database Backup</h3>
@@ -168,7 +168,7 @@
             </div>
 
             <!-- Team Survey Questions -->
-            <div class="border border-hub-border rounded-xl p-5">
+            <div class="border-2 border-hub-border p-5">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-xl">📋</span>
                     <h3 class="font-semibold text-hub-text">Team Survey Questions</h3>
@@ -177,17 +177,17 @@
                 <p class="text-xs text-hub-faint mb-4">CSV format: Category, Subcategory, A, B, C, D, E</p>
                 <div class="flex flex-col gap-2">
                     <a href="/admin/data/download-questions/team"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-hub-hover text-hub-text rounded-lg text-xs font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-hub-hover text-hub-text text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Download CSV
                     </a>
                     <form method="POST" action="/admin/data/upload-questions/team" enctype="multipart/form-data"
                           class="flex items-center gap-2">
                         <input type="file" name="file" accept=".csv" required
-                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
+                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
                         <button type="submit"
                                 onclick="return confirm('This will replace all team survey questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
-                                class="px-3 py-1.5 bg-accent-600 text-white rounded-lg text-xs font-semibold hover:bg-accent-700 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150 whitespace-nowrap">
                             Upload
                         </button>
                     </form>
@@ -195,7 +195,7 @@
             </div>
 
             <!-- Engineering Questions -->
-            <div class="border border-hub-border rounded-xl p-5">
+            <div class="border-2 border-hub-border p-5">
                 <div class="flex items-center gap-2 mb-3">
                     <span class="text-xl">🔧</span>
                     <h3 class="font-semibold text-hub-text">Engineering Questions</h3>
@@ -204,17 +204,17 @@
                 <p class="text-xs text-hub-faint mb-4">CSV: Category, Subcategory, Area, Base…Expert</p>
                 <div class="flex flex-col gap-2">
                     <a href="/admin/data/download-questions/engineering"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-hub-hover text-hub-text rounded-lg text-xs font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-hub-hover text-hub-text text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Download CSV
                     </a>
                     <form method="POST" action="/admin/data/upload-questions/engineering" enctype="multipart/form-data"
                           class="flex items-center gap-2">
                         <input type="file" name="file" accept=".csv" required
-                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
+                               class="text-xs text-hub-muted file:mr-2 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-medium file:bg-accent-500/15 file:text-accent-300 hover:file:bg-accent-500/25">
                         <button type="submit"
                                 onclick="return confirm('This will replace all engineering assessment questions. Existing responses will keep their scores but may reference outdated questions. Continue?')"
-                                class="px-3 py-1.5 bg-accent-600 text-white rounded-lg text-xs font-semibold hover:bg-accent-700 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150 whitespace-nowrap">
                             Upload
                         </button>
                     </form>
@@ -226,7 +226,7 @@
 
 <!-- Participation Matrix -->
 {% if rounds and teams %}
-<div class="bg-hub-card rounded-2xl shadow-soft border border-hub-border overflow-hidden">
+<div class="bg-hub-card border-2 border-hub-border overflow-hidden">
     <div class="p-6 border-b border-hub-border">
         <h2 class="text-lg font-semibold text-hub-text">Participation Overview</h2>
         <p class="text-sm text-hub-muted mt-1">Number of responses per team per round.</p>
@@ -249,7 +249,7 @@
                     <td class="px-4 py-3 text-center">
                         {% set cnt = participation.get((r.id, t.id), 0) %}
                         {% if cnt > 0 %}
-                        <span class="inline-block px-2 py-1 bg-accent-500/15 text-accent-300 rounded-md text-sm font-medium">{{ cnt }}</span>
+                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
                         {% else %}
                         <span class="text-hub-faint">--</span>
                         {% endif %}
