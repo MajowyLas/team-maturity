@@ -1,45 +1,262 @@
-{% extends "base_public.html" %}
-{% block title %}Thank You -- Engineering Delivery Assessment{% endblock %}
+{% extends "base_terminal.html" %}
+{% block title %}$ assess --complete{% endblock %}
+{% block terminal_path %}~/engineering/complete{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto text-center py-20">
-    <div class="text-6xl mb-6" style="animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);">🎉</div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-4 animate-fade-in-up tracking-tight">Thank You!</h1>
-    <p class="text-gray-600 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">Your engineering delivery assessment has been recorded. You can close this page.</p>
-    <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
-        <a href="/engineering/{{ token }}" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
-            Submit Another Response
+<div class="max-w-lg mx-auto text-center py-16">
+    <div class="mb-8 font-mono">
+        <div class="text-term-green text-sm mb-1 animate-type-in">$ ./submit-assessment.sh</div>
+        <div class="text-term-green text-sm mb-1 animate-type-in" style="animation-delay: 0.3s;">Compiling responses...</div>
+        <div class="text-term-green text-sm mb-1 animate-type-in" style="animation-delay: 0.6s;">Pushing to mothership...</div>
+        <div class="text-term-cyan text-sm font-bold animate-type-in" style="animation-delay: 0.9s;">[OK] Assessment deployed successfully.</div>
+    </div>
+
+    <div class="text-5xl mb-6" style="animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) 1.2s both;">
+        <span class="inline-block animate-glow">&#x2714;</span>
+    </div>
+
+    <h1 class="text-2xl font-bold text-term-green mb-3 tracking-tight font-mono animate-fade-in" style="animation-delay: 1.4s; animation-fill-mode: both;">
+        return 0; // success
+    </h1>
+    <p class="text-term-muted mb-8 text-sm font-mono animate-fade-in" style="animation-delay: 1.6s; animation-fill-mode: both;">
+        Your assessment has been recorded. You can <span class="text-term-text">close</span> this terminal.
+    </p>
+
+    <div class="animate-fade-in" style="animation-delay: 1.8s; animation-fill-mode: both;">
+        <a href="/engineering/{{ token }}"
+           class="inline-block px-5 py-2 bg-term-surface border border-term-border rounded-lg text-term-text text-sm font-mono
+                  hover:border-term-green/40 hover:text-term-green hover:shadow-[0_0_15px_rgba(0,255,65,0.1)]
+                  active:scale-[0.97] transition-all duration-200">
+            <span class="text-term-green mr-1">$</span> ./run-assessment.sh --again
         </a>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<style>
+    @keyframes popIn {
+        0% { transform: scale(0); opacity: 0; }
+        70% { transform: scale(1.15); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+</style>
 <script>
-    // Confetti on page load
+    // Pixel dino runner — stops twice to look at you
     (function() {
-        const colors = ['#4CB648', '#3B82F6', '#facc15', '#ef4444', '#c084fc', '#f97316'];
-        const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden';
-        document.body.appendChild(container);
-        for (let i = 0; i < 80; i++) {
-            const dot = document.createElement('div');
-            const size = Math.random() * 10 + 4;
-            const x = Math.random() * 100;
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const isRect = Math.random() > 0.5;
-            dot.style.cssText = `position:absolute;top:-20px;left:${x}%;width:${size}px;height:${isRect ? size*2 : size}px;background:${color};border-radius:${isRect?'2px':'50%'};opacity:1;`;
-            dot.animate([
-                { transform: `translateY(0) rotate(0deg) scale(1)`, opacity: 1 },
-                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random()*1080-540}deg) scale(${Math.random()*0.5+0.5})`, opacity: 0 }
-            ], {
-                duration: Math.random() * 2000 + 2000,
-                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                delay: Math.random() * 600
-            });
-            container.appendChild(dot);
-        }
-        setTimeout(() => container.remove(), 4000);
+        setTimeout(() => {
+            const canvas = document.createElement('canvas');
+            const W = window.innerWidth;
+            const H = 100;
+            canvas.width = W;
+            canvas.height = H;
+            canvas.style.cssText = 'position:fixed;bottom:20%;left:0;width:100%;height:100px;pointer-events:none;z-index:9999;image-rendering:pixelated;';
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            const S = 3;
+
+            // Side-facing run frames
+            const run1 = [
+                '  .##  ',
+                '  .### ',
+                '  .##  ',
+                '#.##   ',
+                '####   ',
+                ' ###   ',
+                ' ##    ',
+                ' #.#   ',
+            ];
+            const run2 = [
+                '  .##  ',
+                '  .### ',
+                '  .##  ',
+                '#.##   ',
+                '####   ',
+                ' ###   ',
+                '  ##   ',
+                ' #. #  ',
+            ];
+
+            // Front-facing "looking at you" frames
+            const look1 = [
+                ' .##. ',
+                ' #..# ',
+                ' #### ',
+                '  ##  ',
+                ' #### ',
+                '  ##  ',
+                ' #  # ',
+                ' #  # ',
+            ];
+            const look2 = [
+                ' .##. ',
+                ' #..# ',
+                ' #### ',
+                '  ##  ',
+                ' #### ',
+                '  ##  ',
+                ' #  # ',
+                '  #  #',
+            ];
+
+            function drawSprite(sprite, x, y, color) {
+                for (let row = 0; row < sprite.length; row++) {
+                    for (let col = 0; col < sprite[row].length; col++) {
+                        if (sprite[row][col] === '#') {
+                            ctx.fillStyle = color;
+                            ctx.fillRect(x + col * S, y + row * S, S, S);
+                        } else if (sprite[row][col] === '.') {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(x + col * S, y + row * S, S, S);
+                        }
+                    }
+                }
+            }
+
+            const groundY = H - 15;
+            const dinoH = 8 * S;
+
+            // Timeline: run → stop → look → run → stop → look → run off
+            // Each segment: { type, startT, endT }
+            const stops = [
+                { at: 0.28, dur: 1800 },  // stop 1: "Dobra robota!"
+                { at: 0.62, dur: 1800 },  // stop 2: "Masz parowke! 🌭"
+            ];
+            const totalRunDuration = 8000;
+            const totalDuration = totalRunDuration + stops.reduce((s, p) => s + p.dur, 0);
+
+            let startTime = null;
+
+            function animate(ts) {
+                if (!startTime) startTime = ts;
+                const elapsed = ts - startTime;
+
+                ctx.clearRect(0, 0, W, H);
+
+                // Ground
+                ctx.strokeStyle = 'rgba(0,255,65,0.12)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(0, groundY);
+                ctx.lineTo(W, groundY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Figure out effective run time (subtract pause durations)
+                let runElapsed = elapsed;
+                let isPaused = false;
+                let pauseElapsed = 0;
+                let totalPausesBefore = 0;
+
+                for (const stop of stops) {
+                    const stopX = stop.at;
+                    // When in run-time does dino reach this x?
+                    const runTimeAtStop = stopX * totalRunDuration;
+                    const realTimeAtStop = runTimeAtStop + totalPausesBefore;
+
+                    if (elapsed >= realTimeAtStop && elapsed < realTimeAtStop + stop.dur) {
+                        // We're in this pause
+                        isPaused = true;
+                        pauseElapsed = elapsed - realTimeAtStop;
+                        runElapsed = runTimeAtStop;
+                        break;
+                    } else if (elapsed >= realTimeAtStop + stop.dur) {
+                        totalPausesBefore += stop.dur;
+                    }
+                }
+
+                if (!isPaused) {
+                    runElapsed = elapsed - totalPausesBefore;
+                }
+
+                const runProgress = Math.min(runElapsed / totalRunDuration, 1);
+                const dinoX = -40 + (W + 80) * runProgress;
+                const dinoY = groundY - dinoH;
+
+                // Pick sprite
+                let sprite;
+                if (isPaused) {
+                    // Looking at user — blink/shift animation
+                    sprite = Math.floor(pauseElapsed / 400) % 2 === 0 ? look1 : look2;
+                } else {
+                    sprite = Math.floor(runElapsed / 180) % 2 === 0 ? run1 : run2;
+                }
+
+                // Dust when running
+                if (!isPaused && Math.random() > 0.6 && runProgress < 0.95) {
+                    ctx.fillStyle = 'rgba(0,255,65,0.06)';
+                    ctx.fillRect(dinoX - 5 - Math.random() * 8, groundY - 1 - Math.random() * 3, S, S);
+                }
+
+                // Draw dino
+                drawSprite(sprite, dinoX, dinoY, '#00ff41');
+
+                // Glow under dino
+                ctx.fillStyle = 'rgba(0,255,65,0.04)';
+                ctx.fillRect(dinoX - 2, groundY + 1, 7 * S + 4, 3);
+
+                // Speech bubble when looking at user
+                if (isPaused && pauseElapsed > 250) {
+                    const bubbleAlpha = Math.min((pauseElapsed - 250) / 200, 1);
+                    ctx.globalAlpha = bubbleAlpha;
+
+                    // Which stop are we at?
+                    const stopIndex = stops.findIndex(s => {
+                        const rt = s.at * totalRunDuration;
+                        let pb = 0;
+                        for (const ps of stops) { if (ps === s) break; pb += ps.dur; }
+                        return elapsed >= rt + pb && elapsed < rt + pb + s.dur;
+                    });
+                    const msgs = ['Dobra robota!', 'Masz parowke! 🌭'];
+                    const msg = msgs[stopIndex] || '?';
+
+                    ctx.font = `bold ${S * 3.5}px 'JetBrains Mono', monospace`;
+                    const textW = ctx.measureText(msg).width;
+                    const bx = dinoX + 7 * S + 6;
+                    const by = dinoY - 18;
+                    const pad = 6;
+
+                    // Bubble background
+                    ctx.fillStyle = '#161b22';
+                    ctx.strokeStyle = '#00ff41';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.roundRect(bx - pad, by - S * 3 - pad, textW + pad * 2, S * 3.5 + pad * 2, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Little triangle pointing to dino
+                    ctx.fillStyle = '#161b22';
+                    ctx.beginPath();
+                    ctx.moveTo(bx + 2, by + S * 0.5 + pad);
+                    ctx.lineTo(bx - 4, by + S * 0.5 + pad + 6);
+                    ctx.lineTo(bx + 8, by + S * 0.5 + pad);
+                    ctx.fill();
+                    ctx.strokeStyle = '#00ff41';
+                    ctx.beginPath();
+                    ctx.moveTo(bx - 4, by + S * 0.5 + pad + 6);
+                    ctx.lineTo(bx + 2, by + S * 0.5 + pad);
+                    ctx.stroke();
+
+                    // Text
+                    ctx.fillStyle = '#00ff41';
+                    ctx.fillText(msg, bx, by);
+
+                    ctx.globalAlpha = 1;
+                }
+
+                const totalProgress = elapsed / totalDuration;
+                if (totalProgress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, fill: 'forwards' });
+                    setTimeout(() => canvas.remove(), 900);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }, 1500);
     })();
 </script>
 {% endblock %}

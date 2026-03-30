@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,18 +25,30 @@
                             900: '#14532d',
                         },
                         accent: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
-                            300: '#93c5fd', 400: '#60a5fa', 500: '#3B82F6',
-                            600: '#2563eb', 700: '#1d4ed8',
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff',
+                            300: '#d8b4fe', 400: '#c084fc', 500: '#a855f7',
+                            600: '#9333ea', 700: '#7e22ce',
                         },
                         navy: {
                             800: '#1e3a5f', 900: '#0f2440',
-                        }
+                        },
+                        hub: {
+                            bg: '#0f1117',
+                            surface: '#161922',
+                            card: '#1a1d2e',
+                            hover: '#232738',
+                            border: '#2a2e3f',
+                            border2: '#363b50',
+                            text: '#e4e5e9',
+                            muted: '#8b8fa3',
+                            faint: '#5d6179',
+                        },
                     },
                     boxShadow: {
-                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
-                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03)',
-                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.15)',
+                        'glow': '0 0 20px rgb(168 85 247 / 0.08)',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
@@ -61,10 +73,15 @@
             }
         }
     </script>
+    <script>
+        // Apply dark theme to Chart.js defaults
+        Chart.defaults.color = '#8b8fa3';
+        Chart.defaults.borderColor = 'rgba(42, 46, 63, 0.5)';
+    </script>
 </head>
-<body class="h-full font-sans">
+<body class="h-full font-sans" style="background: #0f1117; color: #e4e5e9;">
     <!-- Navigation -->
-    <nav class="bg-navy-900 shadow-lg sticky top-0 z-50">
+    <nav class="bg-hub-surface border-b border-hub-border sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-14">
                 <div class="flex items-center space-x-8">
@@ -73,13 +90,13 @@
                         <span class="font-bold text-white text-lg tracking-tight">Team Maturity</span>
                     </a>
                     <div class="hidden sm:flex sm:space-x-1">
-                        <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
                             Team Maturity
                         </a>
-                        <a href="/engineering/dashboard/view" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <a href="/engineering/dashboard/view" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
                             Engineering Maturity
                         </a>
-                        <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover transition-all duration-200">
                             Admin
                         </a>
                     </div>

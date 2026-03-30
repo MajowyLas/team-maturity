@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Engineering Assessment{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        term: {
+                            bg: '#0d1117',
+                            surface: '#161b22',
+                            border: '#30363d',
+                            hover: '#1c2129',
+                            text: '#c9d1d9',
+                            muted: '#8b949e',
+                            green: '#00ff41',
+                            greenDim: '#238636',
+                            greenBg: '#0d2818',
+                            cyan: '#58d1db',
+                            blue: '#58a6ff',
+                            yellow: '#d29922',
+                            orange: '#db6d28',
+                            red: '#f85149',
+                            purple: '#bc8cff',
+                            pink: '#f778ba',
+                        }
+                    },
+                    animation: {
+                        'blink': 'blink 1.2s step-end infinite',
+                        'fade-in': 'fadeIn 0.4s ease-out',
+                        'type-in': 'typeIn 0.6s ease-out',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'scan': 'scanline 8s linear infinite',
+                    },
+                    keyframes: {
+                        blink: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        typeIn: {
+                            '0%': { opacity: '0', transform: 'translateX(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        glow: {
+                            '0%': { textShadow: '0 0 5px rgba(0,255,65,0.3)' },
+                            '100%': { textShadow: '0 0 20px rgba(0,255,65,0.6), 0 0 40px rgba(0,255,65,0.2)' },
+                        },
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100vh)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Scanline overlay */
+        .scanline-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0,255,65,0.08), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Terminal glow effect on focus */
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 1px #00ff41, 0 0 10px rgba(0,255,65,0.15);
+            border-color: #00ff41;
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(0,255,65,0.2);
+            color: #00ff41;
+        }
+
+        /* Radio checked glow */
+        input[type="radio"]:checked + div {
+            animation: selectedGlow 0.3s ease-out;
+        }
+
+        @keyframes selectedGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0,255,65,0.4); }
+            50% { box-shadow: 0 0 15px 2px rgba(0,255,65,0.2); }
+            100% { box-shadow: none; }
+        }
+
+        /* Unanswered highlight — terminal red */
+        .unanswered-highlight {
+            border-left: 2px solid #f85149;
+            background: rgba(248, 81, 73, 0.06);
+            padding-left: 0.75rem;
+        }
+
+        .unanswered-highlight:has(input[type="radio"]:checked) {
+            border-left-color: transparent;
+            background: transparent;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full font-mono scanline-overlay">
+    <!-- Terminal top bar -->
+    <div class="bg-term-surface border-b border-term-border">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-2">
+            <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-term-red opacity-80"></span>
+                <span class="w-3 h-3 rounded-full bg-term-yellow opacity-80"></span>
+                <span class="w-3 h-3 rounded-full bg-term-green opacity-80"></span>
+            </div>
+            <span class="text-term-muted text-xs ml-2">dfw-assess v2.0 ~ {% block terminal_path %}~/engineering{% endblock %}</span>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

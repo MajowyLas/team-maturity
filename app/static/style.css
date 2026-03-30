@@ -13,23 +13,23 @@ a.btn-press:active {
 /* --- FOCUS RINGS --- */
 input:focus, select:focus, textarea:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(76, 182, 72, 0.15);
-    border-color: #4CB648;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    border-color: #a855f7;
 }
 
 /* --- CARD SYSTEM --- */
 .card {
-    background: white;
+    background: #1a1d2e;
     border-radius: 0.875rem;
-    border: 1px solid #f3f4f6;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    border: 1px solid #2a2e3f;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
 }
 
 .card-interactive:hover {
     transform: translateY(-2px);
-    border-color: #bbf7d0;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    border-color: #363b50;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.15);
 }
 
 /* --- ACCORDION --- */
@@ -56,7 +56,7 @@ input:focus, select:focus, textarea:focus {
 
 /* --- RADIO BUTTONS (Survey) --- */
 input[type="radio"]:focus + div {
-    box-shadow: 0 0 0 3px rgba(76, 182, 72, 0.2);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
 }
 
 input[type="radio"]:checked + div {
@@ -141,7 +141,7 @@ input[type="radio"]:checked + div {
 /* --- UNANSWERED QUESTION HIGHLIGHT --- */
 .unanswered-highlight {
     border-left: 3px solid #ef4444;
-    background: #fef2f2;
+    background: rgba(239, 68, 68, 0.08);
     border-radius: 0.5rem;
     padding: 0.5rem 0.75rem;
     transition: all 0.3s ease;
@@ -162,9 +162,9 @@ p, li, td { line-height: 1.65; }
 
 /* --- SCROLLBAR --- */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f9fafb; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar-track { background: #0f1117; }
+::-webkit-scrollbar-thumb { background: #2a2e3f; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #363b50; }
 
 /* --- REDUCED MOTION (a11y) --- */
 @media (prefers-reduced-motion: reduce) {
@@ -180,7 +180,7 @@ p, li, td { line-height: 1.65; }
 @media print {
     nav { display: none; }
     .no-print { display: none; }
-    body { background: white; }
+    body { background: white; color: #111; }
     .shadow-sm, .shadow-soft, .shadow-card { box-shadow: none; }
     .stagger-item { animation: none; opacity: 1; }
     .animate-fade-in { animation: none; }

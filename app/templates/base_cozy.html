@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Team Maturity Assessment{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#111113',
+                            surface: '#19191b',
+                            card: '#1e1e21',
+                            hover: '#252528',
+                            border: '#2e2e32',
+                            border2: '#3a3a3f',
+                            text: '#ededef',
+                            muted: '#8b8b8e',
+                            faint: '#5a5a5e',
+                        },
+                        play: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7e22ce',
+                        },
+                        pop: {
+                            pink: '#f472b6',
+                            coral: '#fb7185',
+                            sky: '#38bdf8',
+                            mint: '#34d399',
+                            amber: '#fbbf24',
+                            blue: '#818cf8',
+                        },
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgb(168 85 247 / 0.1)',
+                        'glow-hover': '0 0 30px rgb(168 85 247 / 0.15)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'fade-in-up': 'fadeInUp 0.5s ease-out both',
+                        'bounce-soft': 'bounceSoft 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(12px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        bounceSoft: {
+                            '0%': { transform: 'scale(0.95)' },
+                            '50%': { transform: 'scale(1.03)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #111113;
+            color: #ededef;
+        }
+
+        /* Subtle gradient blobs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%; left: -10%;
+            width: 50%; height: 50%;
+            background: radial-gradient(ellipse, rgba(168,85,247,0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%; right: -10%;
+            width: 50%; height: 50%;
+            background: radial-gradient(ellipse, rgba(56,189,248,0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        main { position: relative; z-index: 1; }
+
+        /* Focus rings */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
+        }
+
+        ::selection {
+            background: rgba(168, 85, 247, 0.25);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111113; }
+        ::-webkit-scrollbar-thumb { background: #2e2e32; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3a3a3f; }
+
+        /* Unanswered highlight */
+        .unanswered-highlight {
+            border-left: 3px solid #fb7185;
+            background: rgba(251, 113, 133, 0.06);
+            border-radius: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .unanswered-highlight:has(input[type="radio"]:checked) {
+            border-left-color: transparent;
+            background: transparent;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full font-sans">
+    <!-- Gradient header strip -->
+    <div class="h-1 bg-gradient-to-r from-play-500 via-pop-pink to-pop-sky"></div>
+
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 animate-fade-in">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

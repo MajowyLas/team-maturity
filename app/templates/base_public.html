@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,17 +24,28 @@
                             900: '#14532d',
                         },
                         accent: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
-                            300: '#93c5fd', 400: '#60a5fa', 500: '#3B82F6',
-                            600: '#2563eb', 700: '#1d4ed8',
+                            50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff',
+                            300: '#d8b4fe', 400: '#c084fc', 500: '#a855f7',
+                            600: '#9333ea', 700: '#7e22ce',
                         },
                         navy: {
                             800: '#1e3a5f', 900: '#0f2440',
-                        }
+                        },
+                        hub: {
+                            bg: '#0f1117',
+                            surface: '#161922',
+                            card: '#1a1d2e',
+                            hover: '#232738',
+                            border: '#2a2e3f',
+                            border2: '#363b50',
+                            text: '#e4e5e9',
+                            muted: '#8b8fa3',
+                            faint: '#5d6179',
+                        },
                     },
                     boxShadow: {
-                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
-                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03)',
+                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
@@ -55,9 +66,9 @@
         }
     </script>
 </head>
-<body class="h-full font-sans">
-    <!-- Minimal header — no navigation -->
-    <div class="bg-navy-900 h-1"></div>
+<body class="h-full font-sans" style="background: #0f1117; color: #e4e5e9;">
+    <!-- Minimal header — subtle purple accent border -->
+    <div class="h-1 bg-gradient-to-r from-accent-700 via-accent-500 to-accent-700"></div>
 
     <main class="max-w-3xl mx-auto px-4 sm:px-6 py-10 animate-fade-in">
         {% block content %}{% endblock %}

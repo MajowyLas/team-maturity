@@ -1,134 +1,143 @@
-{% extends "base_public.html" %}
-{% block title %}Engineering Delivery Assessment{% endblock %}
+{% extends "base_terminal.html" %}
+{% block title %}$ assess --engineering{% endblock %}
+{% block terminal_path %}~/engineering/assess{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Engineering Delivery Assessment</h1>
-    <p class="text-gray-500 mb-8">Pick the maturity level that best describes where we are today. Be honest.</p>
+<div class="mb-8">
+    <div class="flex items-center gap-2 mb-1">
+        <span class="text-term-green">$</span>
+        <h1 class="text-2xl font-bold text-term-green animate-glow tracking-tight">./run-assessment.sh</h1>
+        <span class="w-2 h-5 bg-term-green animate-blink"></span>
+    </div>
+    <p class="text-term-muted text-sm pl-5">
+        <span class="text-term-muted"># Pick the maturity level that best describes where we are today. Be honest.</span>
+    </p>
+</div>
 
-    <!-- Draft recovery banner -->
-    <div id="draftBanner" class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span class="text-amber-600">💾</span>
-            <p class="text-sm text-amber-800">You have an unfinished assessment (<strong id="draftCount">0</strong> answers saved). Pick up where you left off?</p>
+<!-- Draft recovery banner -->
+<div id="draftBanner" class="hidden mb-6 bg-term-surface border border-term-yellow/30 rounded-lg p-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+        <span class="text-term-yellow font-bold">[WARN]</span>
+        <p class="text-sm text-term-yellow">Unfinished session detected — <strong id="draftCount" class="text-term-text">0</strong> answers cached locally.</p>
+    </div>
+    <div class="flex gap-2 shrink-0 ml-4">
+        <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-term-greenDim text-white text-xs font-bold rounded hover:bg-term-green/30 border border-term-green/30 transition">restore</button>
+        <button type="button" id="discardDraft" class="px-3 py-1.5 text-term-muted text-xs font-medium hover:text-term-red transition">discard</button>
+    </div>
+</div>
+
+<form method="POST" action="/engineering/{{ token }}" id="surveyForm">
+    <!-- Session Info -->
+    <div class="bg-term-surface border border-term-border rounded-lg p-5 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <span class="text-term-green text-sm">></span>
+                <span class="text-sm font-semibold text-term-text">session.init()</span>
+            </div>
+            <span class="px-2.5 py-0.5 bg-term-greenBg border border-term-green/20 text-term-green rounded text-xs font-mono">{{ round.name }}</span>
         </div>
-        <div class="flex gap-2 shrink-0 ml-4">
-            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition">Restore</button>
-            <button type="button" id="discardDraft" class="px-3 py-1.5 text-amber-600 text-xs font-medium hover:underline">Discard</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-term-muted mb-1.5 uppercase tracking-wider">user.name</label>
+                <input type="text" name="respondent_name" required placeholder="jane_smith"
+                       class="w-full rounded-md bg-term-bg border border-term-border px-3 py-2.5 text-sm text-term-text font-mono placeholder:text-term-muted/40 focus:bg-term-hover">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-term-muted mb-1.5 uppercase tracking-wider">team.select()</label>
+                <select name="team_id" required class="w-full rounded-md bg-term-bg border border-term-border px-3 py-2.5 text-sm text-term-text font-mono focus:bg-term-hover">
+                    <option value="" disabled selected class="text-term-muted">// choose your squad</option>
+                    {% for t in teams %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
 
-    <form method="POST" action="/engineering/{{ token }}" id="surveyForm">
-        <!-- Round & Respondent Info -->
-        <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-7 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">Your Information</h2>
-                <span class="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium">{{ round.name }}</span>
+    <!-- Progress bar — terminal style -->
+    <div class="bg-term-surface/95 backdrop-blur-sm border border-term-border rounded-lg p-4 mb-6 sticky top-0 z-10">
+        <div class="flex items-center justify-between">
+            <span class="text-xs text-term-muted font-mono">
+                <span class="text-term-green">$</span> assess --progress
+            </span>
+            <span id="progressText" class="text-xs text-term-text font-mono">
+                [<span id="progressAscii" class="text-term-green">░░░░░░░░░░░░░░░░░░░░</span>] <span id="progressPct">0</span>% (<span id="progressCount">0</span>/{{ total_questions }})
+            </span>
+        </div>
+        <div id="progressStatus" class="mt-1 text-[10px] text-term-muted font-mono">STATUS: waiting for input...</div>
+    </div>
+
+    <!-- Questions by Category -->
+    {% for category, subcategories in grouped_questions.items() %}
+    <div class="bg-term-surface border border-term-border rounded-lg mb-5 overflow-hidden hover:border-term-green/20 transition-colors duration-300">
+        <button type="button" onclick="toggleCategory(this)"
+                class="w-full flex items-center justify-between p-5 text-left hover:bg-term-hover transition-all duration-200 group">
+            <div class="flex items-center gap-3">
+                <span class="text-term-green text-sm opacity-60 group-hover:opacity-100 transition-opacity">></span>
+                <h2 class="text-base font-bold text-term-text group-hover:text-term-green transition-colors">{{ category }}</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name (First & Last)</label>
-                    <input type="text" name="respondent_name" required placeholder="Jane Smith"
-                           class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+            <svg class="category-chevron w-4 h-4 text-term-muted transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div class="category-content px-5 pb-5">
+            {% for subcategory, questions in subcategories.items() %}
+            <div class="mb-6 last:mb-0">
+                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-term-border/50">
+                    <span class="text-term-cyan text-[10px]">#</span>
+                    <h3 class="text-xs font-semibold text-term-cyan uppercase tracking-widest">{{ subcategory }}</h3>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Team</label>
-                    <select name="team_id" required class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-                        <option value="" disabled selected>Select your team...</option>
-                        {% for t in teams %}
-                        <option value="{{ t.id }}">{{ t.name }}</option>
+                {% for q in questions %}
+                <div class="question-block mb-4 last:mb-0">
+                    <p class="text-term-text text-sm mb-2 pl-1">
+                        <span class="text-term-muted mr-1">~</span>{{ q.statement }}
+                    </p>
+                    <div class="space-y-0 border border-term-border rounded overflow-hidden">
+                        {% set levels = [
+                            (1, "BASE", q.level_1, "text-term-red", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
+                            (2, "BEGN", q.level_2, "text-term-orange", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
+                            (3, "INTM", q.level_3, "text-term-yellow", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
+                            (4, "ADVN", q.level_4, "text-term-green", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green"),
+                            (5, "XPRT", q.level_5, "text-term-cyan", "hover:bg-term-hover peer-checked:bg-term-hover peer-checked:border-l-term-green")
+                        ] %}
+                        {% for score, label, description, label_color, bg_classes in levels %}
+                        {% if description %}
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
+                                   class="sr-only peer" onchange="updateProgress()">
+                            <div class="flex items-center px-3 py-2 border-b border-term-border/30 last:border-b-0 {{ bg_classes }} peer-checked:border-l-[3px] transition-all duration-100">
+                                <span class="shrink-0 text-[10px] font-bold text-term-muted w-3 text-right mr-2 font-mono">{{ score }}</span>
+                                <span class="shrink-0 text-[10px] font-bold w-[3rem] font-mono {{ label_color }}">{{ label }}</span>
+                                <span class="shrink-0 text-term-border mx-2">|</span>
+                                <span class="text-xs text-term-muted leading-snug font-sans">{{ description }}</span>
+                            </div>
+                        </label>
+                        {% endif %}
                         {% endfor %}
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Progress bar -->
-        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-card border border-gray-100 p-4 mb-6 sticky top-[4.5rem] z-10">
-            <div class="flex items-center justify-between mb-1">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-gray-700">Progress</span>
-                    <span id="progressMood" class="text-base transition-all duration-300">📋</span>
-                </div>
-                <span id="progressText" class="text-sm text-gray-500 font-mono">0 / {{ total_questions }}</span>
-            </div>
-            <div class="relative w-full bg-gray-200 rounded-full h-2.5">
-                <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-brand-400 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-                <span id="progressRunner" class="absolute top-1/2 -translate-y-1/2 text-sm transition-all duration-500 ease-out" style="left: 0%">🚀</span>
-            </div>
-            <div class="relative w-full h-0 mt-0.5">
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 25%">25%</span>
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 50%">50%</span>
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 75%">75%</span>
-            </div>
-        </div>
-
-
-        <!-- Questions by Category -->
-        {% for category, subcategories in grouped_questions.items() %}
-        <div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-6 overflow-hidden hover:shadow-card transition-shadow duration-300">
-            <button type="button" onclick="toggleCategory(this)"
-                    class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50/80 transition-all duration-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ category }}</h2>
-                <svg class="category-chevron w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div class="category-content px-6 pb-6">
-                {% for subcategory, questions in subcategories.items() %}
-                <div class="mb-8 last:mb-0">
-                    <h3 class="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-4 pb-2 border-b border-gray-100">
-                        {{ subcategory }}
-                    </h3>
-                    {% for q in questions %}
-                    <div class="mb-5 last:mb-0">
-                        <p class="text-gray-900 font-semibold text-sm mb-2">{{ q.statement }}</p>
-
-                        <div class="space-y-0 divide-y divide-gray-100 border border-gray-150 rounded-lg overflow-hidden">
-                            {% set levels = [
-                                (1, "Base", q.level_1, "text-red-500"),
-                                (2, "Beginner", q.level_2, "text-orange-500"),
-                                (3, "Intermediate", q.level_3, "text-yellow-600"),
-                                (4, "Advanced", q.level_4, "text-green-600"),
-                                (5, "Expert", q.level_5, "text-emerald-600")
-                            ] %}
-                            {% for score, label, description, label_color in levels %}
-                            {% if description %}
-                            <label class="block cursor-pointer">
-                                <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                       class="sr-only peer" onchange="updateProgress()">
-                                <div class="flex items-center px-3 py-2 bg-white hover:bg-gray-50 peer-checked:bg-brand-50 peer-checked:border-l-[3px] peer-checked:border-l-brand-500 transition-all duration-100">
-                                    <span class="shrink-0 text-xs font-semibold text-gray-400 w-4 text-right mr-2">{{ score }}</span>
-                                    <span class="shrink-0 text-xs font-bold w-[5rem] {{ label_color }}">{{ label }}</span>
-                                    <span class="shrink-0 w-px h-4 bg-gray-200 mx-3"></span>
-                                    <span class="text-xs text-gray-400 leading-snug">{{ description }}</span>
-                                </div>
-                            </label>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
                     </div>
-                    {% endfor %}
                 </div>
                 {% endfor %}
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
 
-        <!-- Validation message -->
-        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-red-50 border border-red-200 rounded-xl p-4 text-center text-sm text-red-700 font-medium"></div>
+    <!-- Validation message -->
+    <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-term-red/10 border border-term-red/30 rounded-lg p-4 text-center text-sm text-term-red font-mono"></div>
 
-        <!-- Submit -->
-        <div class="text-center py-6">
-            <button type="submit" id="submitBtn"
-                    class="px-8 py-3.5 bg-brand-600 text-white font-semibold rounded-xl shadow-card
-                           hover:bg-brand-700 hover:shadow-card-hover focus:ring-4 focus:ring-brand-200
-                           active:scale-[0.97] transition-all duration-200 text-lg">
-                Submit Assessment
-            </button>
-        </div>
-    </form>
-</div>
+    <!-- Submit -->
+    <div class="text-center py-6">
+        <button type="submit" id="submitBtn"
+                class="px-8 py-3 bg-term-greenDim text-white font-bold rounded-lg border border-term-green/30
+                       hover:bg-term-green/25 hover:border-term-green/50 hover:shadow-[0_0_20px_rgba(0,255,65,0.15)]
+                       focus:ring-2 focus:ring-term-green/30
+                       active:scale-[0.97] transition-all duration-200 font-mono text-sm">
+            <span class="text-term-green mr-1">$</span> git push --assessment
+        </button>
+        <p class="text-term-muted text-[10px] mt-2 font-mono">// submits your assessment to the mothership</p>
+    </div>
+</form>
 {% endblock %}
 
 {% block scripts %}
@@ -136,43 +145,57 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'eng_draft_{{ token }}';
 
-    // ─── Milestones & Quips ───
-    const MILESTONES = [
-        { at: 0,   mood: '📋' },
-        { at: 1,   mood: '🚀' },
-        { at: 25,  mood: '☕' },
-        { at: 50,  mood: '🔥' },
-        { at: 75,  mood: '💪' },
-        { at: 90,  mood: '🎯' },
-        { at: 100, mood: '🎉' },
+    // ─── Terminal Status Messages ───
+    const STATUS_MSGS = [
+        { at: 0,   msg: 'STATUS: waiting for input...' },
+        { at: 1,   msg: 'STATUS: assessment initialized. scanning...' },
+        { at: 25,  msg: 'STATUS: 25% complete. acquiring signal...' },
+        { at: 50,  msg: 'STATUS: halfway there. keep pushing...' },
+        { at: 75,  msg: 'STATUS: 75% locked in. almost there...' },
+        { at: 90,  msg: 'STATUS: finalizing assessment matrix...' },
+        { at: 100, msg: 'STATUS: assessment complete. ready to deploy!' },
     ];
-    let lastMilestone = -1;
+    let lastStatus = -1;
+
+    // ─── ASCII Progress Bar ───
+    function getAsciiBar(pct) {
+        const total = 20;
+        const filled = Math.round((pct / 100) * total);
+        return '█'.repeat(filled) + '░'.repeat(total - filled);
+    }
 
     // ─── Progress ───
     function updateProgress() {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
 
-        document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressRunner').style.left = Math.min(pct, 97) + '%';
-        document.getElementById('progressText').textContent = answered + ' / ' + totalQuestions;
+        // ASCII bar
+        document.getElementById('progressAscii').textContent = getAsciiBar(pct);
+        document.getElementById('progressPct').textContent = pct;
+        document.getElementById('progressCount').textContent = answered;
 
-        let current = MILESTONES[0];
-        for (const m of MILESTONES) {
+        // Status message
+        let current = STATUS_MSGS[0];
+        for (const m of STATUS_MSGS) {
             if (pct >= m.at) current = m;
         }
-        if (current.at !== lastMilestone) {
-            lastMilestone = current.at;
-            const moodEl = document.getElementById('progressMood');
-            moodEl.textContent = current.mood;
-            moodEl.style.transform = 'scale(1.4)';
-            setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
+        if (current.at !== lastStatus) {
+            lastStatus = current.at;
+            const statusEl = document.getElementById('progressStatus');
+            statusEl.style.opacity = '0';
+            setTimeout(() => {
+                statusEl.textContent = current.msg;
+                statusEl.style.opacity = '1';
+                if (pct === 100) statusEl.classList.add('text-term-green');
+            }, 150);
         }
 
-        if (pct === 100 && lastMilestone === 100) {
-            launchConfetti();
+        // Confetti at 100%
+        if (pct === 100 && lastStatus === 100) {
+            launchTerminalConfetti();
         }
 
+        // Clear unanswered highlights
         document.querySelectorAll('.unanswered-highlight').forEach(q => {
             if (q.querySelector('input[type="radio"]:checked')) {
                 q.classList.remove('unanswered-highlight');
@@ -188,50 +211,34 @@
 
     // ─── Auto-scroll to next unanswered ───
     function scrollToNextUnanswered() {
-        const allBlocks = document.querySelectorAll('#surveyForm .category-content .mb-5');
+        const allBlocks = document.querySelectorAll('#surveyForm .question-block');
         for (const block of allBlocks) {
             const radios = block.querySelectorAll('input[type="radio"]');
             if (radios.length > 0 && !block.querySelector('input[type="radio"]:checked')) {
-                // Expand parent category if collapsed
                 const catContent = block.closest('.category-content');
                 if (catContent && catContent.classList.contains('hidden')) {
                     catContent.classList.remove('hidden');
                     const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
                     if (chevron) chevron.classList.add('rotate-180');
                 }
-                setTimeout(() => {
-                    const rect = block.getBoundingClientRect();
-                    const offset = 160;
-                    window.scrollTo({ top: window.scrollY + rect.top - offset, behavior: 'smooth' });
-                }, 300);
+                const rect = block.getBoundingClientRect();
+                const threshold = window.innerHeight * 0.85;
+                if (rect.top > threshold || rect.top < 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: window.scrollY + block.getBoundingClientRect().top - 130, behavior: 'smooth' });
+                    }, 600);
+                }
                 return;
             }
         }
-        // All answered — scroll to submit button
         setTimeout(() => {
             document.getElementById('submitBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 300);
     }
 
-    // ─── Mini Confetti ───
-    function launchConfetti() {
-        const colors = ['#4CB648', '#3B82F6', '#facc15', '#ef4444', '#c084fc'];
-        const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
-        document.body.appendChild(container);
-        for (let i = 0; i < 60; i++) {
-            const dot = document.createElement('div');
-            const size = Math.random() * 8 + 4;
-            const x = Math.random() * 100;
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            dot.style.cssText = `position:absolute;top:-10px;left:${x}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};opacity:1;`;
-            dot.animate([
-                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random()*720-360}deg)`, opacity: 0 }
-            ], { duration: Math.random() * 1500 + 1500, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', delay: Math.random() * 400 });
-            container.appendChild(dot);
-        }
-        setTimeout(() => container.remove(), 3000);
+    // ─── 100% celebration (status only) ───
+    function launchTerminalConfetti() {
+        // No animation on survey — the ASCII bar + status message is enough
     }
 
     // ─── Autosave ───
@@ -288,19 +295,17 @@
         });
 
         const unanswered = [];
-        document.querySelectorAll('#surveyForm .category-content').forEach(section => {
-            section.querySelectorAll('.mb-4, .mb-5').forEach(qBlock => {
-                const radios = qBlock.querySelectorAll('input[type="radio"]');
-                if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) {
-                    unanswered.push(qBlock);
-                }
-            });
+        document.querySelectorAll('#surveyForm .question-block').forEach(qBlock => {
+            const radios = qBlock.querySelectorAll('input[type="radio"]');
+            if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) {
+                unanswered.push(qBlock);
+            }
         });
 
         if (unanswered.length > 0) {
             e.preventDefault();
             const msg = document.getElementById('validationMsg');
-            msg.textContent = `${unanswered.length} unanswered question${unanswered.length > 1 ? 's' : ''} remaining. Please complete all questions.`;
+            msg.innerHTML = `<span class="text-term-red font-bold">[ERROR]</span> ${unanswered.length} unanswered question${unanswered.length > 1 ? 's' : ''}. All fields required.`;
             msg.classList.remove('hidden');
 
             unanswered.forEach(q => q.classList.add('unanswered-highlight'));
@@ -312,7 +317,7 @@
             }
             setTimeout(() => {
                 const rect = first.getBoundingClientRect();
-                const offset = 140;
+                const offset = 130;
                 window.scrollTo({ top: window.scrollY + rect.top - offset, behavior: 'smooth' });
             }, 100);
             return;
@@ -321,7 +326,7 @@
         localStorage.removeItem(DRAFT_KEY);
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
+        btn.innerHTML = '<span class="inline-block animate-pulse">deploying assessment...</span>';
     }
 
     function toggleCategory(btn) {

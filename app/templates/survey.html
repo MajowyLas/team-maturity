@@ -1,106 +1,114 @@
-{% extends "base_public.html" %}
-{% block title %}Take Survey -- Team Maturity Assessment{% endblock %}
+{% extends "base_cozy.html" %}
+{% block title %}Team Health Check{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Team Maturity Assessment Survey</h1>
-    <p class="text-gray-600 mb-1">Rate each statement on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).</p>
-    <p class="text-sm text-brand-600 font-medium mb-8">Team: {{ team.name }}</p>
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-3xl font-extrabold text-dark-text mb-2 tracking-tight">Team Health Check</h1>
+        <p class="text-dark-muted text-sm">Rate how your team is doing — every role, every perspective matters.</p>
+        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-play-500/10 border border-play-500/20 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-play-400 animate-pulse"></span>
+            <span class="text-xs font-semibold text-play-300">{{ team.name }}</span>
+        </div>
+    </div>
 
-    <!-- Draft recovery banner -->
-    <div id="draftBanner" class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+    <!-- Draft recovery -->
+    <div id="draftBanner" class="hidden mb-6 bg-pop-sky/5 border border-pop-sky/15 rounded-2xl p-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <span class="text-amber-600">💾</span>
-            <p class="text-sm text-amber-800">You have an unfinished assessment (<strong id="draftCount">0</strong> answers saved). Pick up where you left off?</p>
+            <span class="text-lg">💾</span>
+            <p class="text-sm text-dark-muted">You have <strong id="draftCount" class="text-pop-sky">0</strong> saved answers. Pick up where you left off?</p>
         </div>
         <div class="flex gap-2 shrink-0 ml-4">
-            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition">Restore</button>
-            <button type="button" id="discardDraft" class="px-3 py-1.5 text-amber-600 text-xs font-medium hover:underline">Discard</button>
+            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-pop-sky/20 text-pop-sky text-xs font-semibold rounded-lg hover:bg-pop-sky/30 border border-pop-sky/20 transition">Restore</button>
+            <button type="button" id="discardDraft" class="px-3 py-1.5 text-dark-faint text-xs font-medium hover:text-dark-muted transition">Discard</button>
         </div>
     </div>
 
     {% if not rounds %}
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-        <p class="text-yellow-800 font-medium">No active assessment rounds.</p>
-        <p class="text-yellow-600 text-sm mt-1">Ask your admin to create a round in the Admin panel.</p>
+    <div class="bg-dark-card border border-dark-border rounded-2xl p-8 text-center">
+        <p class="text-dark-text font-medium">No active rounds right now.</p>
+        <p class="text-dark-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
     </div>
     {% else %}
     <form method="POST" action="/survey/{{ team.token }}" id="surveyForm">
-        <!-- Respondent Info -->
-        <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-7 mb-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
+        <!-- Info card -->
+        <div class="bg-dark-card rounded-2xl border border-dark-border p-6 mb-6">
+            <h2 class="text-sm font-bold text-dark-text mb-4 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-md bg-gradient-to-br from-play-500 to-pop-pink flex items-center justify-center text-white text-[10px]">?</span>
+                About you
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Assessment Round</label>
-                    <select name="round_id" required class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    <label class="block text-xs font-medium text-dark-muted mb-1.5">Round</label>
+                    <select name="round_id" required class="w-full rounded-xl bg-dark-surface border border-dark-border px-3 py-2.5 text-sm text-dark-text">
                         {% for r in rounds %}
                         <option value="{{ r.id }}">{{ r.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name (First & Last)</label>
-                    <input type="text" name="respondent_name" required placeholder="Jane Smith"
-                           class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    <label class="block text-xs font-medium text-dark-muted mb-1.5">Your name</label>
+                    <input type="text" name="respondent_name" required placeholder="e.g. Anna M."
+                           class="w-full rounded-xl bg-dark-surface border border-dark-border px-3 py-2.5 text-sm text-dark-text placeholder:text-dark-faint">
                 </div>
             </div>
         </div>
 
-        <!-- Progress bar -->
-        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-card border border-gray-100 p-4 mb-6 sticky top-[4.5rem] z-10">
-            <div class="flex items-center justify-between mb-1">
+        <!-- Progress -->
+        <div class="bg-dark-card/90 backdrop-blur-sm rounded-2xl border border-dark-border p-4 mb-6 sticky top-0 z-10">
+            <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-gray-700">Progress</span>
                     <span id="progressMood" class="text-base transition-all duration-300">📋</span>
+                    <span id="progressMsg" class="text-sm text-dark-muted transition-all duration-300">Ready when you are!</span>
                 </div>
-                <span id="progressText" class="text-sm text-gray-500 font-mono">0 / {{ total_questions }}</span>
+                <span id="progressText" class="text-xs text-dark-faint font-medium tabular-nums">0 / {{ total_questions }}</span>
             </div>
-            <div class="relative w-full bg-gray-200 rounded-full h-2.5">
-                <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-brand-400 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-                <span id="progressRunner" class="absolute top-1/2 -translate-y-1/2 text-sm transition-all duration-500 ease-out" style="left: 0%">🚀</span>
-            </div>
-            <!-- Milestone markers -->
-            <div class="relative w-full h-0 mt-0.5">
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 25%">25%</span>
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 50%">50%</span>
-                <span class="absolute text-[9px] text-gray-300 font-medium" style="left: 75%">75%</span>
+            <div class="relative w-full bg-dark-surface rounded-full h-2 overflow-hidden">
+                <div id="progressBar" class="h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%; background: linear-gradient(90deg, #a855f7, #f472b6, #38bdf8)"></div>
             </div>
         </div>
 
-        <!-- Questions by Category -->
+        <!-- Questions -->
+        {% set category_colors = ['play-400', 'pop-pink', 'pop-sky', 'pop-mint', 'pop-amber', 'pop-blue', 'pop-coral'] %}
         {% for category, subcategories in grouped_questions.items() %}
-        <div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-6 overflow-hidden hover:shadow-card transition-shadow duration-300">
+        <div class="bg-dark-card rounded-2xl border border-dark-border mb-5 overflow-hidden hover:border-dark-border2 transition-colors duration-300">
             <button type="button" onclick="toggleCategory(this)"
-                    class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50/80 transition-all duration-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ category }}</h2>
-                <svg class="category-chevron w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full flex items-center justify-between p-5 text-left hover:bg-dark-hover transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <span class="w-1.5 h-7 rounded-full bg-{{ category_colors[loop.index0 % category_colors|length] }} opacity-60 group-hover:opacity-100 transition-opacity"></span>
+                    <h2 class="text-base font-bold text-dark-text">{{ category }}</h2>
+                </div>
+                <svg class="category-chevron w-4 h-4 text-dark-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div class="category-content px-6 pb-6">
+            {% set cat_idx = loop.index0 %}
+            <div class="category-content px-5 pb-5">
                 {% for subcategory, questions in subcategories.items() %}
                 <div class="mb-6 last:mb-0">
-                    <h3 class="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-3 pb-2 border-b border-gray-100">
+                    <h3 class="text-[11px] font-bold text-{{ category_colors[cat_idx % category_colors|length] }} uppercase tracking-widest mb-3 pb-2 border-b border-dark-border/50">
                         {{ subcategory }}
                     </h3>
                     {% for q in questions %}
-                    <div class="mb-4 last:mb-0 pl-2">
-                        <p class="text-gray-700 text-sm mb-2">{{ q.statement }}</p>
-                        <div class="flex items-center space-x-1">
-                            <span class="text-xs text-gray-400 w-24 shrink-0">Strongly Disagree</span>
+                    <div class="question-block mb-5 last:mb-0">
+                        <p class="text-dark-text/80 text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] text-dark-faint w-14 shrink-0 text-right">disagree</span>
                             {% for score in range(1, 6) %}
                             <label class="relative cursor-pointer">
                                 <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
                                        class="sr-only peer" onchange="updateProgress()">
-                                <div class="w-11 h-11 rounded-lg border-2 border-gray-200 flex items-center justify-center
-                                            text-sm font-semibold text-gray-500
-                                            peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white peer-checked:shadow-soft
-                                            hover:border-brand-300 hover:bg-brand-50 transition-all duration-150">
+                                <div class="w-11 h-11 rounded-xl border-2 border-dark-border flex items-center justify-center
+                                            text-sm font-bold text-dark-faint
+                                            peer-checked:border-play-500 peer-checked:bg-play-500 peer-checked:text-white peer-checked:shadow-glow peer-checked:scale-110
+                                            hover:border-dark-border2 hover:bg-dark-hover
+                                            active:scale-95 transition-all duration-150">
                                     {{ score }}
                                 </div>
                             </label>
                             {% endfor %}
-                            <span class="text-xs text-gray-400 w-24 text-right shrink-0">Strongly Agree</span>
+                            <span class="text-[10px] text-dark-faint w-14 shrink-0">agree</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -110,17 +118,19 @@
         </div>
         {% endfor %}
 
-        <!-- Validation message -->
-        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-red-50 border border-red-200 rounded-xl p-4 text-center text-sm text-red-700 font-medium"></div>
+        <!-- Validation -->
+        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg bg-pop-coral/10 border border-pop-coral/20 rounded-2xl p-4 text-center text-sm text-pop-coral font-medium"></div>
 
         <!-- Submit -->
-        <div class="text-center py-6">
+        <div class="text-center py-8">
             <button type="submit" id="submitBtn"
-                    class="px-8 py-3.5 bg-brand-600 text-white font-semibold rounded-xl shadow-card
-                           hover:bg-brand-700 hover:shadow-card-hover focus:ring-4 focus:ring-brand-200
+                    class="group px-10 py-4 bg-gradient-to-r from-play-500 via-pop-pink to-pop-sky text-white font-bold rounded-2xl shadow-glow
+                           hover:shadow-glow-hover hover:scale-[1.02] hover:brightness-110
+                           focus:ring-4 focus:ring-play-500/20
                            active:scale-[0.97] transition-all duration-200 text-lg">
-                Submit Assessment
+                Pieroguje! <span class="inline-block group-hover:animate-bounce-soft">🥟</span>
             </button>
+            <p class="text-dark-faint text-xs mt-3">your perspective shapes the team</p>
         </div>
     </form>
     {% endif %}
@@ -132,114 +142,103 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'survey_draft_{{ team.token }}';
 
-    // ─── Milestones & Quips ───
     const MILESTONES = [
-        { at: 0,   mood: '📋' },
-        { at: 1,   mood: '🚀' },
-        { at: 25,  mood: '☕' },
-        { at: 50,  mood: '🔥' },
-        { at: 75,  mood: '💪' },
-        { at: 90,  mood: '🎯' },
-        { at: 100, mood: '🎉' },
+        { at: 0,   mood: '📋', msg: 'Ready when you are!' },
+        { at: 1,   mood: '✨', msg: 'First one down!' },
+        { at: 25,  mood: '🧩', msg: 'Pieces coming together...' },
+        { at: 50,  mood: '🚀', msg: 'Halfway — you\'re on a roll!' },
+        { at: 75,  mood: '💜', msg: 'Almost there, keep going!' },
+        { at: 90,  mood: '🎯', msg: 'Just a few more!' },
+        { at: 100, mood: '🥟', msg: 'All done — approved!' },
     ];
     let lastMilestone = -1;
 
-    // ─── Progress ───
     function updateProgress() {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
 
-        // Bar + runner
         document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressRunner').style.left = Math.min(pct, 97) + '%';
         document.getElementById('progressText').textContent = answered + ' / ' + totalQuestions;
 
-        // Milestone check
         let current = MILESTONES[0];
-        for (const m of MILESTONES) {
-            if (pct >= m.at) current = m;
-        }
+        for (const m of MILESTONES) { if (pct >= m.at) current = m; }
         if (current.at !== lastMilestone) {
             lastMilestone = current.at;
             const moodEl = document.getElementById('progressMood');
+            const msgEl = document.getElementById('progressMsg');
             moodEl.textContent = current.mood;
             moodEl.style.transform = 'scale(1.4)';
             setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
+            msgEl.style.opacity = '0';
+            setTimeout(() => { msgEl.textContent = current.msg; msgEl.style.opacity = '1'; }, 150);
         }
 
-        // Confetti at 100%!
-        if (pct === 100 && lastMilestone === 100) {
-            launchConfetti();
-        }
+        if (pct === 100 && lastMilestone === 100) launchConfetti();
 
-        // Clear highlight on answered question
         document.querySelectorAll('.unanswered-highlight').forEach(q => {
-            if (q.querySelector('input[type="radio"]:checked')) {
-                q.classList.remove('unanswered-highlight');
-            }
+            if (q.querySelector('input[type="radio"]:checked')) q.classList.remove('unanswered-highlight');
         });
-        if (answered === totalQuestions) {
-            document.getElementById('validationMsg')?.classList.add('hidden');
-        }
+        if (answered === totalQuestions) document.getElementById('validationMsg')?.classList.add('hidden');
 
         saveDraft();
         scrollToNextUnanswered();
     }
 
-    // ─── Auto-scroll to next unanswered ───
     function scrollToNextUnanswered() {
-        const allBlocks = document.querySelectorAll('#surveyForm .category-content .mb-4');
+        const allBlocks = document.querySelectorAll('#surveyForm .question-block');
         for (const block of allBlocks) {
             const radios = block.querySelectorAll('input[type="radio"]');
             if (radios.length > 0 && !block.querySelector('input[type="radio"]:checked')) {
-                // Expand parent category if collapsed
                 const catContent = block.closest('.category-content');
                 if (catContent && catContent.classList.contains('hidden')) {
                     catContent.classList.remove('hidden');
                     const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
                     if (chevron) chevron.classList.add('rotate-180');
                 }
-                setTimeout(() => {
-                    const rect = block.getBoundingClientRect();
-                    const offset = 160;
-                    window.scrollTo({ top: window.scrollY + rect.top - offset, behavior: 'smooth' });
-                }, 300);
+                // Only scroll if the next question is below 70% of viewport
+                const rect = block.getBoundingClientRect();
+                const threshold = window.innerHeight * 0.85;
+                if (rect.top > threshold || rect.top < 0) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: window.scrollY + block.getBoundingClientRect().top - 130, behavior: 'smooth' });
+                    }, 600);
+                }
                 return;
             }
         }
-        // All answered — scroll to submit button
         setTimeout(() => {
             document.getElementById('submitBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 300);
     }
 
-    // ─── Mini Confetti ───
     function launchConfetti() {
-        const colors = ['#4CB648', '#3B82F6', '#facc15', '#ef4444', '#c084fc'];
+        const colors = ['#c084fc', '#f472b6', '#38bdf8', '#34d399', '#fbbf24', '#818cf8', '#fb7185'];
         const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden';
         document.body.appendChild(container);
-        for (let i = 0; i < 60; i++) {
+        for (let i = 0; i < 70; i++) {
             const dot = document.createElement('div');
-            const size = Math.random() * 8 + 4;
+            const size = Math.random() * 10 + 5;
             const x = Math.random() * 100;
             const color = colors[Math.floor(Math.random() * colors.length)];
-            dot.style.cssText = `position:absolute;top:-10px;left:${x}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random()>0.5?'50%':'2px'};opacity:1;`;
+            const isRect = Math.random() > 0.6;
+            dot.style.cssText = `position:absolute;top:-20px;left:${x}%;width:${size}px;height:${isRect ? size*1.8 : size}px;background:${color};border-radius:${isRect ? '3px' : '50%'};opacity:0.85;`;
             dot.animate([
-                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random()*720-360}deg)`, opacity: 0 }
-            ], { duration: Math.random() * 1500 + 1500, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', delay: Math.random() * 400 });
+                { transform: 'translateY(0) rotate(0deg) scale(1)', opacity: 0.85 },
+                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random()*900-450}deg) scale(${Math.random()*0.4+0.6})`, opacity: 0 }
+            ], {
+                duration: Math.random() * 2500 + 2000,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                delay: Math.random() * 600
+            });
             container.appendChild(dot);
         }
-        setTimeout(() => container.remove(), 3000);
+        setTimeout(() => container.remove(), 4500);
     }
 
-    // ─── Autosave to localStorage ───
     function saveDraft() {
         const data = {};
-        document.querySelectorAll('#surveyForm input[type="radio"]:checked').forEach(r => {
-            data[r.name] = r.value;
-        });
+        document.querySelectorAll('#surveyForm input[type="radio"]:checked').forEach(r => { data[r.name] = r.value; });
         const name = document.querySelector('[name="respondent_name"]')?.value || '';
         const round = document.querySelector('[name="round_id"]')?.value || '';
         localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers: data, name, round, ts: Date.now() }));
@@ -250,102 +249,62 @@
             const raw = localStorage.getItem(DRAFT_KEY);
             if (!raw) return;
             const draft = JSON.parse(raw);
-            // Expire drafts older than 7 days
-            if (Date.now() - draft.ts > 7 * 24 * 60 * 60 * 1000) {
-                localStorage.removeItem(DRAFT_KEY);
-                return;
-            }
+            if (Date.now() - draft.ts > 7 * 24 * 60 * 60 * 1000) { localStorage.removeItem(DRAFT_KEY); return; }
             const count = Object.keys(draft.answers || {}).length;
             if (count === 0) return;
-
-            // Show recovery banner
-            const banner = document.getElementById('draftBanner');
             document.getElementById('draftCount').textContent = count;
-            banner.classList.remove('hidden');
-
+            document.getElementById('draftBanner').classList.remove('hidden');
             document.getElementById('restoreDraft').onclick = function() {
                 if (draft.name) document.querySelector('[name="respondent_name"]').value = draft.name;
-                if (draft.round) {
-                    const sel = document.querySelector('[name="round_id"]');
-                    if (sel) sel.value = draft.round;
-                }
+                if (draft.round) { const sel = document.querySelector('[name="round_id"]'); if (sel) sel.value = draft.round; }
                 for (const [name, value] of Object.entries(draft.answers)) {
                     const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
                     if (radio) radio.checked = true;
                 }
                 updateProgress();
-                banner.classList.add('hidden');
+                document.getElementById('draftBanner').classList.add('hidden');
             };
             document.getElementById('discardDraft').onclick = function() {
                 localStorage.removeItem(DRAFT_KEY);
-                banner.classList.add('hidden');
+                document.getElementById('draftBanner').classList.add('hidden');
             };
-        } catch(e) { /* ignore corrupt data */ }
+        } catch(e) {}
     }
 
-    // ─── Smart Validation ───
     function validateBeforeSubmit(e) {
-        // Clear previous highlights
-        document.querySelectorAll('.unanswered-highlight').forEach(el => {
-            el.classList.remove('unanswered-highlight');
-        });
-
+        document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
         const unanswered = [];
-        document.querySelectorAll('#surveyForm .category-content').forEach(section => {
-            section.querySelectorAll('.mb-4').forEach(qBlock => {
-                const radios = qBlock.querySelectorAll('input[type="radio"]');
-                if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) {
-                    unanswered.push(qBlock);
-                }
-            });
+        document.querySelectorAll('#surveyForm .question-block').forEach(qBlock => {
+            const radios = qBlock.querySelectorAll('input[type="radio"]');
+            if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) unanswered.push(qBlock);
         });
-
         if (unanswered.length > 0) {
             e.preventDefault();
-
-            // Show validation message
             const msg = document.getElementById('validationMsg');
-            msg.textContent = `${unanswered.length} unanswered question${unanswered.length > 1 ? 's' : ''} remaining. Please complete all questions.`;
+            msg.textContent = `${unanswered.length} question${unanswered.length > 1 ? 's' : ''} still need${unanswered.length === 1 ? 's' : ''} an answer`;
             msg.classList.remove('hidden');
-
-            // Highlight ALL unanswered with red left border
             unanswered.forEach(q => q.classList.add('unanswered-highlight'));
-
-            // Expand parent category if collapsed
             const first = unanswered[0];
-            const catContent = first.closest('.category-content');
-            if (catContent && catContent.classList.contains('hidden')) {
-                catContent.classList.remove('hidden');
-            }
-
-            // Scroll with offset for sticky progress bar
+            const cat = first.closest('.category-content');
+            if (cat && cat.classList.contains('hidden')) cat.classList.remove('hidden');
             setTimeout(() => {
-                const rect = first.getBoundingClientRect();
-                const offset = 140; // progress bar height + margin
-                window.scrollTo({ top: window.scrollY + rect.top - offset, behavior: 'smooth' });
+                window.scrollTo({ top: window.scrollY + first.getBoundingClientRect().top - 130, behavior: 'smooth' });
             }, 100);
             return;
         }
-
-        // Valid — clear draft and show loading
         localStorage.removeItem(DRAFT_KEY);
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
+        btn.innerHTML = '🥟 Sending...';
     }
 
-    // ─── Category toggle ───
     function toggleCategory(btn) {
-        const content = btn.nextElementSibling;
-        const chevron = btn.querySelector('.category-chevron');
-        content.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
+        btn.nextElementSibling.classList.toggle('hidden');
+        btn.querySelector('.category-chevron').classList.toggle('rotate-180');
     }
 
-    // ─── Autosave on name change ───
     document.querySelector('[name="respondent_name"]')?.addEventListener('input', saveDraft);
-
-    // ─── Init ───
+    document.querySelector('[name="round_id"]')?.addEventListener('change', saveDraft);
     document.getElementById('surveyForm')?.addEventListener('submit', validateBeforeSubmit);
     loadDraft();
 </script>
