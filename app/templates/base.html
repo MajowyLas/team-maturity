@@ -94,7 +94,7 @@
         Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
     </script>
 </head>
-<body class="h-full font-sans" style="background: #FFFFFF; color: #000000;">
+<body class="min-h-screen flex flex-col font-sans" style="background: #FFFFFF; color: #000000;">
     {% block nav %}
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-black">
@@ -127,7 +127,7 @@
     {% endblock %}
 
     <!-- Main content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in w-full">
         {% block content %}{% endblock %}
     </main>
 
