@@ -96,8 +96,8 @@
                                 <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
                                        class="sr-only peer" onchange="updateProgress()">
                                 <div class="flex items-center px-3 py-2 border-b border-hub-hover last:border-b-0 hover:bg-hub-hover {{ bg_classes }} transition-all duration-100">
-                                    <span class="shrink-0 text-[10px] font-black text-hub-faint w-3 text-right mr-2">{{ score }}</span>
-                                    <span class="shrink-0 text-[10px] font-black w-[3rem] {{ label_color }}">{{ label }}</span>
+                                    <span class="shrink-0 text-xs font-black text-hub-faint w-3 text-right mr-2">{{ score }}</span>
+                                    <span class="shrink-0 text-xs font-black w-[3rem] {{ label_color }}">{{ label }}</span>
                                     <span class="shrink-0 text-hub-border mx-2">|</span>
                                     <span class="text-xs text-hub-muted leading-snug">{{ description }}</span>
                                 </div>
@@ -120,11 +120,11 @@
         <div class="text-center py-6">
             <button type="submit" id="submitBtn"
                     class="px-8 py-3 bg-black text-white font-black uppercase tracking-wide text-sm
-                           border-2 border-black hover:bg-accent-500 hover:border-accent-500
+                           border-2 border-black hover:bg-hub-muted hover:border-hub-muted
                            active:scale-[0.97] transition-all duration-200">
                 Submit Assessment
             </button>
-            <p class="text-hub-faint text-[10px] mt-2 font-medium uppercase">submits your assessment for this round</p>
+            <p class="text-hub-faint text-xs mt-2 font-medium uppercase">submits your assessment for this round</p>
         </div>
     </form>
 </div>

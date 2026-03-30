@@ -5,8 +5,9 @@
 <div class="max-w-3xl mx-auto py-12">
 
     <div class="text-center mb-12 animate-fade-in-up">
-        <h1 class="text-4xl font-bold text-hub-text mb-3">Team Maturity Assessment</h1>
-        <p class="text-lg text-hub-muted">Set up your team, pick a session, choose a survey, and share the link.</p>
+        <h1 class="text-5xl font-black text-hub-text mb-2">Know Where You Stand</h1>
+        <p class="text-2xl font-bold text-hub-text mb-3">Measure. Improve. Repeat.</p>
+        <p class="text-base text-hub-muted">Run maturity assessments across your teams and track progress over time.</p>
     </div>
 
     <!-- ───── Stepper indicator ───── -->
@@ -37,7 +38,7 @@
         <div class="space-y-2 mb-6" id="teamList">
             {% for t in teams %}
             <button type="button" onclick="selectTeam({{ t.id }}, '{{ t.token }}', this)"
-                    class="team-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 flex items-center justify-between">
+                    class="team-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ t.name }}</span>
                     {% if t.member_count %}
@@ -99,7 +100,7 @@
             {% for r in rounds %}
             {% if r.is_active %}
             <button type="button" onclick="selectRound({{ r.id }}, '{{ r.engineering_token }}', this)"
-                    class="round-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 flex items-center justify-between">
+                    class="round-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ r.name }}</span>
                     <span class="ml-2 px-2 py-0.5 text-xs font-bold border-2 border-hub-text text-hub-text uppercase">Active</span>
@@ -153,7 +154,7 @@
             <!-- Team Maturity -->
             <button type="button" onclick="selectSurvey('team')"
                     id="surveyBtn-team"
-                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">📊</span>
                     <span class="font-semibold text-hub-text text-lg">Team Maturity</span>
@@ -164,7 +165,7 @@
             <!-- Delivery Maturity -->
             <button type="button" onclick="selectSurvey('engineering')"
                     id="surveyBtn-engineering"
-                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">🔧</span>
                     <span class="font-semibold text-hub-text text-lg">Delivery Maturity</span>

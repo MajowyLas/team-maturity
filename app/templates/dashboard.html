@@ -25,6 +25,21 @@
 
 {% set has_data = cards | selectattr("response_count", "gt", 0) | list | length > 0 %}
 
+{% if has_data %}
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+        <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#breakdown" class="hover:text-hub-text transition-colors">Category Breakdown</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#details" class="hover:text-hub-text transition-colors">Statement Scores</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#teams" class="hover:text-hub-text transition-colors">Team Deep Dives</a>
+    </div>
+</nav>
+{% endif %}
+
 {% if not cards or not has_data %}
 <div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
     <div class="text-5xl mb-4">📊</div>
@@ -40,7 +55,7 @@
 {% if overview_stats %}
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-lg font-bold text-hub-text">Overview</h2>
+        <h2 id="overview" class="text-lg font-bold text-hub-text">Overview</h2>
         <div class="flex-1 h-px bg-hub-border"></div>
     </div>
 
@@ -128,7 +143,7 @@
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-lg font-bold text-hub-text">Category Breakdown</h2>
+        <h2 id="breakdown" class="text-lg font-bold text-hub-text">Category Breakdown</h2>
         <div class="flex-1 h-px bg-hub-border"></div>
     </div>
 
@@ -187,7 +202,7 @@
 {% if grouped_statements %}
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-lg font-bold text-hub-text">Detailed Statement Scores</h2>
+        <h2 id="details" class="text-lg font-bold text-hub-text">Detailed Statement Scores</h2>
         <div class="flex-1 h-px bg-hub-border"></div>
     </div>
 
@@ -254,7 +269,7 @@
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="mb-8">
     <div class="flex items-center gap-3 mb-5">
-        <h2 class="text-lg font-bold text-hub-text">Team Deep Dives</h2>
+        <h2 id="teams" class="text-lg font-bold text-hub-text">Team Deep Dives</h2>
         <div class="flex-1 h-px bg-hub-border"></div>
     </div>
 
@@ -262,60 +277,35 @@
         {% for card in cards %}
         {% if card.response_count > 0 %}
         <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-accent-500 transition-colors duration-200 overflow-hidden">
+           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 overflow-hidden">
 
-            <!-- Header: Team name + response count -->
-            <div class="flex items-center justify-between px-4 pt-3 pb-2">
-                <h3 class="text-sm font-black text-hub-text uppercase tracking-wide group-hover:text-hub-text transition truncate">{{ card.team_name }}</h3>
-                <span class="text-[10px] font-bold text-hub-muted border border-hub-border px-1.5 py-0.5 uppercase shrink-0 ml-2">{{ card.response_count }} RESP</span>
-            </div>
-
-            <!-- Score + Category bars row -->
-            <div class="flex items-stretch px-4 pb-3 gap-3">
-                <!-- Large overall score -->
-                <div class="flex flex-col items-center justify-center shrink-0">
-                    <p class="text-3xl font-black leading-none
-                        {% if card.overall >= 3.0 %}text-hub-text
-                        {% else %}text-accent-500{% endif %}">
-                        {{ "%.1f"|format(card.overall) }}
-                    </p>
-                    <p class="text-[9px] font-bold text-hub-faint uppercase tracking-wider">OVERALL</p>
+            <!-- Header: Team name + score + response count -->
+            <div class="px-4 pt-4 pb-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-black text-hub-text uppercase tracking-wide truncate">{{ card.team_name }}</h3>
+                    <span class="text-xs font-bold text-hub-muted shrink-0 ml-2">{{ card.response_count }} responses</span>
                 </div>
-
-                <!-- Mini category bars -->
-                <div class="flex-1 space-y-1 min-w-0">
-                    {% for cat in card.category_scores %}
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-[9px] font-bold text-hub-faint uppercase w-28 truncate" title="{{ cat.category }}">{{ cat.category }}</span>
-                        <div class="flex-1 bg-white border border-black h-3 p-[2px]">
-                            <div class="h-full score-bar-animated
-                                {% if cat.avg >= 3.0 %}bg-black
-                                {% else %}bg-accent-500{% endif %}"
-                                style="width: {{ (cat.avg / 5 * 100) | int }}%"></div>
-                        </div>
-                        <span class="text-[9px] font-bold w-5 text-right
-                            {% if cat.avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat.avg) }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
+                <p class="text-4xl font-black leading-none
+                    {% if card.overall >= 3.0 %}text-hub-text
+                    {% else %}text-accent-500{% endif %}">
+                    {{ "%.1f"|format(card.overall) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
+                </p>
             </div>
 
             <!-- Footer: Strength | Improve -->
             <div class="grid grid-cols-2 divide-x divide-hub-border border-t-2 border-hub-border">
                 <div class="px-3 py-2">
-                    <p class="text-[9px] font-black uppercase tracking-wider text-hub-faint">STRENGTH</p>
+                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">STRENGTH</p>
                     {% if card.top_strength %}
-                    <p class="text-[11px] font-semibold text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }}</p>
-                    <p class="text-sm font-black text-hub-text">{{ "%.1f"|format(card.top_strength.avg) }}</p>
+                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }} {{ "%.1f"|format(card.top_strength.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
                 </div>
                 <div class="px-3 py-2">
-                    <p class="text-[9px] font-black uppercase tracking-wider text-hub-faint">IMPROVE</p>
+                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">IMPROVE</p>
                     {% if card.top_improvement %}
-                    <p class="text-[11px] font-semibold text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }}</p>
-                    <p class="text-sm font-black text-accent-500">{{ "%.1f"|format(card.top_improvement.avg) }}</p>
+                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }} {{ "%.1f"|format(card.top_improvement.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
@@ -329,15 +319,11 @@
     <!-- Teams with no responses yet -->
     {% set pending_teams = cards | selectattr("response_count", "eq", 0) | list %}
     {% if pending_teams %}
-    <div class="border-2 border-dashed border-hub-border p-6">
-        <h3 class="text-sm font-semibold text-hub-muted uppercase tracking-wide mb-3">Awaiting Responses</h3>
-        <div class="flex flex-wrap gap-2">
-            {% for card in pending_teams %}
-            <span class="stagger-item inline-block px-3 py-1.5 bg-hub-card border-2 border-hub-border rounded-lg text-sm text-hub-muted">
-                {{ card.team_name }}
-            </span>
-            {% endfor %}
-        </div>
+    <div class="py-4 opacity-60">
+        <p class="text-sm text-hub-muted">
+            <span class="font-semibold">{{ pending_teams | length }} team{{ 's' if pending_teams | length != 1 }} awaiting responses:</span>
+            {{ pending_teams | map(attribute='team_name') | join(', ') }}
+        </p>
     </div>
     {% endif %}
 </div>

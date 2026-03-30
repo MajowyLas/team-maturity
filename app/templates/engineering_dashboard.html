@@ -5,7 +5,10 @@
 <div class="flex items-center justify-between mb-8">
     <div>
         <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
-        <h1 class="text-3xl font-bold text-hub-text tracking-tight">Delivery Maturity</h1>
+        <h1 class="text-3xl font-bold text-hub-text tracking-tight flex items-center gap-2">
+            <span class="inline-block w-3 h-3 bg-blue-600 shrink-0"></span>
+            Delivery Maturity
+        </h1>
         <p class="text-sm text-hub-muted mt-1">
             {% if selected_team %}{{ selected_team.name }} — team view{% else %}Department-wide assessment results{% endif %}
         </p>
