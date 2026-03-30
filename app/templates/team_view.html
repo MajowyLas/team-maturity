@@ -7,7 +7,7 @@
     <div>
         <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Back to Overview</a>
         <h1 class="text-3xl font-bold text-hub-text tracking-tight">{{ team.name }}</h1>
-        <p class="text-sm text-hub-muted mt-1">Combined assessment results — team maturity &amp; engineering maturity</p>
+        <p class="text-sm text-hub-muted mt-1">Combined assessment results — team maturity &amp; delivery maturity</p>
     </div>
     {% if rounds %}
     <div class="flex items-center space-x-2">
@@ -49,9 +49,9 @@
         {% endif %}
     </div>
 
-    <!-- Engineering Maturity Score -->
+    <!-- Delivery Maturity Score -->
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
-        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Engineering Maturity</p>
+        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Delivery Maturity</p>
         {% if eng_stats %}
         <p class="text-3xl font-bold {% if eng_stats.overall_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">
             {{ "%.1f"|format(eng_stats.overall_avg) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
@@ -243,7 +243,7 @@
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-6 pb-3 border-b border-hub-border">
         <span class="text-xl">🔧</span>
-        <h2 class="text-2xl font-bold text-hub-text">Engineering Maturity</h2>
+        <h2 class="text-2xl font-bold text-hub-text">Delivery Maturity</h2>
         <span class="text-sm text-hub-faint">{{ eng_stats.response_count }} responses · {{ maturity_labels.get((eng_stats.overall_avg | round | int), "") }}</span>
     </div>
 

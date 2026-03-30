@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Engineering Delivery Dashboard{% endblock %}
+{% block title %}Delivery Maturity Dashboard{% endblock %}
 
 {% block content %}
 <div class="flex items-center justify-between mb-8">
     <div>
         <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
-        <h1 class="text-3xl font-bold text-hub-text tracking-tight">Engineering Delivery Maturity</h1>
+        <h1 class="text-3xl font-bold text-hub-text tracking-tight">Delivery Maturity</h1>
         <p class="text-sm text-hub-muted mt-1">
             {% if selected_team %}{{ selected_team.name }} — team view{% else %}Department-wide assessment results{% endif %}
         </p>
@@ -327,7 +327,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Engineering Maturity',
+                        label: 'Delivery Maturity',
                         data: values,
                         backgroundColor: 'rgba(255, 0, 0, 0.08)',
                         borderColor: '#000000',

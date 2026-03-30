@@ -161,13 +161,13 @@
                 <p class="text-sm text-hub-muted">How mature is your Scrum team?</p>
             </button>
 
-            <!-- Engineering Maturity -->
+            <!-- Delivery Maturity -->
             <button type="button" onclick="selectSurvey('engineering')"
                     id="surveyBtn-engineering"
                     class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-accent-500 transition-colors duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">🔧</span>
-                    <span class="font-semibold text-hub-text text-lg">Engineering Maturity</span>
+                    <span class="font-semibold text-hub-text text-lg">Delivery Maturity</span>
                 </div>
                 <p class="text-sm text-hub-muted">How mature are your engineering practices?</p>
             </button>
@@ -358,7 +358,7 @@
             summary = 'your team for the Team Maturity survey';
         } else {
             link = base + '/engineering/' + selectedEngToken;
-            summary = 'engineers to conduct the Engineering Maturity assessment';
+            summary = 'engineers to conduct the Delivery Maturity assessment';
         }
 
         document.getElementById('surveyLinkOutput').value = link;
