@@ -94,7 +94,7 @@
                             {% if description %}
                             <label class="block cursor-pointer">
                                 <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                       class="sr-only peer" onchange="updateProgress()">
+                                       class="sr-only peer" onchange="updateProgress(event)">
                                 <div class="flex items-center px-3 py-2 border-b border-hub-hover last:border-b-0 hover:bg-hub-hover {{ bg_classes }} transition-all duration-100">
                                     <span class="shrink-0 text-xs font-black text-hub-faint w-3 text-right mr-2">{{ score }}</span>
                                     <span class="shrink-0 text-xs font-black w-[3rem] {{ label_color }}">{{ label }}</span>
@@ -146,7 +146,7 @@
     ];
     let lastStatus = -1;
 
-    function updateProgress() {
+    function updateProgress(event) {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
 
@@ -182,33 +182,43 @@
         }
 
         saveDraft();
-        scrollToNextUnanswered();
+        scrollByTwoQuestions(event);
     }
 
-    function scrollToNextUnanswered() {
-        const allBlocks = document.querySelectorAll('#surveyForm .question-block');
-        for (const block of allBlocks) {
-            const radios = block.querySelectorAll('input[type="radio"]');
-            if (radios.length > 0 && !block.querySelector('input[type="radio"]:checked')) {
-                const catContent = block.closest('.category-content');
-                if (catContent && catContent.classList.contains('hidden')) {
-                    catContent.classList.remove('hidden');
-                    const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
-                    if (chevron) chevron.classList.add('rotate-180');
-                }
-                const rect = block.getBoundingClientRect();
-                const threshold = window.innerHeight * 0.85;
-                if (rect.top > threshold || rect.top < 0) {
-                    setTimeout(() => {
-                        window.scrollTo({ top: window.scrollY + block.getBoundingClientRect().top - 130, behavior: 'smooth' });
-                    }, 600);
-                }
-                return;
-            }
+    function scrollByTwoQuestions(event) {
+        // Find the question block that was just answered
+        const radio = event?.target;
+        if (!radio) return;
+        const currentBlock = radio.closest('.question-block');
+        if (!currentBlock) return;
+
+        // Collect all question blocks in order
+        const allBlocks = Array.from(document.querySelectorAll('#surveyForm .question-block'));
+        const currentIdx = allBlocks.indexOf(currentBlock);
+        if (currentIdx === -1) return;
+
+        // Target: 2 questions ahead of the one just answered
+        const targetIdx = Math.min(currentIdx + 2, allBlocks.length - 1);
+        const targetBlock = allBlocks[targetIdx];
+
+        // Ensure the target's category is expanded
+        const catContent = targetBlock.closest('.category-content');
+        if (catContent && catContent.classList.contains('hidden')) {
+            catContent.classList.remove('hidden');
+            const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
+            if (chevron) chevron.classList.add('rotate-180');
         }
-        setTimeout(() => {
-            document.getElementById('submitBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+
+        // Only scroll if target is not fully visible
+        const rect = targetBlock.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight || rect.top < 0) {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: window.scrollY + targetBlock.getBoundingClientRect().top - 130,
+                    behavior: 'smooth'
+                });
+            }, 200);
+        }
     }
 
     function saveDraft() {
