@@ -52,15 +52,25 @@
 </div>
 {% else %}
 
-<!-- Maturity levels link -->
-<div class="mb-6 text-right">
-    <button type="button" onclick="document.getElementById('maturityModal').classList.remove('hidden')"
-            class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
-        What do the maturity levels mean?
-    </button>
-</div>
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+            <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#charts" class="hover:text-hub-text transition-colors">Charts</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#details" class="hover:text-hub-text transition-colors">Detailed Area Scores</a>
+        </div>
+        <button type="button" onclick="document.getElementById('maturityModal').classList.remove('hidden')"
+                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+            What do the maturity levels mean?
+        </button>
+    </div>
+</nav>
 
 <!-- Summary Cards -->
+<h2 id="overview" class="text-lg font-bold text-hub-text mb-4 scroll-mt-28">Overview</h2>
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
@@ -73,6 +83,14 @@
         <p class="text-xs font-semibold mt-1 text-hub-text">
             {{ maturity_labels.get((stats.overall_avg | round | int), "") }}
         </p>
+        {% if stats.previous_overall is not none %}
+        {% set delta = stats.overall_avg - stats.previous_overall %}
+        <p class="text-xs mt-1 font-semibold
+            {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
+            {% if delta > 0 %}▲ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}▼ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
+            <span class="font-normal text-hub-faint ml-0.5">vs prev</span>
+        </p>
+        {% endif %}
     </div>
 
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
@@ -137,6 +155,7 @@
 </div>
 
 <!-- Charts -->
+<h2 id="charts" class="text-lg font-bold text-hub-text mb-4 scroll-mt-28">Charts</h2>
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <div class="bg-hub-card border-2 border-hub-border p-6">
         <h3 class="text-lg font-semibold text-hub-text mb-4">Category Radar</h3>
@@ -165,7 +184,7 @@
 <!-- Per-Area Detail Scores -->
 {% if grouped_areas %}
 <div class="mb-8">
-    <h2 class="text-2xl font-bold text-hub-text mb-6">Detailed Area Scores</h2>
+    <h2 id="details" class="text-lg font-bold text-hub-text mb-6 scroll-mt-28">Detailed Area Scores</h2>
 
     {% for category, subcategories in grouped_areas.items() %}
     <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">

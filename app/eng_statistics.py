@@ -133,6 +133,28 @@ def get_engineering_stats(
     strengths = subcategory_scores[-3:][::-1] if len(subcategory_scores) >= 3 else subcategory_scores[::-1]
     improvements = subcategory_scores[:3]
 
+    # ── Previous round comparison ──
+    previous_round = (
+        db.query(AssessmentRound)
+        .filter(AssessmentRound.id < round_id)
+        .order_by(AssessmentRound.id.desc())
+        .first()
+    )
+
+    previous_overall: float | None = None
+    category_deltas: dict[str, float] = {}
+
+    if previous_round:
+        prev = get_engineering_stats(db, previous_round.id, team_id=team_id)
+        if prev:
+            previous_overall = prev["overall_avg"]
+            prev_cat_map = {c["category"]: c["avg"] for c in prev["category_scores"]}
+            for cat in category_scores:
+                if cat["category"] in prev_cat_map:
+                    category_deltas[cat["category"]] = round(
+                        cat["avg"] - prev_cat_map[cat["category"]], 2
+                    )
+
     return {
         "response_count": response_count,
         "overall_avg": overall_avg,
@@ -141,6 +163,8 @@ def get_engineering_stats(
         "subcategory_scores": subcategory_scores,
         "strengths": strengths,
         "improvements": improvements,
+        "previous_overall": previous_overall,
+        "category_deltas": category_deltas,
     }
 
 

@@ -131,7 +131,29 @@
         {% block content %}{% endblock %}
     </main>
 
-    <script></script>
+    <!-- Footer -->
+    <footer class="border-t border-hub-border mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+            <span class="text-xs text-hub-faint">Built for DataFeedWatch</span>
+            <span class="text-xs text-hub-faint">Maturity Assessment Tool</span>
+        </div>
+    </footer>
+
+    <script>
+        // Nav active state
+        (function() {
+            const path = window.location.pathname;
+            const links = document.querySelectorAll('nav a[href]');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === '/') return;
+                if (path.startsWith(href)) {
+                    link.classList.remove('text-white/60');
+                    link.classList.add('text-white', 'border-b-2', 'border-white');
+                }
+            });
+        })();
+    </script>
     <script src="/static/charts.js"></script>
     {% block scripts %}{% endblock %}
 </body>

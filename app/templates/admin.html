@@ -5,11 +5,11 @@
 <h1 class="text-3xl font-bold text-hub-text mb-8 tracking-tight">Admin Panel</h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Teams + Survey Links -->
+    <!-- Teams & Survey Links -->
     <div class="bg-hub-card border-2 border-hub-border">
         <div class="p-6 border-b border-hub-border">
             <h2 class="text-lg font-semibold text-hub-text">Teams & Survey Links</h2>
-            <p class="text-sm text-hub-muted mt-1">Each team has a unique survey link. Copy and share with the team.</p>
+            <p class="text-sm text-hub-muted mt-1">Share these links with your teams to collect assessments.</p>
         </div>
         <div class="p-6">
             <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 mb-4">
@@ -22,6 +22,7 @@
                     Add Team
                 </button>
             </form>
+            {% set active_round = rounds | selectattr('is_active') | first %}
             {% if teams %}
             <ul class="divide-y divide-hub-border">
                 {% for t in teams %}
@@ -44,14 +45,29 @@
                                         class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
-                                   id="link-{{ t.id }}"
-                                   class="flex-1 border-2 border-hub-border bg-hub-surface px-3 py-1.5 text-xs text-hub-muted font-mono">
-                            <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                    class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                                Copy Link
-                            </button>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-hub-faint uppercase shrink-0 w-20">Team</span>
+                                <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
+                                       id="link-{{ t.id }}"
+                                       class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
+                                <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
+                                        class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                    Copy
+                                </button>
+                            </div>
+                            {% if active_round %}
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-hub-faint uppercase shrink-0 w-20">Delivery</span>
+                                <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
+                                       id="eng-link-{{ t.id }}"
+                                       class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
+                                <button type="button" onclick="copyLink('eng-link-{{ t.id }}', this)"
+                                        class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                    Copy
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -89,13 +105,14 @@
         </div>
     </div>
 
-    <!-- Assessment Rounds -->
+    <!-- Rounds -->
     <div class="bg-hub-card border-2 border-hub-border">
         <div class="p-6 border-b border-hub-border">
-            <h2 class="text-lg font-semibold text-hub-text">Assessment Rounds</h2>
+            <h2 class="text-lg font-semibold text-hub-text">Rounds</h2>
+            <p class="text-sm text-hub-muted mt-1">Manage assessment cycles. Active rounds accept responses.</p>
         </div>
         <div class="p-6">
-            <form method="POST" action="/admin/rounds" class="flex gap-2 mb-4">
+            <form method="POST" action="/admin/rounds" class="flex gap-2 mb-6">
                 <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
                        class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
                 <button type="submit"
@@ -106,8 +123,8 @@
             {% if rounds %}
             <ul class="divide-y divide-hub-border">
                 {% for r in rounds %}
-                <li class="stagger-item py-4 rounded-lg px-2 -mx-2 hover:bg-hub-hover transition-colors duration-150">
-                    <div class="flex items-center justify-between mb-2">
+                <li class="stagger-item py-4">
+                    <div class="flex items-center justify-between">
                         <div>
                             <span class="font-medium text-hub-text">{{ r.name }}</span>
                             <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
@@ -123,17 +140,6 @@
                                 </button>
                             </form>
                         </div>
-                    </div>
-                    <!-- Engineering Survey Link -->
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="text-xs text-hub-faint shrink-0">Eng. Survey:</span>
-                        <input type="text" readonly value="{{ base_url }}/engineering/{{ r.engineering_token }}"
-                               id="eng-link-{{ r.id }}"
-                               class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
-                        <button type="button" onclick="copyLink('eng-link-{{ r.id }}', this)"
-                                class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                            Copy
-                        </button>
                     </div>
                 </li>
                 {% endfor %}
