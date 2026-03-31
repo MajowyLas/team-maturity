@@ -7,12 +7,13 @@ COPY pyproject.toml .
 COPY app/ app/
 COPY data/ data/
 
-# Install the package (needs app/ present for setuptools find_packages)
-RUN pip install --no-cache-dir .
+# Install dependencies only (don't install the package itself to site-packages,
+# so Path(__file__) resolves to /app/app/ where templates & static files live)
+RUN pip install --no-cache-dir -e .
 
 # Render sets PORT; default 8000 for local docker testing
 ENV PORT=8000
 
 EXPOSE ${PORT}
 
-CMD ["python", "-c", "from app.main import cli; cli()"]
+CMD python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
