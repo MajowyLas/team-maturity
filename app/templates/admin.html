@@ -271,18 +271,32 @@
 
 <!-- Participation Matrix -->
 {% if rounds and teams %}
+{% set visible_limit = 4 %}
+{% set recent_rounds = rounds[:visible_limit] %}
+{% set has_more = rounds | length > visible_limit %}
 <div class="bg-hub-card border-2 border-hub-border overflow-hidden">
-    <div class="p-6 border-b border-hub-border">
-        <h2 class="text-lg font-semibold text-hub-text">Participation Overview</h2>
-        <p class="text-sm text-hub-muted mt-1">Number of responses per team per round.</p>
+    <div class="p-6 border-b border-hub-border flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-hub-text">Participation Overview</h2>
+            <p class="text-sm text-hub-muted mt-1">Number of responses per team per round.</p>
+        </div>
+        {% if has_more %}
+        <button type="button" onclick="toggleAllRounds()" id="showAllBtn"
+                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+            Show all {{ rounds | length }} rounds
+        </button>
+        {% endif %}
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-hub-surface">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-hub-muted uppercase">Team</th>
-                    {% for r in rounds %}
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase">{{ r.name }}</th>
+                    {% for r in recent_rounds %}
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col">{{ r.name }}</th>
+                    {% endfor %}
+                    {% for r in rounds[visible_limit:] %}
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col-extra hidden">{{ r.name }}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -290,8 +304,18 @@
                 {% for t in teams %}
                 <tr class="hover:bg-hub-hover transition-colors duration-150">
                     <td class="px-4 py-3 font-medium text-hub-text">{{ t.name }}</td>
-                    {% for r in rounds %}
-                    <td class="px-4 py-3 text-center">
+                    {% for r in recent_rounds %}
+                    <td class="px-4 py-3 text-center round-col">
+                        {% set cnt = participation.get((r.id, t.id), 0) %}
+                        {% if cnt > 0 %}
+                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
+                        {% else %}
+                        <span class="text-hub-faint">--</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    {% for r in rounds[visible_limit:] %}
+                    <td class="px-4 py-3 text-center round-col-extra hidden">
                         {% set cnt = participation.get((r.id, t.id), 0) %}
                         {% if cnt > 0 %}
                         <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
@@ -319,6 +343,14 @@
     function hideEditForm(teamId) {
         document.getElementById('team-edit-' + teamId).classList.add('hidden');
         document.getElementById('team-view-' + teamId).classList.remove('hidden');
+    }
+
+    function toggleAllRounds() {
+        const extras = document.querySelectorAll('.round-col-extra');
+        const btn = document.getElementById('showAllBtn');
+        const isHidden = extras[0]?.classList.contains('hidden');
+        extras.forEach(el => el.classList.toggle('hidden'));
+        btn.textContent = isHidden ? 'Show recent only' : 'Show all {{ rounds | length }} rounds';
     }
 
     function confirmDeleteRound(roundId, roundName) {
