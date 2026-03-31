@@ -123,6 +123,20 @@ def toggle_round(round_id: int, db: Session = Depends(get_db)):
     return RedirectResponse(url="/admin", status_code=303)
 
 
+@router.post("/rounds/{round_id}/delete")
+def delete_round(round_id: int, db: Session = Depends(get_db)):
+    """Delete a round and all its responses."""
+    rnd = db.get(AssessmentRound, round_id)
+    if rnd:
+        responses = db.query(Response).filter(Response.round_id == round_id).all()
+        for resp in responses:
+            db.query(ResponseAnswer).filter(ResponseAnswer.response_id == resp.id).delete()
+            db.delete(resp)
+        db.delete(rnd)
+        db.commit()
+    return RedirectResponse(url="/admin", status_code=303)
+
+
 @router.post("/teams/{team_id}/edit")
 def edit_team(
     team_id: int,

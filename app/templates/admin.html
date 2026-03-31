@@ -107,6 +107,12 @@
                                         {% if r.is_active %}Close{% else %}Reopen{% endif %}
                                     </button>
                                 </form>
+                                <form method="POST" action="/admin/rounds/{{ r.id }}/delete" class="inline"
+                                      id="delete-round-form-{{ r.id }}">
+                                    <button type="button"
+                                            onclick="confirmDeleteRound({{ r.id }}, '{{ r.name }}')"
+                                            class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                                </form>
                             </div>
                         </div>
                     </li>
@@ -317,6 +323,13 @@
     function hideEditForm(teamId) {
         document.getElementById('team-edit-' + teamId).classList.add('hidden');
         document.getElementById('team-view-' + teamId).classList.remove('hidden');
+    }
+
+    function confirmDeleteRound(roundId, roundName) {
+        let msg = 'Delete round "' + roundName + '"?\n\n⚠️ All responses collected in this round will be permanently deleted.';
+        if (confirm(msg)) {
+            document.getElementById('delete-round-form-' + roundId).submit();
+        }
     }
 
     function confirmDeleteTeam(teamId, teamName, responseCount) {
