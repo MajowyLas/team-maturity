@@ -5,50 +5,21 @@
 <h1 class="text-3xl font-bold text-hub-text mb-8 tracking-tight">Admin Panel</h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Teams & Survey Links -->
-    <div class="bg-hub-card border-2 border-hub-border">
-        <div class="p-6 border-b border-hub-border">
-            <h2 class="text-lg font-semibold text-hub-text">Teams & Survey Links</h2>
-            <p class="text-sm text-hub-muted mt-1">Share these links with your teams to collect assessments.</p>
-        </div>
-        <div class="p-6">
-            <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 mb-4">
-                <input type="text" name="team_name" required placeholder="New team name..."
-                       class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
-                <input type="number" name="member_count" min="1" placeholder="Members"
-                       class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
-                <button type="submit"
-                        class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
-                    Add Team
-                </button>
-            </form>
-            {% set active_round = rounds | selectattr('is_active') | first %}
-
-            <!-- Delivery Survey Link (shared across all teams) -->
-            {% if active_round %}
-            <div class="mb-5 pb-5 border-b-2 border-hub-border">
-                <p class="text-xs font-bold text-hub-muted uppercase mb-2">Delivery Survey — one link for all teams</p>
-                <div class="flex items-center gap-2">
-                    <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
-                           id="eng-link-shared"
-                           class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
-                    <button type="button" onclick="copyLink('eng-link-shared', this)"
-                            class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                        Copy
-                    </button>
-                </div>
+    <!-- LEFT COLUMN -->
+    <div class="space-y-8">
+        <!-- Teams -->
+        <div class="bg-hub-card border-2 border-hub-border">
+            <div class="p-6 border-b border-hub-border">
+                <h2 class="text-lg font-semibold text-hub-text">Teams</h2>
+                <p class="text-sm text-hub-muted mt-1">Manage your squads.</p>
             </div>
-            {% endif %}
-
-            <!-- Team Survey Links (per team) -->
-            {% if teams %}
-            <p class="text-xs font-bold text-hub-muted uppercase mb-3">Team Surveys — one link per team</p>
-            <ul class="divide-y divide-hub-border">
-                {% for t in teams %}
-                <li class="stagger-item py-4">
-                    <!-- View mode -->
-                    <div id="team-view-{{ t.id }}">
-                        <div class="flex items-center justify-between mb-2">
+            <div class="p-6">
+                {% if teams %}
+                <ul class="divide-y divide-hub-border mb-4">
+                    {% for t in teams %}
+                    <li class="stagger-item py-3">
+                        <!-- View mode -->
+                        <div id="team-view-{{ t.id }}" class="flex items-center justify-between">
                             <div>
                                 <span class="font-medium text-hub-text">{{ t.name }}</span>
                                 {% if t.member_count %}
@@ -64,92 +35,154 @@
                                         class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
-                                   id="link-{{ t.id }}"
-                                   class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
-                            <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                    class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                                Copy
-                            </button>
+
+                        <!-- Edit mode (hidden by default) -->
+                        <div id="team-edit-{{ t.id }}" class="hidden">
+                            <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
+                                <div class="flex flex-wrap gap-2">
+                                    <input type="text" name="team_name" value="{{ t.name }}" required
+                                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                    <input type="number" name="member_count" min="1" placeholder="Members"
+                                           value="{{ t.member_count or '' }}"
+                                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit"
+                                            class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                                        Save
+                                    </button>
+                                    <button type="button" onclick="hideEditForm({{ t.id }})"
+                                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover transition-all duration-200">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </div>
 
-                    <!-- Edit mode (hidden by default) -->
-                    <div id="team-edit-{{ t.id }}" class="hidden">
-                        <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
-                            <div class="flex flex-wrap gap-2">
-                                <input type="text" name="team_name" value="{{ t.name }}" required
-                                       class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
-                                <input type="number" name="member_count" min="1" placeholder="Members"
-                                       value="{{ t.member_count or '' }}"
-                                       class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
-                            </div>
-                            <div class="flex gap-2">
-                                <button type="submit"
-                                        class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
-                                    Save
-                                </button>
-                                <button type="button" onclick="hideEditForm({{ t.id }})"
-                                        class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover transition-all duration-200">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <!-- Hidden delete form -->
+                        <form id="delete-form-{{ t.id }}" method="POST" action="/admin/teams/{{ t.id }}/delete" class="hidden"></form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-hub-muted text-sm text-center py-4 mb-4">No teams yet.</p>
+                {% endif %}
 
-                    <!-- Hidden delete form -->
-                    <form id="delete-form-{{ t.id }}" method="POST" action="/admin/teams/{{ t.id }}/delete" class="hidden"></form>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-hub-muted text-sm text-center py-4">No teams yet. Add one above.</p>
-            {% endif %}
+                <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 pt-4 border-t border-hub-border">
+                    <input type="text" name="team_name" required placeholder="New team name..."
+                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <input type="number" name="member_count" min="1" placeholder="Members"
+                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <button type="submit"
+                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                        Add Team
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rounds -->
+        <div class="bg-hub-card border-2 border-hub-border">
+            <div class="p-6 border-b border-hub-border">
+                <h2 class="text-lg font-semibold text-hub-text">Rounds</h2>
+                <p class="text-sm text-hub-muted mt-1">Manage assessment cycles. Active rounds accept responses.</p>
+            </div>
+            <div class="p-6">
+                {% if rounds %}
+                <ul class="divide-y divide-hub-border mb-4">
+                    {% for r in rounds %}
+                    <li class="stagger-item py-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="font-medium text-hub-text">{{ r.name }}</span>
+                                <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
+                                    {% if r.is_active %}border-hub-text text-hub-text{% else %}border-hub-border text-hub-muted{% endif %}">
+                                    {% if r.is_active %}Active{% else %}Closed{% endif %}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-hub-text hover:underline">Export CSV</a>
+                                <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
+                                    <button type="submit" class="text-xs text-hub-muted hover:text-hub-text">
+                                        {% if r.is_active %}Close{% else %}Reopen{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-hub-muted text-sm text-center py-4 mb-4">No rounds yet.</p>
+                {% endif %}
+
+                <form method="POST" action="/admin/rounds" class="flex gap-2 pt-4 border-t border-hub-border">
+                    <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
+                           class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <button type="submit"
+                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                        Create Round
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Rounds -->
-    <div class="bg-hub-card border-2 border-hub-border">
+    <!-- RIGHT COLUMN: Survey Links -->
+    <div class="bg-hub-card border-2 border-hub-border h-fit">
         <div class="p-6 border-b border-hub-border">
-            <h2 class="text-lg font-semibold text-hub-text">Rounds</h2>
-            <p class="text-sm text-hub-muted mt-1">Manage assessment cycles. Active rounds accept responses.</p>
+            <h2 class="text-lg font-semibold text-hub-text">Survey Links</h2>
+            <p class="text-sm text-hub-muted mt-1">Copy and share with your teams.</p>
         </div>
         <div class="p-6">
-            <form method="POST" action="/admin/rounds" class="flex gap-2 mb-6">
-                <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
-                       class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
-                <button type="submit"
-                        class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
-                    Create Round
-                </button>
-            </form>
-            {% if rounds %}
-            <ul class="divide-y divide-hub-border">
-                {% for r in rounds %}
-                <li class="stagger-item py-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="font-medium text-hub-text">{{ r.name }}</span>
-                            <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
-                                {% if r.is_active %}border-hub-text text-hub-text{% else %}border-hub-border text-hub-muted{% endif %}">
-                                {% if r.is_active %}Active{% else %}Closed{% endif %}
-                            </span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-hub-text hover:underline">Export CSV</a>
-                            <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
-                                <button type="submit" class="text-xs text-hub-muted hover:text-hub-text">
-                                    {% if r.is_active %}Close{% else %}Reopen{% endif %}
-                                </button>
-                            </form>
-                        </div>
+            {% set active_round = rounds | selectattr('is_active') | first %}
+
+            <!-- Delivery Survey (shared) -->
+            {% if active_round %}
+            <div class="mb-6 pb-6 border-b border-hub-border">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="inline-block w-2.5 h-2.5 bg-blue-600"></span>
+                    <p class="text-xs font-bold text-hub-text uppercase">Delivery Survey</p>
+                </div>
+                <p class="text-xs text-hub-faint mb-2">One link for all teams — share department-wide.</p>
+                <div class="flex items-center gap-2">
+                    <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
+                           id="eng-link-shared"
+                           class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
+                    <button type="button" onclick="copyLink('eng-link-shared', this)"
+                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                        Copy
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Team Surveys (per team) -->
+            <div class="flex items-center gap-2 mb-3">
+                <span class="inline-block w-2.5 h-2.5 bg-accent-500"></span>
+                <p class="text-xs font-bold text-hub-text uppercase">Team Surveys</p>
+            </div>
+            <p class="text-xs text-hub-faint mb-3">One link per team — each tracks responses separately.</p>
+
+            {% if teams %}
+            <ul class="space-y-3">
+                {% for t in teams %}
+                <li>
+                    <p class="text-sm font-medium text-hub-text mb-1">{{ t.name }}</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
+                               id="link-{{ t.id }}"
+                               class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
+                        <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
+                                class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            Copy
+                        </button>
                     </div>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-hub-muted text-sm text-center py-4">No rounds yet. Create one above.</p>
+            <p class="text-hub-muted text-sm text-center py-4">Add teams first to generate survey links.</p>
             {% endif %}
         </div>
     </div>
