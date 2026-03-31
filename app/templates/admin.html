@@ -198,29 +198,73 @@
 <div class="bg-hub-card border-2 border-hub-border mb-8">
     <div class="p-6 border-b border-hub-border">
         <h2 class="text-lg font-semibold text-hub-text">Data Management</h2>
-        <p class="text-sm text-hub-muted mt-1">Upload question CSVs, download data exports, or back up the database.</p>
+        <p class="text-sm text-hub-muted mt-1">Manage survey questions and database backups.</p>
     </div>
-    <div class="p-6">
-        <div class="flex items-center gap-2 mb-3">
-            <span class="text-xl">💾</span>
-            <h3 class="font-semibold text-hub-text">Database</h3>
+    <div class="p-6 space-y-6">
+        <!-- Survey Questions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-xs font-bold text-hub-text uppercase mb-1">Team Survey Questions</p>
+                <p class="text-xs text-hub-faint mb-3"><strong>{{ team_q_count }}</strong> questions loaded</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="/admin/data/download-questions/team"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download CSV
+                    </a>
+                    <form method="POST" action="/admin/data/upload-questions/team" enctype="multipart/form-data"
+                          class="inline-flex items-center gap-2">
+                        <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
+                            Upload CSV
+                            <input type="file" name="file" accept=".csv" required class="hidden"
+                                   onchange="if(confirm('This will replace all team survey questions. Continue?')) this.form.submit();">
+                        </label>
+                    </form>
+                </div>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-hub-text uppercase mb-1">Delivery Questions</p>
+                <p class="text-xs text-hub-faint mb-3"><strong>{{ eng_q_count }}</strong> questions loaded</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="/admin/data/download-questions/engineering"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Download CSV
+                    </a>
+                    <form method="POST" action="/admin/data/upload-questions/engineering" enctype="multipart/form-data"
+                          class="inline-flex items-center gap-2">
+                        <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
+                            Upload CSV
+                            <input type="file" name="file" accept=".csv" required class="hidden"
+                                   onchange="if(confirm('This will replace all delivery questions. Continue?')) this.form.submit();">
+                        </label>
+                    </form>
+                </div>
+            </div>
         </div>
-        <p class="text-xs text-hub-muted mb-4">Download the full SQLite database or upload a backup to restore.</p>
-        <div class="flex flex-wrap items-center gap-2">
-            <a href="/admin/data/download-db"
-               class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Download maturity.db
-            </a>
-            <form method="POST" action="/admin/data/upload-db" enctype="multipart/form-data"
-                  class="inline-flex items-center gap-2">
-                <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
-                    Upload maturity.db
-                    <input type="file" name="file" accept=".db,.sqlite,.sqlite3" required class="hidden"
-                           onchange="if(confirm('⚠️ This will REPLACE all current data (teams, rounds, responses) with the uploaded database. This cannot be undone. Continue?')) this.form.submit();">
-                </label>
-            </form>
+
+        <!-- Database Backup -->
+        <div class="pt-6 border-t border-hub-border">
+            <p class="text-xs font-bold text-hub-text uppercase mb-1">Database Backup</p>
+            <p class="text-xs text-hub-faint mb-3">Download or restore the full database (teams, rounds, responses, questions).</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="/admin/data/download-db"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Download maturity.db
+                </a>
+                <form method="POST" action="/admin/data/upload-db" enctype="multipart/form-data"
+                      class="inline-flex items-center gap-2">
+                    <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
+                        Upload maturity.db
+                        <input type="file" name="file" accept=".db,.sqlite,.sqlite3" required class="hidden"
+                               onchange="if(confirm('⚠️ This will REPLACE all current data with the uploaded database. This cannot be undone. Continue?')) this.form.submit();">
+                    </label>
+                </form>
+            </div>
         </div>
     </div>
 </div>
