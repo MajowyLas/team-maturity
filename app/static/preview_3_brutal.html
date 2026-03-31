@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: Minimal Brutalism</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+                        display: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        * { border-radius: 0 !important; }
+
+        body {
+            background: #FFF;
+            color: #000;
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+        }
+
+        /* No shadows anywhere */
+        * { box-shadow: none !important; }
+
+        /* Selection */
+        ::selection {
+            background: #FF0000;
+            color: #FFF;
+        }
+
+        /* Scrollbar — brutalist */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FFF; border-left: 2px solid #000; }
+        ::-webkit-scrollbar-thumb { background: #000; }
+
+        /* Focus */
+        input:focus, select:focus {
+            outline: 2px solid #000;
+            outline-offset: -2px;
+        }
+
+        /* Card - just a box with thick border */
+        .brutal-card {
+            border: 2px solid #000;
+            background: #FFF;
+        }
+
+        /* Accent card */
+        .brutal-accent {
+            border: 2px solid #000;
+            background: #FF0000;
+            color: #FFF;
+        }
+
+        /* Inverted */
+        .brutal-invert {
+            background: #000;
+            color: #FFF;
+            border: 2px solid #000;
+        }
+
+        /* Button */
+        .brutal-btn {
+            border: 2px solid #000;
+            background: #000;
+            color: #FFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 32px;
+            cursor: pointer;
+            transition: none;
+        }
+        .brutal-btn:hover {
+            background: #FF0000;
+            border-color: #FF0000;
+        }
+        .brutal-btn:active {
+            background: #FFF;
+            color: #000;
+        }
+
+        /* Score bar */
+        .brutal-bar-track {
+            height: 8px;
+            background: #FFF;
+            border: 1px solid #000;
+        }
+        .brutal-bar-fill {
+            height: 6px;
+            margin: 1px;
+            background: #000;
+        }
+        .brutal-bar-fill-accent {
+            background: #FF0000;
+        }
+
+        /* Divider */
+        .brutal-divider {
+            border-top: 2px solid #000;
+        }
+
+        /* Thin divider */
+        .brutal-thin-divider {
+            border-top: 1px solid #000;
+        }
+
+        /* Radio scored button */
+        .brutal-radio-btn {
+            width: 44px;
+            height: 44px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            background: #FFF;
+            color: #000;
+            transition: none;
+        }
+        input[type="radio"]:checked + .brutal-radio-btn {
+            background: #000;
+            color: #FFF;
+        }
+        .brutal-radio-btn:hover {
+            background: #000;
+            color: #FFF;
+        }
+
+        /* For engineering maturity level options */
+        .brutal-level-option {
+            border-bottom: 1px solid #000;
+            padding: 8px 12px;
+            cursor: pointer;
+            background: #FFF;
+        }
+        .brutal-level-option:last-child {
+            border-bottom: none;
+        }
+        .brutal-level-option:hover {
+            background: #000;
+            color: #FFF;
+        }
+        input[type="radio"]:checked + .brutal-level-option {
+            background: #000;
+            color: #FFF;
+            border-left: 4px solid #FF0000;
+        }
+        input[type="radio"]:checked + .brutal-level-option .level-label {
+            color: #FF0000;
+        }
+
+        /* Large heading style */
+        h1.brutal-heading {
+            font-family: 'Inter', system-ui, sans-serif;
+            font-weight: 900;
+            font-size: 2.5rem;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- ══════════ NAV BAR ══════════ -->
+    <nav class="brutal-invert sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <span class="font-black text-lg tracking-tight">TEAM MATURITY</span>
+            </div>
+            <div class="flex gap-0">
+                <a href="#" class="px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-black border-r border-white/20 transition-none">Dashboard</a>
+                <a href="#" class="px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-black border-r border-white/20 transition-none">Engineering</a>
+                <a href="#" class="px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-none">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-10">
+        <!-- ══════════ STYLE LABEL ══════════ -->
+        <div class="mb-10 pb-6 brutal-divider">
+            <p class="text-xs uppercase tracking-widest mb-2" style="color: #000;">Preview mode / aesthetic only / no functional changes</p>
+            <h1 class="brutal-heading">Minimal<br>Brutalism</h1>
+            <p class="text-sm mt-2">Black + white + one accent (red). Zero shadows. Zero radii. Raw structure.</p>
+        </div>
+
+        <!-- ══════════ SECTION 1: DASHBOARD HUB ══════════ -->
+        <div class="mb-12">
+            <div class="flex items-center gap-4 mb-6">
+                <h2 class="text-xl font-black uppercase tracking-tight">Overview</h2>
+                <div class="flex-1 brutal-divider"></div>
+                <span class="text-xs font-bold uppercase">Q1-2026</span>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-0">
+                <div class="brutal-card p-6 text-center border-r-0">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2">Overall Maturity</p>
+                    <p class="text-5xl font-black" style="letter-spacing: -0.04em;">3.7</p>
+                    <p class="text-xs mt-1 font-bold" style="color: #000;">
+                        <span style="color: #FF0000;">+0.32</span> vs prev
+                    </p>
+                </div>
+                <div class="brutal-card p-6 text-center border-r-0">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2">Responses</p>
+                    <p class="text-5xl font-black" style="letter-spacing: -0.04em;">24</p>
+                    <p class="text-xs mt-1 font-bold uppercase">participants</p>
+                </div>
+                <div class="brutal-card p-6 border-r-0">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2">Top Strength</p>
+                    <p class="text-base font-black">Stakeholders</p>
+                    <p class="text-3xl font-black" style="letter-spacing: -0.04em;">4.2</p>
+                </div>
+                <div class="brutal-accent p-6">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2">Needs Improvement</p>
+                    <p class="text-base font-black">Team Autonomy</p>
+                    <p class="text-3xl font-black" style="letter-spacing: -0.04em;">2.8</p>
+                </div>
+            </div>
+
+            <!-- Category Scores -->
+            <div class="brutal-card p-6 mt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-black uppercase tracking-widest">Category Scores — delta vs prev</h3>
+                </div>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-0">
+                    <div class="text-center p-3 border-r border-black last:border-r-0">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Responsiveness</p>
+                        <p class="text-xl font-black">3.8</p>
+                        <p class="text-xs font-bold">+0.15</p>
+                    </div>
+                    <div class="text-center p-3 border-r border-black">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Improvement</p>
+                        <p class="text-xl font-black">4.1</p>
+                        <p class="text-xs font-bold">+0.40</p>
+                    </div>
+                    <div class="text-center p-3 border-r border-black">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Stakeholders</p>
+                        <p class="text-xl font-black">4.2</p>
+                        <p class="text-xs font-bold">+0.22</p>
+                    </div>
+                    <div class="text-center p-3 border-r border-black">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Effectiveness</p>
+                        <p class="text-xl font-black">3.2</p>
+                        <p class="text-xs font-bold" style="color: #FF0000;">-0.10</p>
+                    </div>
+                    <div class="text-center p-3 border-r border-black">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Autonomy</p>
+                        <p class="text-xl font-black">2.8</p>
+                        <p class="text-xs font-bold">--</p>
+                    </div>
+                    <div class="text-center p-3">
+                        <p class="text-[10px] font-bold uppercase truncate mb-1">Mgmt Support</p>
+                        <p class="text-xl font-black">3.9</p>
+                        <p class="text-xs font-bold">+0.50</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar + Strengths -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 mt-6">
+                <div class="space-y-0">
+                    <div class="brutal-card p-5 border-b-0">
+                        <h3 class="text-xs font-black uppercase tracking-widest mb-3">Top 3 Strengths</h3>
+                        <div class="py-2 brutal-thin-divider">
+                            <div class="flex justify-between pt-2"><span class="text-sm font-medium">Sprint Goals <span class="text-xs">(Stakeholders)</span></span><span class="font-black text-lg">4.5</span></div>
+                        </div>
+                        <div class="py-2 brutal-thin-divider">
+                            <div class="flex justify-between pt-2"><span class="text-sm font-medium">Quality Mindset <span class="text-xs">(Improvement)</span></span><span class="font-black text-lg">4.3</span></div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between"><span class="text-sm font-medium">Release Freq <span class="text-xs">(Responsiveness)</span></span><span class="font-black text-lg">4.1</span></div>
+                        </div>
+                    </div>
+                    <div class="brutal-card p-5">
+                        <h3 class="text-xs font-black uppercase tracking-widest mb-3" style="color: #FF0000;">Top 3 Improvement Areas</h3>
+                        <div class="py-2 brutal-thin-divider">
+                            <div class="flex justify-between pt-2"><span class="text-sm font-medium">Self-Management <span class="text-xs">(Autonomy)</span></span><span class="font-black text-lg" style="color: #FF0000;">2.6</span></div>
+                        </div>
+                        <div class="py-2 brutal-thin-divider">
+                            <div class="flex justify-between pt-2"><span class="text-sm font-medium">Cross-Functional <span class="text-xs">(Autonomy)</span></span><span class="font-black text-lg" style="color: #FF0000;">3.0</span></div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between"><span class="text-sm font-medium">Morale <span class="text-xs">(Effectiveness)</span></span><span class="font-black text-lg" style="color: #FF0000;">3.1</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="brutal-card p-6 border-l-0">
+                    <h3 class="text-xs font-black uppercase tracking-widest mb-3">Category Overview</h3>
+                    <div style="height: 340px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ TEAM CARDS ══════════ -->
+        <div class="mb-12">
+            <div class="flex items-center gap-4 mb-6">
+                <h2 class="text-xl font-black uppercase tracking-tight">Team Deep Dives</h2>
+                <div class="flex-1 brutal-divider"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-0">
+                <!-- Team card 1 -->
+                <div class="brutal-card cursor-pointer hover:bg-black hover:text-white transition-none group border-r-0">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-lg font-black">Team Alpha</h3>
+                            <span class="text-[10px] px-2 py-1 border-2 border-current font-bold uppercase">8 resp</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-4xl font-black" style="letter-spacing: -0.04em;">4.1</p>
+                                <p class="text-[10px] font-bold uppercase">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Responsive</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 82%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">4.1</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Improve</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 86%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">4.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Stakehld</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 90%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">4.5</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Autonomy</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill brutal-bar-fill-accent" style="width: 60%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right" style="color: #FF0000;">3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t-2 border-black">
+                        <div class="px-4 py-3 border-r-2 border-black">
+                            <p class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Strength</p>
+                            <p class="text-xs font-black">Sprint Goals</p>
+                            <p class="text-sm font-black">4.5</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] font-bold uppercase tracking-wider mb-0.5" style="color: #FF0000;">Improve</p>
+                            <p class="text-xs font-black">Self-Mgmt</p>
+                            <p class="text-sm font-black" style="color: #FF0000;">2.8</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team card 2 -->
+                <div class="brutal-card cursor-pointer hover:bg-black hover:text-white transition-none group border-r-0">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-lg font-black">Team Bravo</h3>
+                            <span class="text-[10px] px-2 py-1 border-2 border-current font-bold uppercase">6 resp</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-4xl font-black" style="letter-spacing: -0.04em; color: #FF0000;">3.2</p>
+                                <p class="text-[10px] font-bold uppercase">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Responsive</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 66%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">3.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Improve</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 60%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">3.0</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Stakehld</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill" style="width: 72%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right">3.6</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate font-bold uppercase">Autonomy</span>
+                                    <div class="flex-1 brutal-bar-track"><div class="brutal-bar-fill brutal-bar-fill-accent" style="width: 54%;"></div></div>
+                                    <span class="text-[10px] font-black w-5 text-right" style="color: #FF0000;">2.7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t-2 border-black">
+                        <div class="px-4 py-3 border-r-2 border-black">
+                            <p class="text-[10px] font-bold uppercase tracking-wider mb-0.5">Strength</p>
+                            <p class="text-xs font-black">Review Quality</p>
+                            <p class="text-sm font-black">3.8</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] font-bold uppercase tracking-wider mb-0.5" style="color: #FF0000;">Improve</p>
+                            <p class="text-xs font-black">Cross-Func</p>
+                            <p class="text-sm font-black" style="color: #FF0000;">2.5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending -->
+                <div class="p-5 flex items-center justify-center" style="border: 2px dashed #000;">
+                    <div class="text-center">
+                        <p class="text-xs font-bold uppercase tracking-widest">Awaiting Responses</p>
+                        <p class="text-base font-black mt-1">Team Charlie</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ SECTION 2: SURVEY SAMPLE (both types) ══════════ -->
+        <div class="mb-12">
+            <div class="flex items-center gap-4 mb-6">
+                <h2 class="text-xl font-black uppercase tracking-tight">Survey Sample</h2>
+                <div class="flex-1 brutal-divider"></div>
+            </div>
+
+            <!-- Session info -->
+            <div class="brutal-card p-6 mb-0">
+                <h2 class="text-xs font-black uppercase tracking-widest mb-4">About You</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-1">Round</label>
+                        <select class="w-full px-3 py-2.5 text-sm border-2 border-black bg-white">
+                            <option>Q1-2026</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase mb-1">Name</label>
+                        <input type="text" placeholder="e.g. Anna M." class="w-full px-3 py-2.5 text-sm border-2 border-black bg-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="brutal-invert p-4 mb-0">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold">Progress</span>
+                    <span class="text-xs font-bold">8 / 20</span>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.2);">
+                    <div style="width: 40%; height: 100%; background: #FF0000;"></div>
+                </div>
+            </div>
+
+            <!-- Team-style question (1-5 buttons) -->
+            <div class="brutal-card p-6 mb-0 border-t-0">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-1 h-6" style="background: #FF0000;"></span>
+                    <h2 class="text-base font-black uppercase">Stakeholders</h2>
+                </div>
+                <h3 class="text-[11px] font-black uppercase tracking-widest mb-4 pb-2 brutal-thin-divider">Sprint Goals</h3>
+
+                <div class="mb-6">
+                    <p class="text-sm mb-3 leading-relaxed">Sprint goals are clearly defined and the team understands what success looks like.</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] w-14 shrink-0 text-right font-bold uppercase">disagree</span>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b1" value="1" class="sr-only peer"><div class="brutal-radio-btn">1</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b1" value="2" class="sr-only peer"><div class="brutal-radio-btn">2</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b1" value="3" class="sr-only peer" checked><div class="brutal-radio-btn">3</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b1" value="4" class="sr-only peer"><div class="brutal-radio-btn">4</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b1" value="5" class="sr-only peer"><div class="brutal-radio-btn">5</div></label>
+                        <span class="text-[10px] w-14 shrink-0 font-bold uppercase">agree</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm mb-3 leading-relaxed">Stakeholders actively participate in sprint reviews and provide useful feedback.</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] w-14 shrink-0 text-right font-bold uppercase">disagree</span>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b2" value="1" class="sr-only peer"><div class="brutal-radio-btn">1</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b2" value="2" class="sr-only peer"><div class="brutal-radio-btn">2</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b2" value="3" class="sr-only peer"><div class="brutal-radio-btn">3</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b2" value="4" class="sr-only peer"><div class="brutal-radio-btn">4</div></label>
+                        <label class="cursor-pointer"><input type="radio" name="demo_b2" value="5" class="sr-only peer"><div class="brutal-radio-btn">5</div></label>
+                        <span class="text-[10px] w-14 shrink-0 font-bold uppercase">agree</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engineering-style question (maturity levels) -->
+            <div class="brutal-card p-6 border-t-0">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-1 h-6" style="background: #000;"></span>
+                    <h2 class="text-base font-black uppercase">Build & Deploy</h2>
+                </div>
+                <h3 class="text-[11px] font-black uppercase tracking-widest mb-4 pb-2 brutal-thin-divider">CI/CD Pipeline</h3>
+
+                <div>
+                    <p class="text-sm mb-3 leading-relaxed">How automated is your build and deployment pipeline?</p>
+                    <div class="border-2 border-black">
+                        <label class="block cursor-pointer"><input type="radio" name="demo_e1" value="1" class="sr-only peer">
+                            <div class="brutal-level-option flex items-center">
+                                <span class="text-[10px] font-black w-3 text-right mr-2">1</span>
+                                <span class="level-label text-[10px] font-black w-12" style="color: #FF0000;">BASE</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-xs">Manual builds. No automation. Deployment by hand.</span>
+                            </div>
+                        </label>
+                        <label class="block cursor-pointer"><input type="radio" name="demo_e1" value="2" class="sr-only peer">
+                            <div class="brutal-level-option flex items-center">
+                                <span class="text-[10px] font-black w-3 text-right mr-2">2</span>
+                                <span class="level-label text-[10px] font-black w-12">BEGN</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-xs">Basic CI in place. Builds trigger on push but deploy is manual.</span>
+                            </div>
+                        </label>
+                        <label class="block cursor-pointer"><input type="radio" name="demo_e1" value="3" class="sr-only peer" checked>
+                            <div class="brutal-level-option flex items-center">
+                                <span class="text-[10px] font-black w-3 text-right mr-2">3</span>
+                                <span class="level-label text-[10px] font-black w-12">INTM</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-xs">CI/CD pipeline exists. Deploys to staging auto, prod needs approval.</span>
+                            </div>
+                        </label>
+                        <label class="block cursor-pointer"><input type="radio" name="demo_e1" value="4" class="sr-only peer">
+                            <div class="brutal-level-option flex items-center">
+                                <span class="text-[10px] font-black w-3 text-right mr-2">4</span>
+                                <span class="level-label text-[10px] font-black w-12">ADVN</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-xs">Full CD with feature flags. One-click prod deploy with rollback.</span>
+                            </div>
+                        </label>
+                        <label class="block cursor-pointer"><input type="radio" name="demo_e1" value="5" class="sr-only peer">
+                            <div class="brutal-level-option flex items-center">
+                                <span class="text-[10px] font-black w-3 text-right mr-2">5</span>
+                                <span class="level-label text-[10px] font-black w-12">XPRT</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-xs">Continuous deployment. Every commit goes to prod. Self-healing infra.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="text-center py-8">
+                <button class="brutal-btn text-lg">Submit Assessment</button>
+                <p class="text-xs mt-3 font-bold uppercase tracking-wider">your perspective shapes the team</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        Chart.defaults.color = '#000';
+        Chart.defaults.borderColor = 'rgba(0,0,0,0.1)';
+
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['Responsiveness', 'Improvement', 'Stakeholders', 'Effectiveness', 'Autonomy', 'Mgmt Support'],
+                datasets: [{
+                    label: 'Team Maturity',
+                    data: [3.8, 4.1, 4.2, 3.2, 2.8, 3.9],
+                    backgroundColor: 'rgba(255,0,0,0.05)',
+                    borderColor: '#000',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#FF0000',
+                    pointRadius: 5,
+                    pointBorderColor: '#000',
+                    pointBorderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true, max: 5,
+                        ticks: { stepSize: 1, backdropColor: 'transparent', color: '#000', font: { size: 10, weight: '700' } },
+                        grid: { color: 'rgba(0,0,0,0.15)' },
+                        angleLines: { color: 'rgba(0,0,0,0.1)' },
+                        pointLabels: { color: '#000', font: { size: 10, weight: '700', family: 'Space Grotesk' } },
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

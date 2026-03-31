@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: Retro-Tech Terminal Modernism (Green CRT)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        terminal: ['IBM Plex Mono', 'Share Tech Mono', 'Consolas', 'monospace'],
+                        display: ['VT323', 'monospace'],
+                    },
+                    colors: {
+                        crt: {
+                            bg: '#000000',
+                            surface: '#0A0A0A',
+                            card: '#080C08',
+                            hover: '#0D120D',
+                            border: 'rgba(0,255,136,0.12)',
+                            border2: 'rgba(0,255,136,0.20)',
+                            text: '#66FFBB',
+                            muted: '#33D08F',
+                            faint: '#1A6B48',
+                            glow: '#00FF88',
+                            glowDim: '#00D56F',
+                            red: '#FF3B30',
+                            yellow: '#FFB454',
+                            amber: '#FF9F1C',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: #000000;
+            color: #66FFBB;
+            font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
+        }
+
+        /* CRT scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.15) 2px,
+                rgba(0, 0, 0, 0.15) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* CRT edge vignette */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* CRT glow on text */
+        .glow { text-shadow: 0px 0px 6px rgba(0,255,136,0.45); }
+        .glow-strong { text-shadow: 0px 0px 10px rgba(0,255,136,0.6), 0px 0px 30px rgba(0,255,136,0.2); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,255,136,0.35); }
+
+        /* Focus */
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 1px #00FF88, 0 0 8px rgba(0,255,136,0.2);
+            border-color: #00FF88;
+        }
+
+        ::selection {
+            background: rgba(0,255,136,0.25);
+            color: #00FF88;
+        }
+
+        /* Grid line pattern for cards */
+        .grid-pattern {
+            background-image:
+                linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Blinking cursor */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .cursor-blink {
+            animation: blink 1.2s step-end infinite;
+        }
+
+        /* Score bar */
+        .score-track {
+            background: rgba(0,255,136,0.06);
+            border: 1px solid rgba(0,255,136,0.08);
+        }
+        .score-fill {
+            background: linear-gradient(90deg, #00D56F, #00FF88);
+            box-shadow: 0 0 6px rgba(0,255,136,0.3);
+        }
+
+        /* Radio options */
+        input[type="radio"]:checked + div {
+            background: rgba(0,255,136,0.08) !important;
+            border-color: rgba(0,255,136,0.4) !important;
+        }
+        input[type="radio"]:checked + div .level-score {
+            color: #00FF88;
+            text-shadow: 0 0 6px rgba(0,255,136,0.4);
+        }
+
+        /* Section label */
+        .section-label {
+            font-family: 'VT323', monospace;
+            font-size: 1.4rem;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- ══════════ TERMINAL TOP BAR ══════════ -->
+    <div class="border-b" style="border-color: rgba(0,255,136,0.12); background: #0A0A0A;">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
+            <div class="flex gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full" style="background: #FF3B30; opacity: 0.7;"></span>
+                <span class="w-2.5 h-2.5 rounded-full" style="background: #FFB454; opacity: 0.7;"></span>
+                <span class="w-2.5 h-2.5 rounded-full" style="background: #00FF88; opacity: 0.7;"></span>
+            </div>
+            <span class="text-xs" style="color: #33D08F;">dfw-maturity v2.0 ~ user@delivery-hub</span>
+            <div class="flex-1"></div>
+            <div class="flex gap-4 text-xs" style="color: #33D08F;">
+                <a href="#" class="hover:text-crt-glow transition-colors">[dashboard]</a>
+                <a href="#" class="hover:text-crt-glow transition-colors">[engineering]</a>
+                <a href="#" class="hover:text-crt-glow transition-colors">[admin]</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- ══════════ STYLE LABEL ══════════ -->
+        <div class="mb-8 pb-4" style="border-bottom: 1px solid rgba(0,255,136,0.12);">
+            <p class="text-xs" style="color: #1A6B48;">PREVIEW_MODE: aesthetic_only // no functional changes</p>
+            <h1 class="section-label glow-strong mt-2" style="color: #00FF88;">
+                <span style="color: #33D08F;">$</span> style --retro-tech-terminal-modernism
+                <span class="cursor-blink inline-block w-2 h-5 ml-1" style="background: #00FF88;"></span>
+            </h1>
+            <p class="text-xs mt-1" style="color: #33D08F;"># Green CRT mode / IBM Plex Mono / rigid grid / ambient glow</p>
+        </div>
+
+        <!-- ══════════ SECTION 1: DASHBOARD HUB ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="glow" style="color: #00FF88;">></span>
+                <h2 class="text-base font-bold glow" style="color: #66FFBB;">Overview</h2>
+                <div class="flex-1 h-px" style="background: rgba(0,255,136,0.12);"></div>
+                <span class="text-xs" style="color: #1A6B48;">round: Q1-2026</span>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+                <div class="grid-pattern p-5 text-center" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <p class="text-xs font-medium mb-1" style="color: #33D08F;">overall_maturity</p>
+                    <p class="text-4xl font-bold glow-strong" style="color: #00FF88;">3.7</p>
+                    <p class="text-xs mt-1" style="color: #00D56F;">
+                        <span style="color: #00FF88;">+0.32</span>
+                        <span style="color: #1A6B48;"> vs prev</span>
+                    </p>
+                </div>
+                <div class="grid-pattern p-5 text-center" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <p class="text-xs font-medium mb-1" style="color: #33D08F;">responses</p>
+                    <p class="text-4xl font-bold glow" style="color: #66FFBB;">24</p>
+                    <p class="text-xs mt-1" style="color: #1A6B48;">participants</p>
+                </div>
+                <div class="grid-pattern p-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <p class="text-xs font-medium mb-2" style="color: #33D08F;">top_strength</p>
+                    <p class="text-sm font-semibold" style="color: #00FF88;">Stakeholders</p>
+                    <p class="text-2xl font-bold glow-strong" style="color: #00FF88;">4.2</p>
+                </div>
+                <div class="grid-pattern p-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <p class="text-xs font-medium mb-2" style="color: #33D08F;">needs_improvement</p>
+                    <p class="text-sm font-semibold" style="color: #FFB454;">Team Autonomy</p>
+                    <p class="text-2xl font-bold" style="color: #FFB454; text-shadow: 0 0 6px rgba(255,180,84,0.3);">2.8</p>
+                </div>
+            </div>
+
+            <!-- Category scores -->
+            <div class="grid-pattern p-5 mb-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-semibold" style="color: #66FFBB;">
+                        category_scores
+                        <span style="color: #1A6B48;"> -- delta vs prev round</span>
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Responsiveness</p>
+                        <p class="text-lg font-bold glow" style="color: #00FF88;">3.8</p>
+                        <p class="text-xs font-semibold" style="color: #00FF88;">+0.15</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Improvement</p>
+                        <p class="text-lg font-bold glow" style="color: #00FF88;">4.1</p>
+                        <p class="text-xs font-semibold" style="color: #00FF88;">+0.40</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Stakeholders</p>
+                        <p class="text-lg font-bold glow" style="color: #00FF88;">4.2</p>
+                        <p class="text-xs font-semibold" style="color: #00FF88;">+0.22</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Effectiveness</p>
+                        <p class="text-lg font-bold" style="color: #FFB454; text-shadow: 0 0 4px rgba(255,180,84,0.3);">3.2</p>
+                        <p class="text-xs font-semibold" style="color: #FF3B30;">-0.10</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Autonomy</p>
+                        <p class="text-lg font-bold" style="color: #FFB454; text-shadow: 0 0 4px rgba(255,180,84,0.3);">2.8</p>
+                        <p class="text-xs font-semibold" style="color: #33D08F;">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #33D08F;">Mgmt Support</p>
+                        <p class="text-lg font-bold glow" style="color: #00FF88;">3.9</p>
+                        <p class="text-xs font-semibold" style="color: #00FF88;">+0.50</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar + Strengths -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="space-y-3">
+                    <div class="grid-pattern p-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                        <h3 class="text-sm font-semibold mb-3" style="color: #00FF88;">top_3_strengths</h3>
+                        <div class="py-2" style="border-bottom: 1px solid rgba(0,255,136,0.08);">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Sprint Goals <span class="text-xs" style="color: #1A6B48;">(Stakeholders)</span></span>
+                                <span class="font-bold glow" style="color: #00FF88;">4.5</span>
+                            </div>
+                        </div>
+                        <div class="py-2" style="border-bottom: 1px solid rgba(0,255,136,0.08);">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Quality Mindset <span class="text-xs" style="color: #1A6B48;">(Improvement)</span></span>
+                                <span class="font-bold glow" style="color: #00FF88;">4.3</span>
+                            </div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Release Freq <span class="text-xs" style="color: #1A6B48;">(Responsiveness)</span></span>
+                                <span class="font-bold glow" style="color: #00FF88;">4.1</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-pattern p-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                        <h3 class="text-sm font-semibold mb-3" style="color: #FFB454; text-shadow: 0 0 4px rgba(255,180,84,0.3);">top_3_improvements</h3>
+                        <div class="py-2" style="border-bottom: 1px solid rgba(0,255,136,0.08);">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Self-Management <span class="text-xs" style="color: #1A6B48;">(Autonomy)</span></span>
+                                <span class="font-bold" style="color: #FFB454;">2.6</span>
+                            </div>
+                        </div>
+                        <div class="py-2" style="border-bottom: 1px solid rgba(0,255,136,0.08);">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Cross-Functional <span class="text-xs" style="color: #1A6B48;">(Autonomy)</span></span>
+                                <span class="font-bold" style="color: #FFB454;">3.0</span>
+                            </div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm" style="color: #66FFBB;">Morale <span class="text-xs" style="color: #1A6B48;">(Effectiveness)</span></span>
+                                <span class="font-bold" style="color: #FFB454;">3.1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-pattern p-5" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <h3 class="text-sm font-semibold mb-3" style="color: #66FFBB;">radar_overview</h3>
+                    <div style="height: 320px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ TEAM CARDS ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="glow" style="color: #00FF88;">></span>
+                <h2 class="text-base font-bold glow" style="color: #66FFBB;">Team Deep Dives</h2>
+                <div class="flex-1 h-px" style="background: rgba(0,255,136,0.12);"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <!-- Team card 1 -->
+                <div class="grid-pattern cursor-pointer hover:border-crt-border2 transition-colors" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-base font-bold glow" style="color: #66FFBB;">Team Alpha</h3>
+                            <span class="text-[10px] px-2 py-0.5" style="color: #33D08F; border: 1px solid rgba(0,255,136,0.12);">8 responses</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold glow-strong" style="color: #00FF88;">4.1</p>
+                                <p class="text-[10px]" style="color: #1A6B48;">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Responsive</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 82%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">4.1</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Improve</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 86%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">4.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Stakehld</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 90%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">4.5</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Autonomy</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5" style="width: 60%; background: #FFB454; box-shadow: 0 0 4px rgba(255,180,84,0.3);"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #FFB454;">3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2" style="border-top: 1px solid rgba(0,255,136,0.08); background: rgba(0,255,136,0.02);">
+                        <div class="px-4 py-3" style="border-right: 1px solid rgba(0,255,136,0.08);">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #1A6B48;">strength</p>
+                            <p class="text-xs font-semibold" style="color: #00FF88;">Sprint Goals</p>
+                            <p class="text-sm font-bold glow" style="color: #00FF88;">4.5</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #1A6B48;">improve</p>
+                            <p class="text-xs font-semibold" style="color: #FFB454;">Self-Mgmt</p>
+                            <p class="text-sm font-bold" style="color: #FFB454;">2.8</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team card 2 -->
+                <div class="grid-pattern cursor-pointer hover:border-crt-border2 transition-colors" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-base font-bold glow" style="color: #66FFBB;">Team Bravo</h3>
+                            <span class="text-[10px] px-2 py-0.5" style="color: #33D08F; border: 1px solid rgba(0,255,136,0.12);">6 responses</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold" style="color: #FFB454; text-shadow: 0 0 8px rgba(255,180,84,0.3);">3.2</p>
+                                <p class="text-[10px]" style="color: #1A6B48;">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Responsive</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 66%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">3.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Improve</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 60%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">3.0</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Stakehld</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5 score-fill" style="width: 72%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #33D08F;">3.6</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #33D08F;">Autonomy</span>
+                                    <div class="flex-1 h-1.5 score-track"><div class="h-1.5" style="width: 54%; background: #FFB454; box-shadow: 0 0 4px rgba(255,180,84,0.3);"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #FFB454;">2.7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2" style="border-top: 1px solid rgba(0,255,136,0.08); background: rgba(0,255,136,0.02);">
+                        <div class="px-4 py-3" style="border-right: 1px solid rgba(0,255,136,0.08);">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #1A6B48;">strength</p>
+                            <p class="text-xs font-semibold" style="color: #00FF88;">Review Quality</p>
+                            <p class="text-sm font-bold glow" style="color: #00FF88;">3.8</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #1A6B48;">improve</p>
+                            <p class="text-xs font-semibold" style="color: #FFB454;">Cross-Func</p>
+                            <p class="text-sm font-bold" style="color: #FFB454;">2.5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending team -->
+                <div class="p-5 flex items-center justify-center" style="border: 1px dashed rgba(0,255,136,0.12); background: transparent;">
+                    <div class="text-center">
+                        <p class="text-xs" style="color: #1A6B48;">awaiting_responses</p>
+                        <p class="text-sm mt-1" style="color: #33D08F;">Team Charlie</p>
+                        <span class="cursor-blink inline-block w-1.5 h-3 mt-2" style="background: #33D08F;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ SECTION 2: SURVEY SAMPLE ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="glow" style="color: #00FF88;">></span>
+                <h2 class="text-base font-bold glow" style="color: #66FFBB;">Survey Sample (Engineering)</h2>
+                <div class="flex-1 h-px" style="background: rgba(0,255,136,0.12);"></div>
+            </div>
+
+            <!-- Session info -->
+            <div class="grid-pattern p-5 mb-4" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span style="color: #00FF88;">></span>
+                        <span class="text-sm font-semibold" style="color: #66FFBB;">session.init()</span>
+                    </div>
+                    <span class="px-2 py-0.5 text-xs" style="color: #00FF88; border: 1px solid rgba(0,255,136,0.15); background: rgba(0,255,136,0.05);">Q1-2026</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-medium uppercase tracking-wider mb-1" style="color: #33D08F;">user.name</label>
+                        <input type="text" placeholder="jane_smith" class="w-full px-3 py-2 text-sm" style="background: #000; border: 1px solid rgba(0,255,136,0.12); color: #66FFBB;">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium uppercase tracking-wider mb-1" style="color: #33D08F;">team.select()</label>
+                        <select class="w-full px-3 py-2 text-sm" style="background: #000; border: 1px solid rgba(0,255,136,0.12); color: #66FFBB;">
+                            <option>// choose your squad</option>
+                            <option>Team Alpha</option>
+                            <option>Team Bravo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="p-3 mb-4" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs" style="color: #33D08F;"><span style="color: #00FF88;">$</span> assess --progress</span>
+                    <span class="text-xs" style="color: #66FFBB;">
+                        [<span class="glow" style="color: #00FF88;">████████░░░░░░░░░░░░</span>] 40% (8/20)
+                    </span>
+                </div>
+                <p class="mt-1 text-[10px]" style="color: #33D08F;">STATUS: 25% complete. acquiring signal...</p>
+            </div>
+
+            <!-- Question category -->
+            <div class="mb-4" style="border: 1px solid rgba(0,255,136,0.12); background: #0A0A0A;">
+                <div class="p-4 flex items-center justify-between" style="border-bottom: 1px solid rgba(0,255,136,0.08);">
+                    <div class="flex items-center gap-2">
+                        <span style="color: #00FF88; opacity: 0.6;">></span>
+                        <h3 class="text-sm font-bold" style="color: #66FFBB;">Build & Deploy</h3>
+                    </div>
+                    <svg class="w-4 h-4" style="color: #33D08F;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-center gap-2 mb-3 pb-2" style="border-bottom: 1px solid rgba(0,255,136,0.06);">
+                        <span class="text-[10px]" style="color: #58d1db;">#</span>
+                        <h4 class="text-[10px] font-semibold uppercase tracking-widest" style="color: #58d1db;">CI/CD Pipeline</h4>
+                    </div>
+
+                    <!-- Question 1 -->
+                    <div class="mb-4">
+                        <p class="text-sm mb-2 pl-1" style="color: #66FFBB;">
+                            <span style="color: #33D08F;" class="mr-1">~</span>How automated is your build and deployment pipeline?
+                        </p>
+                        <div style="border: 1px solid rgba(0,255,136,0.08);">
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q1" value="1" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">1</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #FF3B30;">BASE</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Manual builds. No automation. Deployment by hand.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q1" value="2" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">2</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #FFB454;">BEGN</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Basic CI in place. Builds trigger on push but deploy is manual.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q1" value="3" class="sr-only peer" checked>
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">3</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #FFB454;">INTM</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">CI/CD pipeline exists. Deploys to staging auto, prod needs approval.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q1" value="4" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">4</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #00FF88;">ADVN</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Full CD with feature flags. One-click prod deploy with rollback.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q1" value="5" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">5</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #58d1db;">XPRT</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Continuous deployment. Every commit goes to prod. Self-healing infra.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div>
+                        <p class="text-sm mb-2 pl-1" style="color: #66FFBB;">
+                            <span style="color: #33D08F;" class="mr-1">~</span>How do you handle environment configuration?
+                        </p>
+                        <div style="border: 1px solid rgba(0,255,136,0.08);">
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q2" value="1" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">1</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #FF3B30;">BASE</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Config hardcoded. Environment differences cause regular issues.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q2" value="3" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-bottom: 1px solid rgba(0,255,136,0.05); border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">3</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #FFB454;">INTM</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">Env vars used. Config managed per environment but some drift.</span>
+                                </div>
+                            </label>
+                            <label class="block cursor-pointer">
+                                <input type="radio" name="demo_q2" value="5" class="sr-only peer">
+                                <div class="flex items-center px-3 py-2 hover:bg-crt-hover peer-checked:bg-crt-hover transition-all" style="border-left: 3px solid transparent;">
+                                    <span class="level-score shrink-0 text-[10px] font-bold w-3 text-right mr-2" style="color: #33D08F;">5</span>
+                                    <span class="shrink-0 text-[10px] font-bold w-[3rem]" style="color: #58d1db;">XPRT</span>
+                                    <span class="mx-2" style="color: rgba(0,255,136,0.12);">|</span>
+                                    <span class="text-xs leading-snug font-sans" style="color: #33D08F;">GitOps. All config versioned, validated, and auto-synced across envs.</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <div class="text-center py-6">
+                <button class="px-8 py-3 font-bold text-sm" style="background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3); color: #00FF88; text-shadow: 0 0 6px rgba(0,255,136,0.3);">
+                    <span style="color: #00FF88;">$</span> git push --assessment
+                </button>
+                <p class="text-[10px] mt-2" style="color: #1A6B48;">// submits your assessment to the mothership</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Radar chart
+        Chart.defaults.color = '#33D08F';
+        Chart.defaults.borderColor = 'rgba(0,255,136,0.08)';
+
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['Responsiveness', 'Improvement', 'Stakeholders', 'Effectiveness', 'Autonomy', 'Mgmt Support'],
+                datasets: [{
+                    label: 'Team Maturity',
+                    data: [3.8, 4.1, 4.2, 3.2, 2.8, 3.9],
+                    backgroundColor: 'rgba(0,255,136,0.08)',
+                    borderColor: '#00FF88',
+                    borderWidth: 1.5,
+                    pointBackgroundColor: '#00FF88',
+                    pointRadius: 3,
+                    pointBorderColor: '#00FF88',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true, max: 5,
+                        ticks: { stepSize: 1, backdropColor: 'transparent', color: '#1A6B48', font: { size: 9 } },
+                        grid: { color: 'rgba(0,255,136,0.08)' },
+                        angleLines: { color: 'rgba(0,255,136,0.06)' },
+                        pointLabels: { color: '#33D08F', font: { size: 10, family: 'IBM Plex Mono' } },
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

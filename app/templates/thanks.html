@@ -1,20 +1,275 @@
 {% extends "base.html" %}
-{% block title %}Thank You -- Team Maturity Assessment{% endblock %}
+{% block title %}Done! -- Team Health Check{% endblock %}
+{% block nav %}{% endblock %}
 
 {% block content %}
-<div class="max-w-lg mx-auto text-center py-20">
-    <div class="text-6xl mb-6" style="animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);">✅</div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-4 animate-fade-in-up tracking-tight">Thank You!</h1>
-    <p class="text-gray-600 mb-8 animate-fade-in-up" style="animation-delay: 0.1s;">Your assessment has been recorded successfully.</p>
-    <div class="flex justify-center space-x-4 animate-fade-in-up" style="animation-delay: 0.2s;">
-        {% if token %}
-        <a href="/survey/{{ token }}" class="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
-            Submit Another
-        </a>
-        {% endif %}
-        <a href="/dashboard" class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-medium hover:bg-brand-700 shadow-soft hover:shadow-card active:scale-[0.97] transition-all duration-200">
-            View Dashboard
+<div class="max-w-lg mx-auto text-center py-16">
+    <div class="text-5xl mb-5 animate-fade-in-up">&#x2714;</div>
+
+    <h1 class="text-3xl font-black text-hub-text mb-3 tracking-tight uppercase animate-fade-in-up" style="animation-delay: 0.1s;">You're all set!</h1>
+    <p class="text-hub-muted mb-2 animate-fade-in-up text-sm" style="animation-delay: 0.2s;">Your input has been recorded. Every perspective makes the team stronger.</p>
+    <p class="text-hub-faint text-xs animate-fade-in-up" style="animation-delay: 0.3s;">You can close this page now.</p>
+
+    {% if token %}
+    <div class="animate-fade-in-up mt-8" style="animation-delay: 0.4s;">
+        <a href="/survey/{{ token }}"
+           class="inline-block px-6 py-2.5 bg-white border-2 border-hub-border text-hub-text text-sm font-bold uppercase tracking-wide
+                  hover:bg-black hover:text-white
+                  active:scale-[0.97] transition-all duration-150">
+            Submit another response
         </a>
     </div>
+    {% endif %}
 </div>
+
+<!-- Canvas for blob creature -->
+<canvas id="blobCanvas" style="position:fixed;bottom:12%;left:0;width:100%;height:140px;pointer-events:none;z-index:9999;"></canvas>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Bouncy blob creature — walks across, stops once to judge you, continues
+    (function() {
+        const canvas = document.getElementById('blobCanvas');
+        const dpr = window.devicePixelRatio || 1;
+        const W = window.innerWidth;
+        const H = 140;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const C = {
+            body: '#000000',
+            belly: '#555555',
+            eye: '#ffffff',
+            pupil: '#000000',
+            cheek: '#FF0000',
+            feet: '#333333',
+        };
+
+        function drawBlob(x, y, frame, facing, blinking) {
+            const walkCycle = Math.sin(frame * 0.18);
+            const bounce = facing === 'front'
+                ? Math.sin(frame * 0.08) * 2
+                : Math.abs(Math.sin(frame * 0.18)) * 8;
+            const tilt = facing === 'front' ? 0 : walkCycle * 0.12;
+            const squishX = facing === 'front' ? 0 : Math.sin(frame * 0.18) * 1.5;
+            const squishY = facing === 'front' ? 0 : -Math.abs(Math.sin(frame * 0.18)) * 1;
+
+            ctx.save();
+            ctx.translate(x, y - bounce);
+            ctx.rotate(tilt);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+            ctx.beginPath();
+            ctx.ellipse(0, 24 + bounce * 0.5, 20 - bounce * 0.3, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Feet
+            const stepL = Math.sin(frame * 0.18) * (facing === 'front' ? 0 : 4);
+            const stepR = Math.sin(frame * 0.18 + Math.PI) * (facing === 'front' ? 0 : 4);
+            ctx.fillStyle = C.feet;
+            ctx.beginPath(); ctx.ellipse(-8 + stepL, 20, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(8 + stepR, 20, 6, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Body
+            ctx.fillStyle = C.body;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20 + squishX, 22 + squishY, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Belly highlight
+            ctx.fillStyle = C.belly;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.ellipse(0, 4, 12, 14, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            if (facing === 'front') {
+                const eyeY = -4;
+                [-8, 8].forEach(ex => {
+                    ctx.fillStyle = C.eye;
+                    ctx.beginPath();
+                    ctx.ellipse(ex, eyeY, 5.5, blinking ? 1.5 : 6.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (!blinking) {
+                        ctx.fillStyle = C.pupil;
+                        ctx.beginPath();
+                        ctx.ellipse(ex, eyeY + 1.5, 3, 4, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(ex + 1.5, eyeY - 1.5, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                // Cheeks
+                ctx.fillStyle = C.cheek;
+                ctx.globalAlpha = 0.35;
+                ctx.beginPath(); ctx.ellipse(-14, 4, 5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.ellipse(14, 4, 5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+
+                // Smirk
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.arc(2, 5, 5, 0.1, Math.PI - 0.4);
+                ctx.stroke();
+
+                // Waving arm
+                const wave = Math.sin(frame * 0.25);
+                ctx.strokeStyle = C.body;
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(17, -2);
+                ctx.quadraticCurveTo(26 + wave * 4, -16 + Math.cos(frame * 0.2) * 6, 24, -26 + wave * 5);
+                ctx.stroke();
+                ctx.fillStyle = C.belly;
+                ctx.beginPath();
+                ctx.arc(24, -26 + wave * 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else {
+                const eyeX = 6;
+                ctx.fillStyle = C.eye;
+                ctx.beginPath();
+                ctx.ellipse(eyeX, -5, 5, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = C.pupil;
+                ctx.beginPath();
+                ctx.ellipse(eyeX + 2, -4, 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(eyeX + 3, -6.5, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = C.cheek;
+                ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.ellipse(13, 3, 4.5, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(8, 4, 3.5, 0, Math.PI * 0.7);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawBubble(x, y, text) {
+            ctx.font = '900 13px Inter, system-ui, sans-serif';
+            const tw = ctx.measureText(text).width;
+            const bx = x + 28;
+            const by = y - 42;
+            const pad = 10;
+            const bw = tw + pad * 2;
+            const bh = 28;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.rect(bx - pad, by - bh / 2, bw, bh);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(bx + 2, by + bh / 2);
+            ctx.lineTo(bx - 8, by + bh / 2 + 8);
+            ctx.lineTo(bx + 12, by + bh / 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            ctx.fillStyle = '#000000';
+            ctx.fillText(text, bx, by + 4);
+        }
+
+        const stops = [
+            { at: 0.48, dur: 2200, msg: 'Papa! \u{1F44B}' },
+        ];
+        const totalRunDuration = 8000;
+        const totalDuration = totalRunDuration + stops.reduce((s, p) => s + p.dur, 0);
+
+        let startTime = null;
+
+        function animate(ts) {
+            if (!startTime) startTime = ts;
+            const elapsed = ts - startTime;
+
+            ctx.clearRect(0, 0, W * dpr, H * dpr);
+
+            // Ground line
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([6, 8]);
+            ctx.beginPath();
+            ctx.moveTo(0, H - 16);
+            ctx.lineTo(W, H - 16);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            let runElapsed = elapsed;
+            let isPaused = false;
+            let pauseElapsed = 0;
+            let currentStop = null;
+            let totalPausesBefore = 0;
+
+            for (const stop of stops) {
+                const runTimeAtStop = stop.at * totalRunDuration;
+                const realTimeAtStop = runTimeAtStop + totalPausesBefore;
+
+                if (elapsed >= realTimeAtStop && elapsed < realTimeAtStop + stop.dur) {
+                    isPaused = true;
+                    pauseElapsed = elapsed - realTimeAtStop;
+                    runElapsed = runTimeAtStop;
+                    currentStop = stop;
+                    break;
+                } else if (elapsed >= realTimeAtStop + stop.dur) {
+                    totalPausesBefore += stop.dur;
+                }
+            }
+
+            if (!isPaused) runElapsed = elapsed - totalPausesBefore;
+
+            const runProgress = Math.min(runElapsed / totalRunDuration, 1);
+            const blobX = -30 + (W + 60) * runProgress;
+            const blobY = H - 42;
+
+            const frame = Math.floor(runElapsed / 16);
+            const facing = isPaused ? 'front' : 'right';
+            const blinking = isPaused && (Math.floor(pauseElapsed / 350) % 6 === 5);
+
+            drawBlob(blobX, blobY, frame, facing, blinking);
+
+            if (isPaused && currentStop && pauseElapsed > 400) {
+                const alpha = Math.min((pauseElapsed - 400) / 250, 1);
+                ctx.globalAlpha = alpha;
+                drawBubble(blobX, blobY, currentStop.msg);
+                ctx.globalAlpha = 1;
+            }
+
+            const totalProgress = elapsed / totalDuration;
+            if (totalProgress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                canvas.style.transition = 'opacity 0.8s';
+                canvas.style.opacity = '0';
+                setTimeout(() => canvas.remove(), 900);
+            }
+        }
+
+        setTimeout(() => requestAnimationFrame(animate), 800);
+    })();
+</script>
 {% endblock %}

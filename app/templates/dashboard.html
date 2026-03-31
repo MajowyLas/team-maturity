@@ -3,12 +3,19 @@
 
 {% block content %}
 <div class="flex items-center justify-between mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
+    <div>
+        <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
+        <h1 class="text-3xl font-bold text-hub-text tracking-tight flex items-center gap-2">
+            <span class="inline-block w-3 h-3 bg-accent-500 shrink-0"></span>
+            Team Maturity
+        </h1>
+        <p class="text-sm text-hub-muted mt-1">Team-wide assessment results</p>
+    </div>
     {% if rounds %}
     <div class="flex items-center space-x-2">
-        <label class="text-sm text-gray-600">Round:</label>
+        <label class="text-sm text-hub-muted">Round:</label>
         <select id="roundSelector" onchange="window.location='/dashboard?round_id='+this.value"
-                class="rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500">
+                class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-black">
             {% for r in rounds %}
             <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
                 {{ r.name }}{% if r.is_active %} (Active){% endif %}
@@ -21,251 +28,428 @@
 
 {% set has_data = cards | selectattr("response_count", "gt", 0) | list | length > 0 %}
 
+{% if has_data %}
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+            <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#breakdown" class="hover:text-hub-text transition-colors">Category Breakdown</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#details" class="hover:text-hub-text transition-colors">Statement Scores</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#teams" class="hover:text-hub-text transition-colors">Team Deep Dives</a>
+        </div>
+        <button type="button" onclick="document.getElementById('categoryModal').classList.remove('hidden')"
+                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+            What do the categories mean?
+        </button>
+    </div>
+</nav>
+{% endif %}
+
 {% if not cards or not has_data %}
-<div class="bg-white rounded-2xl shadow-card border border-gray-100 p-12 text-center animate-fade-in-up">
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
     <div class="text-5xl mb-4">📊</div>
-    <h2 class="text-xl font-semibold text-gray-700 mb-2">No Data Yet</h2>
-    <p class="text-gray-500 mb-6">Once teams submit their assessments, results will appear here.</p>
-    <a href="/admin" class="text-brand-600 font-medium hover:underline">Set up teams and rounds</a>
+    <h2 class="text-xl font-semibold text-hub-text mb-2">No Data Yet</h2>
+    <p class="text-hub-muted mb-6">Once teams submit their assessments, results will appear here.</p>
+    <a href="/admin" class="text-hub-muted font-medium hover:underline hover:text-hub-text">Set up teams and rounds</a>
 </div>
 {% else %}
 
-<!-- Team Cards Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-    {% for card in cards %}
-    {% if card.response_count > 0 %}
-    <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-       class="stagger-item group block bg-white rounded-2xl shadow-soft border border-gray-100 hover:shadow-card-hover hover:border-brand-200 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 1: Bird's Eye View — high-level KPIs & category scores
+     ═══════════════════════════════════════════════════════════════════════ -->
+{% if overview_stats %}
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 id="overview" class="text-lg font-bold text-hub-text scroll-mt-28">Overview</h2>
+        <div class="flex-1 h-px bg-hub-border"></div>
+    </div>
 
-        <!-- Card Header -->
-        <div class="p-6 pb-4">
-            <div class="flex items-start justify-between mb-4">
-                <h3 class="text-lg font-bold text-gray-900 group-hover:text-brand-600 transition truncate max-w-[200px]" title="{{ card.team_name }}">{{ card.team_name }}</h3>
-                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">{{ card.response_count }} response{{ 's' if card.response_count != 1 }}</span>
-            </div>
-
-            <!-- Overall Score -->
-            <div class="flex items-center gap-4 mb-4">
-                <div class="text-center">
-                    <p class="text-3xl font-bold
-                        {% if card.overall >= 4.0 %}text-green-600
-                        {% elif card.overall >= 3.0 %}text-yellow-600
-                        {% elif card.overall >= 2.0 %}text-orange-600
-                        {% else %}text-red-600{% endif %}">
-                        {{ "%.1f"|format(card.overall) }}
-                    </p>
-                    <p class="text-xs text-gray-400">Overall</p>
-                </div>
-
-                <!-- Mini category bars -->
-                <div class="flex-1 space-y-1.5">
-                    {% for cat in card.category_scores %}
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-gray-500 w-20 truncate" title="{{ cat.category }}">{{ cat.category }}</span>
-                        <div class="flex-1 bg-gray-100 rounded-full h-2">
-                            <div class="h-2 rounded-full score-bar-animated
-                                {% if cat.avg >= 4.0 %}bg-green-500
-                                {% elif cat.avg >= 3.0 %}bg-yellow-500
-                                {% elif cat.avg >= 2.0 %}bg-orange-500
-                                {% else %}bg-red-500{% endif %}"
-                                style="width: {{ (cat.avg / 5 * 100) | int }}%"></div>
-                        </div>
-                        <span class="text-[10px] font-semibold text-gray-600 w-6 text-right">{{ "%.1f"|format(cat.avg) }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
+            <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
+            <p class="text-4xl font-bold
+                {% if overview_stats.overall_avg >= 3.0 %}text-hub-text
+                {% else %}text-accent-500{% endif %}">
+                {{ "%.1f"|format(overview_stats.overall_avg) }}
+            </p>
+            {% if overview_stats.previous_overall is not none %}
+            {% set delta = overview_stats.overall_avg - overview_stats.previous_overall %}
+            <p class="text-xs mt-1 font-semibold
+                {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
+                {% if delta > 0 %}▲ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}▼ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
+                <span class="font-normal text-hub-faint ml-0.5">vs prev</span>
+            </p>
+            {% else %}
+            <p class="text-xs text-hub-faint mt-1">across all teams</p>
+            {% endif %}
         </div>
 
-        <!-- Card Footer: Strength & Improvement -->
-        <div class="grid grid-cols-2 divide-x divide-gray-100 border-t border-gray-100 bg-gray-50 group-hover:bg-brand-50/30 transition-colors duration-200">
-            <div class="px-4 py-3">
-                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Strength</p>
-                {% if card.top_strength %}
-                <p class="text-xs font-semibold text-green-700 truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }}</p>
-                <p class="text-sm font-bold text-green-600">{{ "%.1f"|format(card.top_strength.avg) }}</p>
-                {% else %}
-                <p class="text-xs text-gray-400">--</p>
-                {% endif %}
-            </div>
-            <div class="px-4 py-3">
-                <p class="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">To Improve</p>
-                {% if card.top_improvement %}
-                <p class="text-xs font-semibold text-orange-700 truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }}</p>
-                <p class="text-sm font-bold text-orange-600">{{ "%.1f"|format(card.top_improvement.avg) }}</p>
-                {% else %}
-                <p class="text-xs text-gray-400">--</p>
-                {% endif %}
-            </div>
+        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
+            <p class="text-sm font-medium text-hub-muted mb-1">Responses</p>
+            <p class="text-4xl font-bold text-hub-text">{{ overview_stats.response_count }}</p>
+            <p class="text-xs text-hub-faint mt-1">participants</p>
         </div>
-    </a>
+
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
+            {% if overview_stats.strengths %}
+            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.strengths[0].subcategory }}</p>
+            <p class="text-3xl font-bold text-hub-text">{{ "%.1f"|format(overview_stats.strengths[0].avg) }}</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
+            {% if overview_stats.improvements %}
+            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.improvements[0].subcategory }}</p>
+            <p class="text-3xl font-bold text-accent-500">{{ "%.1f"|format(overview_stats.improvements[0].avg) }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Category Scores with Deltas -->
+    {% if overview_stats.category_deltas %}
+    <div class="bg-hub-card border-2 border-hub-border p-5">
+        <div class="mb-3">
+            <h3 class="text-sm font-semibold text-hub-text">Category Scores
+                <span class="font-normal text-hub-faint">— change vs previous round</span>
+            </h3>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {% for cat in overview_stats.category_scores %}
+            <div class="text-center">
+                <p class="text-xs text-hub-muted truncate mb-1" title="{{ cat.category }}">{{ cat.category }}</p>
+                <p class="text-lg font-bold
+                    {% if cat.avg >= 3.0 %}text-hub-text
+                    {% else %}text-accent-500{% endif %}">
+                    {{ "%.1f"|format(cat.avg) }}
+                </p>
+                {% if cat.category in overview_stats.category_deltas %}
+                {% set d = overview_stats.category_deltas[cat.category] %}
+                <p class="text-xs font-semibold
+                    {% if d > 0 %}text-hub-text{% elif d < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
+                    {% if d > 0 %}▲ +{{ "%.2f"|format(d) }}{% elif d < 0 %}▼ {{ "%.2f"|format(d) }}{% else %}—{% endif %}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     {% endif %}
-    {% endfor %}
 </div>
 
-<!-- Team Trend Summary -->
-{% if trend_summary %}
-<div class="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 mb-8 animate-fade-in">
-    <h3 class="text-lg font-semibold text-gray-900 mb-1">Team Trend Summary</h3>
-    <p class="text-sm text-gray-400 mb-4">Latest score per team vs. previous round.</p>
-    <div class="divide-y divide-gray-100">
-        {% for t in trend_summary %}
-        <div class="py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors duration-150">
-            <!-- Row 1: team name + overall score -->
-            <div class="flex items-center justify-between gap-4 mb-1">
-                <a href="/dashboard/team/{{ t.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-                   class="font-medium text-gray-800 hover:text-brand-600 transition-colors text-sm truncate max-w-[180px]"
-                   title="{{ t.team_name }}">
-                    {{ t.team_name }}
-                </a>
-                <div class="flex items-center gap-3 shrink-0">
-                    <span class="text-xs text-gray-400">{{ t.latest_round }}</span>
-                    <span class="text-base font-bold
-                        {% if t.latest_score >= 4.0 %}text-green-600
-                        {% elif t.latest_score >= 3.0 %}text-yellow-600
-                        {% elif t.latest_score >= 2.0 %}text-orange-600
-                        {% else %}text-red-600{% endif %}">
-                        {{ "%.2f"|format(t.latest_score) }}
-                    </span>
-                    {% if t.delta is not none %}
-                    <span class="text-sm font-semibold w-14 text-right
-                        {% if t.delta > 0 %}text-green-600
-                        {% elif t.delta < 0 %}text-red-600
-                        {% else %}text-gray-400{% endif %}">
-                        {% if t.delta > 0 %}▲{% elif t.delta < 0 %}▼{% else %}→{% endif %}{{ "%.2f"|format(t.delta | abs) }}
-                    </span>
-                    {% else %}
-                    <span class="text-sm text-gray-300 w-14 text-right">—</span>
-                    {% endif %}
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2: Deep Dive — strengths, improvements, radar, trends
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 id="breakdown" class="text-lg font-bold text-hub-text scroll-mt-28">Category Breakdown</h2>
+        <div class="flex-1 h-px bg-hub-border"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Left: Strengths + Improvements stacked -->
+        <div class="space-y-4">
+            <div class="bg-hub-card border-2 border-hub-border p-5">
+                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Strengths</h3>
+                {% for s in overview_stats.strengths %}
+                <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
+                    <div>
+                        <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+                        <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+                    </div>
+                    <span class="text-base font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
                 </div>
+                {% endfor %}
             </div>
-            <!-- Row 2: category scores inline -->
-            <div class="flex flex-wrap gap-x-4 gap-y-1">
-                {% for cat in t.category_scores %}
-                {% set cdelta = t.category_deltas.get(cat.category) %}
-                <span class="flex items-center gap-1 text-[10px]">
-                    <span class="text-gray-400" title="{{ cat.category }}">{{ cat.category }}</span>
-                    <span class="font-semibold
-                        {% if cat.avg >= 4.0 %}text-green-600
-                        {% elif cat.avg >= 3.0 %}text-yellow-600
-                        {% elif cat.avg >= 2.0 %}text-orange-600
-                        {% else %}text-red-600{% endif %}">{{ "%.2f"|format(cat.avg) }}</span>
-                    {% if cdelta is not none %}
-                    <span class="font-semibold
-                        {% if cdelta > 0 %}text-green-500{% elif cdelta < 0 %}text-red-500{% else %}text-gray-400{% endif %}">
-                        {% if cdelta > 0 %}▲{% elif cdelta < 0 %}▼{% else %}→{% endif %}{{ "%.2f"|format(cdelta | abs) }}
-                    </span>
-                    {% endif %}
-                </span>
+            <div class="bg-hub-card border-2 border-hub-border p-5">
+                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Improvement Areas</h3>
+                {% for s in overview_stats.improvements %}
+                <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
+                    <div>
+                        <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+                        <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+                    </div>
+                    <span class="text-base font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
+                </div>
                 {% endfor %}
             </div>
         </div>
+        <!-- Right: Category Radar -->
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <h3 class="text-base font-semibold text-hub-text mb-3">Category Overview</h3>
+            <div style="height: 340px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="overviewRadarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maturity Trends -->
+    {% if overview_trends and overview_trends.round_names | length >= 2 %}
+    <div class="bg-hub-card border-2 border-hub-border p-6 animate-fade-in">
+        <h3 class="text-base font-semibold text-hub-text mb-4">Maturity Trends</h3>
+        <div style="height: 300px;">
+            <canvas id="overviewTrendChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 2b: Detailed Statement Scores — collapsible per-statement breakdown
+     ═══════════════════════════════════════════════════════════════════════ -->
+{% if grouped_statements %}
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 id="details" class="text-lg font-bold text-hub-text scroll-mt-28">Detailed Statement Scores</h2>
+        <div class="flex-1 h-px bg-hub-border"></div>
+    </div>
+
+    {% for category, subcategories in grouped_statements.items() %}
+    <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+        <!-- Category header -->
+        <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
+                {% set all_avgs = [] %}
+                {% for stmts in subcategories.values() %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
+                {% if all_avgs %}
+                {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
+                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                </span>
+                {% endif %}
+            </div>
+            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div class="section-content">
+            {% for subcategory, statements in subcategories.items() %}
+            <div class="border-t border-hub-border">
+                <!-- Subcategory header -->
+                <div class="px-5 py-3 bg-hub-surface">
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
+                        {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
+                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(sub_avg) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Statements -->
+                {% for s in statements %}
+                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
+                        <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if s.avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(s.avg) }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 3: Team Deep Dives — clickable cards linking to team view
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="mb-8">
+    <div class="flex items-center gap-3 mb-5">
+        <h2 id="teams" class="text-lg font-bold text-hub-text scroll-mt-28">Team Deep Dives</h2>
+        <div class="flex-1 h-px bg-hub-border"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+        {% for card in cards %}
+        {% if card.response_count > 0 %}
+        <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
+           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 overflow-hidden">
+
+            <!-- Header: Team name + score + response count -->
+            <div class="px-4 pt-4 pb-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-black text-hub-text uppercase tracking-wide truncate">{{ card.team_name }}</h3>
+                    <span class="text-xs font-bold text-hub-muted shrink-0 ml-2">{{ card.response_count }} responses</span>
+                </div>
+                <p class="text-4xl font-black leading-none
+                    {% if card.overall >= 3.0 %}text-hub-text
+                    {% else %}text-accent-500{% endif %}">
+                    {{ "%.1f"|format(card.overall) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
+                </p>
+            </div>
+
+            <!-- Footer: Strength | Improve -->
+            <div class="grid grid-cols-2 divide-x divide-hub-border border-t-2 border-hub-border">
+                <div class="px-3 py-2">
+                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">STRENGTH</p>
+                    {% if card.top_strength %}
+                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }} {{ "%.1f"|format(card.top_strength.avg) }}</p>
+                    {% else %}
+                    <p class="text-xs text-hub-faint">--</p>
+                    {% endif %}
+                </div>
+                <div class="px-3 py-2">
+                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">IMPROVE</p>
+                    {% if card.top_improvement %}
+                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }} {{ "%.1f"|format(card.top_improvement.avg) }}</p>
+                    {% else %}
+                    <p class="text-xs text-hub-faint">--</p>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endif %}
         {% endfor %}
     </div>
+
+    <!-- Teams with no responses yet -->
+    {% set pending_teams = cards | selectattr("response_count", "eq", 0) | list %}
+    {% if pending_teams %}
+    <div class="py-4 opacity-60">
+        <p class="text-sm text-hub-muted">
+            <span class="font-semibold">{{ pending_teams | length }} team{{ 's' if pending_teams | length != 1 }} awaiting responses:</span>
+            {{ pending_teams | map(attribute='team_name') | join(', ') }}
+        </p>
+    </div>
+    {% endif %}
 </div>
+
 {% endif %}
 
-<!-- Maturity Trends -->
-{% if overview_trends and overview_trends.round_names | length >= 2 %}
-<div class="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 mb-8 animate-fade-in">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Maturity Trends</h3>
-    <div style="height: 320px;">
-        <canvas id="overviewTrendChart"></canvas>
+<!-- Category Descriptions Modal -->
+<div id="categoryModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70" onclick="document.getElementById('categoryModal').classList.add('hidden')"></div>
+    <div class="relative bg-white border-3 border-hub-border max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" style="border-width: 3px;">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-hub-text">Category Descriptions</h2>
+            <button onclick="document.getElementById('categoryModal').classList.add('hidden')"
+                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-4 text-sm">
+            <div>
+                <h3 class="font-semibold text-hub-text">Responsiveness</h3>
+                <p class="text-hub-muted">How quickly and smoothly the team delivers working software. Covers release automation, refinement practices, and release frequency.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-hub-text">Continuous Improvement</h3>
+                <p class="text-hub-muted">The team's ability to learn and adapt. Includes quality mindset, retrospective effectiveness, learning culture, psychological safety, and use of metrics.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-hub-text">Stakeholders</h3>
+                <p class="text-hub-muted">How well the team collaborates with stakeholders. Covers sprint goals clarity, review quality, ongoing collaboration, and value focus.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-hub-text">Team Effectiveness</h3>
+                <p class="text-hub-muted">Overall team health and output quality. Includes morale, stakeholder satisfaction, and perceived value delivery.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-hub-text">Team Autonomy</h3>
+                <p class="text-hub-muted">The team's ability to self-organize and make decisions independently. Covers self-management and cross-functionality.</p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-hub-text">Management Support</h3>
+                <p class="text-hub-muted">How well management enables the team. Focuses on removing blockers, shielding from distractions, and providing resources.</p>
+            </div>
+        </div>
     </div>
 </div>
-{% endif %}
 
-<!-- Teams with no responses yet -->
-{% set pending_teams = cards | selectattr("response_count", "eq", 0) | list %}
-{% if pending_teams %}
-<div class="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-6">
-    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Awaiting Responses</h3>
-    <div class="flex flex-wrap gap-2">
-        {% for card in pending_teams %}
-        <span class="stagger-item inline-block px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-600">
-            {{ card.team_name }}
-        </span>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
-{% if overview_trends and overview_trends.round_names | length >= 2 %}
+<script>
+    function toggleSection(btn) {
+        const content = btn.nextElementSibling;
+        const chevron = btn.querySelector('.section-chevron');
+        content.classList.toggle('collapsed');
+        chevron.classList.toggle('rotate-180');
+    }
+</script>
+{% if overview_stats %}
+<script>
+{
+    const labels = [];
+    const values = [];
+    {% for c in overview_stats.category_scores %}
+    labels.push({{ c.category | tojson }});
+    values.push({{ c.avg }});
+    {% endfor %}
+
+    if (labels.length > 0) {
+        new Chart(document.getElementById('overviewRadarChart'), {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Team Maturity',
+                    data: values,
+                    backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#FF0000',
+                    pointBorderColor: '#000000',
+                    pointRadius: 6,
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            backdropColor: 'transparent',
+                            color: '#888',
+                            font: { size: 10, weight: 'bold' },
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.12)' },
+                        angleLines: { color: 'rgba(0, 0, 0, 0.12)' },
+                        pointLabels: { color: '#000', font: { size: 10, weight: '700' } },
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+}
+</script>
+{% endif %}
+{% if overview_stats and overview_trends and overview_trends.round_names | length >= 2 %}
 <script>
 {
     const trendsData = {{ overview_trends | tojson }};
-    const teamColors = [
-        'rgb(59, 130, 246)',   // blue
-        'rgb(16, 185, 129)',   // green
-        'rgb(245, 158, 11)',   // amber
-        'rgb(239, 68, 68)',    // red
-        'rgb(139, 92, 246)',   // violet
-        'rgb(236, 72, 153)',   // pink
-        'rgb(20, 184, 166)',   // teal
-        'rgb(249, 115, 22)',   // orange
-        'rgb(14, 165, 233)',   // sky
-        'rgb(168, 85, 247)',   // purple
-        'rgb(234, 179, 8)',    // yellow
-        'rgb(34, 197, 94)',    // lime-green
-        'rgb(244, 63, 94)',    // rose
-        'rgb(6, 182, 212)',    // cyan
-    ];
-
-    const datasets = trendsData.teams.map((team, i) => ({
+    const datasets = trendsData.teams.map(team => ({
         label: team.name,
         data: team.scores,
-        borderColor: teamColors[i % teamColors.length],
-        backgroundColor: teamColors[i % teamColors.length] + '18',
-        tension: 0.3,
-        fill: false,
-        borderWidth: 2.5,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        spanGaps: true,
     }));
-
-    new Chart(document.getElementById('overviewTrendChart'), {
-        type: 'line',
-        data: {
-            labels: trendsData.round_names,
-            datasets: datasets,
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 5,
-                    title: { display: true, text: 'Overall Score' },
-                },
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { usePointStyle: false, boxWidth: 14, boxHeight: 14, generateLabels(chart) {
-                        return chart.data.datasets.map((ds, i) => ({
-                            text: ds.label,
-                            fillStyle: ds.borderColor,
-                            strokeStyle: ds.borderColor,
-                            lineWidth: 0,
-                            datasetIndex: i,
-                            hidden: !chart.isDatasetVisible(i),
-                        }));
-                    }},
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2) ?? '—'}`,
-                    },
-                },
-            },
-        },
-    });
+    createHighlightTrendChart('overviewTrendChart', trendsData.round_names, datasets);
 }
 </script>
 {% endif %}

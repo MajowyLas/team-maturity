@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Team Maturity Assessment{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/trend-chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -19,19 +20,55 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
-                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
-                        }
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
+                            300: '#86efac', 400: '#4ade80', 500: '#4CB648',
+                            600: '#3d9c3a', 700: '#2d7a2a', 800: '#1f5e1d',
+                            900: '#14532d',
+                        },
+                        accent: {
+                            50: '#fff5f5', 100: '#ffe3e3', 200: '#ffc9c9',
+                            300: '#ffa8a8', 400: '#CC0000', 500: '#FF0000',
+                            600: '#e60000', 700: '#cc0000',
+                        },
+                        forest: {
+                            300: '#4a9c5e',
+                            400: '#2D7A3F',
+                            500: '#1a6b30',
+                            600: '#0A6622',
+                        },
+                        hub: {
+                            bg: '#FFFFFF',
+                            surface: '#FFFFFF',
+                            card: '#FFFFFF',
+                            hover: '#F5F5F5',
+                            border: '#000000',
+                            border2: '#000000',
+                            text: '#000000',
+                            muted: '#555555',
+                            faint: '#888888',
+                        },
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '0px',
+                        DEFAULT: '0px',
+                        'md': '0px',
+                        'lg': '0px',
+                        'xl': '0px',
+                        '2xl': '0px',
+                        '3xl': '0px',
+                        'full': '0px',
                     },
                     boxShadow: {
-                        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
-                        'card': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03)',
-                        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                        'soft': 'none',
+                        'card': 'none',
+                        'card-hover': 'none',
+                        'glow': 'none',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'fade-in-up': 'fadeInUp 0.5s ease-out',
-                        'slide-down': 'slideDown 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'fade-in-up': 'fadeInUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.2s ease-out',
                     },
                     keyframes: {
                         fadeIn: {
@@ -39,11 +76,11 @@
                             '100%': { opacity: '1' },
                         },
                         fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(12px)' },
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-8px)' },
+                            '0%': { opacity: '0', transform: 'translateY(-4px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                     },
@@ -51,40 +88,72 @@
             }
         }
     </script>
+    <script>
+        // Chart.js defaults — white brutal
+        Chart.defaults.color = '#000000';
+        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
+    </script>
 </head>
-<body class="h-full font-sans">
+<body class="min-h-screen flex flex-col font-sans" style="background: #FFFFFF; color: #000000;">
+    {% block nav %}
     <!-- Navigation -->
-    <nav class="bg-white/95 backdrop-blur-sm shadow-soft border-b border-gray-100 sticky top-0 z-50">
+    <nav class="sticky top-0 z-50 bg-black">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center space-x-8">
-                    <a href="/" class="flex items-center space-x-2 group">
-                        <span class="text-2xl group-hover:scale-110 transition-transform duration-200">📊</span>
-                        <span class="font-bold text-gray-900 text-lg">Team Maturity</span>
-                    </a>
-                    <div class="hidden sm:flex sm:space-x-2">
-                        <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200">
-                            Dashboard
+            <div class="flex items-center justify-between h-14">
+                <a href="/" class="flex items-center">
+                    <span class="font-black text-lg tracking-tight uppercase text-white">Maturity_</span>
+                </a>
+                <div class="flex items-center">
+                    <div class="flex space-x-1">
+                        <a href="/dashboard" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                            Team
                         </a>
-                        <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-brand-700 hover:bg-brand-50 transition-all duration-200">
+                        <a href="/engineering/dashboard/view" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                            Delivery
+                        </a>
+                        <a href="/admin" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
                             Admin
                         </a>
                     </div>
+                    {% if auth_enabled %}
+                    <a href="/logout" class="ml-4 px-3 py-2 text-sm font-bold text-white/40 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                        Sign Out
+                    </a>
+                    {% endif %}
                 </div>
-                {% if auth_enabled %}
-                <a href="/logout" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200">
-                    Sign Out
-                </a>
-                {% endif %}
             </div>
         </div>
     </nav>
+    {% endblock %}
 
     <!-- Main content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in w-full">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
+    <footer class="border-t border-hub-border mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
+            <span class="text-xs text-hub-faint">Built for DataFeedWatch</span>
+            <span class="text-xs text-hub-faint">Maturity Assessment Tool</span>
+        </div>
+    </footer>
+
+    <script>
+        // Nav active state
+        (function() {
+            const path = window.location.pathname;
+            const links = document.querySelectorAll('nav a[href]');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === '/') return;
+                if (path.startsWith(href)) {
+                    link.classList.remove('text-white/60');
+                    link.classList.add('text-white', 'border-b-2', 'border-white');
+                }
+            });
+        })();
+    </script>
     <script src="/static/charts.js"></script>
     {% block scripts %}{% endblock %}
 </body>

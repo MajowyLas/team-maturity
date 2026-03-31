@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Team Maturity Assessment",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-c", "import uvicorn; uvicorn.run('app.main:app', host='127.0.0.1', port=8002, reload=False)"],
+      "port": 8002
+    },
+    {
+      "name": "Style Previews",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8005", "--directory", "previews"],
+      "port": 8005
+    }
+  ]
+}

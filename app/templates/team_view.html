@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} — Team View{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+    <div>
+        <a href="/dashboard{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Back to Overview</a>
+        <h1 class="text-3xl font-bold text-hub-text tracking-tight">{{ team.name }}</h1>
+        <p class="text-sm text-hub-muted mt-1">Combined assessment results — team maturity &amp; delivery maturity</p>
+    </div>
+    {% if rounds %}
+    <div class="flex items-center space-x-2">
+        <label class="text-sm text-hub-muted">Round:</label>
+        <select id="roundSelector"
+                onchange="window.location='/dashboard/team/{{ team.id }}?round_id='+this.value"
+                class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
+            {% for r in rounds %}
+            <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
+                {{ r.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+</div>
+
+{% if (not stats or stats.response_count == 0) and not eng_stats %}
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center">
+    <div class="text-5xl mb-4">🔍</div>
+    <h2 class="text-xl font-semibold text-hub-text mb-2">No Responses Yet</h2>
+    <p class="text-hub-muted">This team has no submissions for the selected round in either survey.</p>
+</div>
+{% else %}
+
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+        <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#team-maturity" class="hover:text-hub-text transition-colors">Team Maturity</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#delivery-maturity" class="hover:text-hub-text transition-colors">Delivery Maturity</a>
+    </div>
+</nav>
+
+<!-- ═══════ COMBINED SUMMARY ═══════ -->
+<div class="flex items-center gap-3 mb-5">
+    <h2 id="overview" class="text-lg font-bold text-hub-text scroll-mt-28">Overview</h2>
+    <div class="flex-1 h-px bg-hub-border"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <!-- Team Maturity Score -->
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
+        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Team Maturity</p>
+        {% if summary %}
+        <p class="text-3xl font-bold {% if summary.overall_score >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">
+            {{ "%.1f"|format(summary.overall_score) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
+        </p>
+        <p class="text-xs text-hub-faint mt-1">{{ summary.response_count }} responses</p>
+        {% else %}
+        <p class="text-2xl font-bold text-hub-faint">—</p>
+        <p class="text-xs text-hub-faint mt-1">No data</p>
+        {% endif %}
+    </div>
+
+    <!-- Delivery Maturity Score -->
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
+        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Delivery Maturity</p>
+        {% if eng_stats %}
+        <p class="text-3xl font-bold {% if eng_stats.overall_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">
+            {{ "%.1f"|format(eng_stats.overall_avg) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
+        </p>
+        <p class="text-xs text-hub-faint mt-1">{{ eng_stats.response_count }} responses · {{ maturity_labels.get((eng_stats.overall_avg | round | int), "") }}</p>
+        {% else %}
+        <p class="text-2xl font-bold text-hub-faint">—</p>
+        <p class="text-xs text-hub-faint mt-1">No data</p>
+        {% endif %}
+    </div>
+
+    <!-- Top Strength (from either) -->
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
+        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Top Strength</p>
+        {% if summary and summary.strengths %}
+        <p class="text-sm font-semibold text-hub-text">{{ summary.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(summary.strengths[0].avg) }}</p>
+        <p class="text-xs text-hub-faint">Team survey</p>
+        {% elif eng_stats and eng_stats.strengths %}
+        <p class="text-sm font-semibold text-hub-text">{{ eng_stats.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(eng_stats.strengths[0].avg) }}</p>
+        <p class="text-xs text-hub-faint">Engineering</p>
+        {% else %}
+        <p class="text-2xl font-bold text-hub-faint">—</p>
+        {% endif %}
+    </div>
+
+    <!-- Needs Improvement (from either) -->
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
+        <p class="text-xs font-medium text-hub-faint uppercase tracking-wide mb-1">Needs Improvement</p>
+        {% if summary and summary.improvements %}
+        <p class="text-sm font-semibold text-hub-text">{{ summary.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(summary.improvements[0].avg) }}</p>
+        <p class="text-xs text-hub-faint">Team survey</p>
+        {% elif eng_stats and eng_stats.improvements %}
+        <p class="text-sm font-semibold text-hub-text">{{ eng_stats.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(eng_stats.improvements[0].avg) }}</p>
+        <p class="text-xs text-hub-faint">Engineering</p>
+        {% else %}
+        <p class="text-2xl font-bold text-hub-faint">—</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Strengths & Improvements side-by-side -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-base font-semibold text-hub-text mb-3">Strengths</h3>
+        {% if summary and summary.strengths %}
+        <p class="text-xs font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
+        {% for s in summary.strengths %}
+        <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+            <span class="text-sm font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if eng_stats and eng_stats.strengths %}
+        <p class="text-xs font-semibold text-hub-faint uppercase tracking-wide mb-2 {% if summary and summary.strengths %}mt-3 pt-3 border-t border-hub-border{% endif %}">🔧 Engineering</p>
+        {% for s in eng_stats.strengths %}
+        <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+            <span class="text-sm font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-base font-semibold text-hub-text mb-3">Improvement Areas</h3>
+        {% if summary and summary.improvements %}
+        <p class="text-xs font-semibold text-hub-faint uppercase tracking-wide mb-2">📊 Team Survey</p>
+        {% for s in summary.improvements %}
+        <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+            <span class="text-sm font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if eng_stats and eng_stats.improvements %}
+        <p class="text-xs font-semibold text-hub-faint uppercase tracking-wide mb-2 {% if summary and summary.improvements %}mt-3 pt-3 border-t border-hub-border{% endif %}">🔧 Engineering</p>
+        {% for s in eng_stats.improvements %}
+        <div class="flex items-center justify-between py-1.5 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
+            <span class="text-sm font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══════ SECTION: TEAM MATURITY SURVEY ═══════ -->
+{% if stats and stats.response_count > 0 %}
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-6 pb-3 border-b border-hub-border">
+        <span class="text-xl">📊</span>
+        <h2 id="team-maturity" class="text-2xl font-bold text-hub-text scroll-mt-28">Team Maturity Survey</h2>
+        <span class="text-sm text-hub-faint">{{ stats.response_count }} responses</span>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">Category Radar</h3>
+            <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="teamRadarChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">Subcategory Breakdown</h3>
+            {% set sub_count = stats.subcategory_scores | length %}
+            <div style="height: {{ [250, sub_count * 28] | max }}px;">
+                <canvas id="teamSubcategoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Chart -->
+    {% if trends %}
+    <div class="bg-hub-card border-2 border-hub-border p-6 mb-6">
+        <h3 class="text-sm font-semibold text-hub-text mb-4">Trends Across Rounds</h3>
+        <div style="height: 300px;">
+            <canvas id="teamTrendChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detailed Statement Scores (collapsed) -->
+    {% if grouped_statements %}
+    <div>
+        <h3 class="text-2xl font-bold text-hub-text mb-6">Detailed Statement Scores</h3>
+        {% for category, subcategories in grouped_statements.items() %}
+        <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+            <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                    class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+                <div class="flex items-center gap-3">
+                    <h4 class="text-lg font-bold text-hub-text">{{ category }}</h4>
+                    {% set all_avgs = [] %}
+                    {% for stmts in subcategories.values() %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
+                    {% if all_avgs %}
+                    {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
+                    <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                        <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                        <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
+                    </span>
+                    {% endif %}
+                </div>
+                <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div class="section-content">
+                {% for subcategory, statements in subcategories.items() %}
+                <div class="border-t border-hub-border">
+                    <div class="px-5 py-3 bg-hub-surface">
+                        <div class="flex items-center gap-3">
+                            <h5 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h5>
+                            {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(sub_avg) }}
+                            </span>
+                        </div>
+                    </div>
+                    {% for s in statements %}
+                    <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
+                            <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if s.avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(s.avg) }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ═══════ SECTION: ENGINEERING MATURITY ═══════ -->
+{% if eng_stats %}
+<div class="mb-10">
+    <div class="flex items-center gap-3 mb-6 pb-3 border-b border-hub-border">
+        <span class="text-xl">🔧</span>
+        <h2 id="delivery-maturity" class="text-2xl font-bold text-hub-text scroll-mt-28">Delivery Maturity</h2>
+        <span class="text-sm text-hub-faint">{{ eng_stats.response_count }} responses · {{ maturity_labels.get((eng_stats.overall_avg | round | int), "") }}</span>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">Category Radar</h3>
+            <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="engRadarChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-hub-card border-2 border-hub-border p-6">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">Category Scores</h3>
+            <div style="height: 300px;">
+                <canvas id="engBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Area Scores (collapsed) -->
+    {% if grouped_eng_areas %}
+    <div>
+        <h3 class="text-2xl font-bold text-hub-text mb-6">Detailed Area Scores</h3>
+        {% for category, subcategories in grouped_eng_areas.items() %}
+        <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+            <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                    class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+                <div class="flex items-center gap-3">
+                    <h4 class="text-lg font-bold text-hub-text">{{ category }}</h4>
+                    {% set all_avgs = [] %}
+                    {% for areas in subcategories.values() %}{% for a in areas %}{% if all_avgs.append(a.avg) %}{% endif %}{% endfor %}{% endfor %}
+                    {% if all_avgs %}
+                    {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
+                    <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                        <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                        <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
+                    </span>
+                    {% endif %}
+                </div>
+                <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div class="section-content">
+                {% for subcategory, areas in subcategories.items() %}
+                <div class="border-t border-hub-border">
+                    <div class="px-5 py-3 bg-hub-surface">
+                        <div class="flex items-center gap-3">
+                            <h5 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h5>
+                            {% set sub_avg = (areas | map(attribute='avg') | sum) / (areas | length) %}
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(sub_avg) }}
+                            </span>
+                        </div>
+                    </div>
+                    {% for a in areas %}
+                    <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                        <div class="flex items-start justify-between gap-4">
+                            <p class="flex-1 text-sm font-semibold text-hub-text">{{ a.area }}</p>
+                            <div class="shrink-0 flex items-center gap-2">
+                                <span class="text-xs text-hub-muted">{{ a.level_label }}</span>
+                                <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                    {% if a.avg >= 3.0 %}border-hub-text text-hub-text
+                                    {% else %}border-accent-500 text-accent-500{% endif %}">
+                                    {{ "%.1f"|format(a.avg) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleSection(btn) {
+        const content = btn.nextElementSibling;
+        const chevron = btn.querySelector('.section-chevron');
+        content.classList.toggle('collapsed');
+        chevron.classList.toggle('rotate-180');
+    }
+</script>
+
+{% if stats and stats.response_count > 0 %}
+<script>
+    const teamColors = [
+        'rgba(59,130,246,0.7)', 'rgba(16,185,129,0.7)', 'rgba(245,158,11,0.7)',
+        'rgba(239,68,68,0.7)', 'rgba(139,92,246,0.7)', 'rgba(236,72,153,0.7)',
+    ];
+    const teamBorders = teamColors.map(c => c.replace('0.7', '1'));
+
+    // Team Radar
+    {
+        const labels = [];
+        const values = [];
+        {% for c in stats.category_scores %}
+        labels.push("{{ c.category }}");
+        values.push({{ c.avg }});
+        {% endfor %}
+        if (labels.length > 0) {
+            new Chart(document.getElementById('teamRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '{{ team.name }}',
+                        data: values,
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    // Team Subcategory Bar
+    {
+        const labels = [];
+        const values = [];
+        const colors = [];
+        {% for s in stats.subcategory_scores %}
+        labels.push("{{ s.subcategory }}");
+        values.push({{ s.avg }});
+        colors.push(teamColors[{{ loop.index0 }} % teamColors.length]);
+        {% endfor %}
+        new Chart(document.getElementById('teamSubcategoryChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ data: values, backgroundColor: '#FFFFFF', borderColor: '#000000', borderWidth: 2, borderRadius: 0, barThickness: 14 }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { beginAtZero: true, max: 5 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // Trend Chart (Highlight on Hover)
+    {
+        const trendsData = {{ trends | tojson }};
+        let roundLabels = [];
+        const datasets = [];
+        for (const [cat, points] of Object.entries(trendsData)) {
+            if (points.length === 0) continue;
+            if (roundLabels.length === 0) roundLabels = points.map(p => p.round_name);
+            datasets.push({ label: cat, data: points.map(p => p.avg) });
+        }
+        if (roundLabels.length > 1) {
+            createHighlightTrendChart('teamTrendChart', roundLabels, datasets);
+        } else {
+            document.getElementById('teamTrendChart')?.closest('.bg-hub-card')?.style.setProperty('display', 'none');
+        }
+    }
+</script>
+{% endif %}
+
+{% if eng_stats %}
+<script>
+    const engColors = [
+        'rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(16, 185, 129, 0.7)',
+        'rgba(245, 158, 11, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(236, 72, 153, 0.7)',
+        'rgba(20, 184, 166, 0.7)',
+    ];
+    const engBorders = engColors.map(c => c.replace('0.7', '1'));
+    const maturityLabels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
+
+    // Engineering Radar
+    {
+        const labels = [];
+        const values = [];
+        {% for c in eng_stats.category_scores %}
+        labels.push({{ c.category | tojson }});
+        values.push({{ c.avg }});
+        {% endfor %}
+        if (labels.length > 0) {
+            new Chart(document.getElementById('engRadarChart'), {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Engineering',
+                        data: values,
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true, max: 5,
+                            ticks: { stepSize: 1, callback: v => maturityLabels[v] || '' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    // Engineering Bar
+    {
+        const labels = [];
+        const values = [];
+        const colors = [];
+        {% for c in eng_stats.category_scores %}
+        labels.push({{ c.category | tojson }});
+        values.push({{ c.avg }});
+        colors.push(engColors[{{ loop.index0 }} % engColors.length]);
+        {% endfor %}
+        new Chart(document.getElementById('engBarChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ data: values, backgroundColor: '#FFFFFF', borderColor: '#000000', borderWidth: 2, borderRadius: 0, barThickness: 24 }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true, max: 5,
+                        ticks: { stepSize: 1, callback: v => maturityLabels[v] || '' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

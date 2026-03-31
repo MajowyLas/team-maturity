@@ -1,84 +1,108 @@
 {% extends "base.html" %}
-{% block title %}Take Survey -- Team Maturity Assessment{% endblock %}
+{% block title %}Team Health Check — {{ team.name }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Team Maturity Assessment Survey</h1>
-    <p class="text-gray-600 mb-1">Rate each statement on a scale of 1 (Strongly Disagree) to 5 (Strongly Agree).</p>
-    <p class="text-sm text-brand-600 font-medium mb-8">Team: {{ team.name }}</p>
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-10">
+        <h1 class="text-3xl font-black text-hub-text tracking-tight uppercase">Team Health Check</h1>
+        <p class="text-hub-muted text-sm mt-1">Rate how your team is doing — every role, every perspective matters.</p>
+        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
+            <span class="w-2 h-2 bg-accent-500"></span>
+            <span class="text-xs font-black text-hub-text uppercase">{{ team.name }}</span>
+        </div>
+    </div>
+
+    <!-- Draft recovery -->
+    <div id="draftBanner" class="hidden mb-6 border-2 border-hub-border p-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">💾</span>
+            <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-accent-500 font-black">0</strong> saved answers. Pick up where you left off?</p>
+        </div>
+        <div class="flex gap-2 shrink-0 ml-4">
+            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+            <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
+        </div>
+    </div>
 
     {% if not rounds %}
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-        <p class="text-yellow-800 font-medium">No active assessment rounds.</p>
-        <p class="text-yellow-600 text-sm mt-1">Ask your admin to create a round in the Admin panel.</p>
+    <div class="border-2 border-hub-border p-8 text-center">
+        <p class="text-hub-text font-bold">No active rounds right now.</p>
+        <p class="text-hub-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
     </div>
     {% else %}
     <form method="POST" action="/survey/{{ team.token }}" id="surveyForm">
-        <!-- Respondent Info -->
-        <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-7 mb-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Your Information</h2>
+        <!-- Info card -->
+        <div class="border-2 border-hub-border p-6 mb-6">
+            <h2 class="text-sm font-black text-hub-text mb-4 uppercase tracking-wide">About you</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Assessment Round</label>
-                    <select name="round_id" required class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Round</label>
+                    <select name="round_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
                         {% for r in rounds %}
                         <option value="{{ r.id }}">{{ r.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name (First & Last)</label>
-                    <input type="text" name="respondent_name" required placeholder="Jane Smith"
-                           class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
+                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
+                    <input type="text" name="respondent_name" required placeholder="e.g. Anna M."
+                           class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
                 </div>
             </div>
         </div>
 
-        <!-- Progress bar -->
-        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-card border border-gray-100 p-4 mb-6 sticky top-[4.5rem] z-10">
+        <!-- Progress -->
+        <div class="bg-black text-white p-4 mb-6 sticky top-14 z-10">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">Progress</span>
-                <span id="progressText" class="text-sm text-gray-500">0 / {{ total_questions }}</span>
+                <span class="text-sm font-bold uppercase">Progress</span>
+                <span id="progressText" class="text-xs font-bold tabular-nums">0 / {{ total_questions }}</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div id="progressBar" class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            <div class="relative w-full bg-white/20 h-2.5 overflow-hidden">
+                <div id="progressBar" class="h-2.5 bg-accent-500 transition-all duration-700 ease-out" style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- Questions by Category -->
+        <!-- Questions -->
         {% for category, subcategories in grouped_questions.items() %}
-        <div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-6 overflow-hidden hover:shadow-card transition-shadow duration-300">
+        <div class="border-2 border-hub-border mb-5 overflow-hidden transition-colors duration-300">
             <button type="button" onclick="toggleCategory(this)"
-                    class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50/80 transition-all duration-200">
-                <h2 class="text-xl font-bold text-gray-900">{{ category }}</h2>
-                <svg class="category-chevron w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <span class="w-1.5 h-7 bg-accent-500"></span>
+                    <h2 class="text-base font-black text-hub-text uppercase">{{ category }}</h2>
+                </div>
+                <svg class="category-chevron w-4 h-4 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div class="category-content px-6 pb-6">
+            <div class="category-content px-5 pb-5">
                 {% for subcategory, questions in subcategories.items() %}
                 <div class="mb-6 last:mb-0">
-                    <h3 class="text-sm font-semibold text-brand-600 uppercase tracking-wide mb-3 pb-2 border-b border-gray-100">
+                    <h3 class="text-xs font-black text-hub-text uppercase tracking-widest mb-3 pb-2 border-b-2 border-hub-border">
                         {{ subcategory }}
                     </h3>
                     {% for q in questions %}
-                    <div class="mb-4 last:mb-0 pl-2">
-                        <p class="text-gray-700 text-sm mb-2">{{ q.statement }}</p>
-                        <div class="flex items-center space-x-1">
-                            <span class="text-xs text-gray-400 w-16 sm:w-24 shrink-0 hidden sm:inline">Strongly Disagree</span>
-                            {% for score in range(1, 6) %}
-                            <label class="relative cursor-pointer">
-                                <input type="radio" name="q_{{ q.id }}" value="{{ score }}" required
-                                       class="sr-only peer" onchange="updateProgress()">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 border-gray-200 flex items-center justify-center
-                                            text-sm font-semibold text-gray-500
-                                            peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-checked:text-white peer-checked:shadow-soft
-                                            hover:border-brand-300 hover:bg-brand-50 transition-all duration-150">
-                                    {{ score }}
-                                </div>
-                            </label>
-                            {% endfor %}
-                            <span class="text-xs text-gray-400 w-16 sm:w-24 text-right shrink-0 hidden sm:inline">Strongly Agree</span>
+                    <div class="question-block mb-5 last:mb-0">
+                        <p class="text-hub-text text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-hub-faint shrink-0 text-right font-bold uppercase">disagree</span>
+                            <div class="flex items-center gap-2">
+                                {% for score in range(1, 6) %}
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
+                                           class="sr-only peer" onchange="updateProgress(event)">
+                                    <div class="w-10 h-10 border-2 border-hub-border flex items-center justify-center
+                                                text-sm font-black text-hub-faint
+                                                peer-checked:border-black peer-checked:bg-black peer-checked:text-white
+                                                hover:border-hub-text hover:bg-hub-hover
+                                                active:scale-95 transition-all duration-150">
+                                        {{ score }}
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <span class="text-xs text-hub-faint shrink-0 font-bold uppercase">agree</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -88,14 +112,18 @@
         </div>
         {% endfor %}
 
+        <!-- Validation -->
+        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg border-2 border-accent-500 bg-accent-50 p-4 text-center text-sm text-accent-600 font-bold"></div>
+
         <!-- Submit -->
-        <div class="text-center py-6">
+        <div class="text-center py-8">
             <button type="submit" id="submitBtn"
-                    class="px-8 py-3.5 bg-brand-600 text-white font-semibold rounded-xl shadow-card
-                           hover:bg-brand-700 hover:shadow-card-hover focus:ring-4 focus:ring-brand-200
-                           active:scale-[0.97] transition-all duration-200 text-lg">
+                    class="px-10 py-4 bg-black text-white font-black uppercase tracking-wide text-lg
+                           hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
+                           border-2 border-black hover:border-hub-muted">
                 Submit Assessment
             </button>
+            <p class="text-hub-faint text-xs mt-3 font-medium">your perspective shapes the team</p>
         </div>
     </form>
     {% endif %}
@@ -105,40 +133,153 @@
 {% block scripts %}
 <script>
     const totalQuestions = {{ total_questions }};
+    const DRAFT_KEY = 'survey_draft_{{ team.token }}';
 
-    function updateProgress() {
+    const MILESTONES = [
+        { at: 0,   mood: '📋', msg: 'Ready when you are!' },
+        { at: 1,   mood: '✨', msg: 'First one down!' },
+        { at: 25,  mood: '🧩', msg: 'Pieces coming together...' },
+        { at: 50,  mood: '🚀', msg: 'Halfway — you\'re on a roll!' },
+        { at: 75,  mood: '💜', msg: 'Almost there, keep going!' },
+        { at: 90,  mood: '🎯', msg: 'Just a few more!' },
+        { at: 100, mood: '🏁', msg: 'All done — ready to submit!' },
+    ];
+    let lastMilestone = -1;
+
+    function updateProgress(event) {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
+
         document.getElementById('progressBar').style.width = pct + '%';
         document.getElementById('progressText').textContent = answered + ' / ' + totalQuestions;
+
+        let current = MILESTONES[0];
+        for (const m of MILESTONES) { if (pct >= m.at) current = m; }
+        if (current.at !== lastMilestone) {
+            lastMilestone = current.at;
+            const moodEl = document.getElementById('progressMood');
+            const msgEl = document.getElementById('progressMsg');
+            if (moodEl) {
+                moodEl.textContent = current.mood;
+                moodEl.style.transform = 'scale(1.4)';
+                setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
+            }
+            if (msgEl) {
+                msgEl.style.opacity = '0';
+                setTimeout(() => { msgEl.textContent = current.msg; msgEl.style.opacity = '1'; }, 150);
+            }
+        }
+
+        document.querySelectorAll('.unanswered-highlight').forEach(q => {
+            if (q.querySelector('input[type="radio"]:checked')) q.classList.remove('unanswered-highlight');
+        });
+        if (answered === totalQuestions) document.getElementById('validationMsg')?.classList.add('hidden');
+
+        saveDraft();
+        scrollByTwoQuestions(event);
+    }
+
+    function scrollByTwoQuestions(event) {
+        const radio = event?.target;
+        if (!radio) return;
+        const currentBlock = radio.closest('.question-block');
+        if (!currentBlock) return;
+
+        const allBlocks = Array.from(document.querySelectorAll('#surveyForm .question-block'));
+        const currentIdx = allBlocks.indexOf(currentBlock);
+        if (currentIdx === -1) return;
+
+        const targetIdx = Math.min(currentIdx + 2, allBlocks.length - 1);
+        const targetBlock = allBlocks[targetIdx];
+
+        const catContent = targetBlock.closest('.category-content');
+        if (catContent && catContent.classList.contains('hidden')) {
+            catContent.classList.remove('hidden');
+            const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
+            if (chevron) chevron.classList.add('rotate-180');
+        }
+
+        const rect = targetBlock.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight || rect.top < 0) {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: window.scrollY + targetBlock.getBoundingClientRect().top - 130,
+                    behavior: 'smooth'
+                });
+            }, 200);
+        }
+    }
+
+    function saveDraft() {
+        const data = {};
+        document.querySelectorAll('#surveyForm input[type="radio"]:checked').forEach(r => { data[r.name] = r.value; });
+        const name = document.querySelector('[name="respondent_name"]')?.value || '';
+        const round = document.querySelector('[name="round_id"]')?.value || '';
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers: data, name, round, ts: Date.now() }));
+    }
+
+    function loadDraft() {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const draft = JSON.parse(raw);
+            if (Date.now() - draft.ts > 7 * 24 * 60 * 60 * 1000) { localStorage.removeItem(DRAFT_KEY); return; }
+            const count = Object.keys(draft.answers || {}).length;
+            if (count === 0) return;
+            document.getElementById('draftCount').textContent = count;
+            document.getElementById('draftBanner').classList.remove('hidden');
+            document.getElementById('restoreDraft').onclick = function() {
+                if (draft.name) document.querySelector('[name="respondent_name"]').value = draft.name;
+                if (draft.round) { const sel = document.querySelector('[name="round_id"]'); if (sel) sel.value = draft.round; }
+                for (const [name, value] of Object.entries(draft.answers)) {
+                    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                    if (radio) radio.checked = true;
+                }
+                updateProgress();
+                document.getElementById('draftBanner').classList.add('hidden');
+            };
+            document.getElementById('discardDraft').onclick = function() {
+                localStorage.removeItem(DRAFT_KEY);
+                document.getElementById('draftBanner').classList.add('hidden');
+            };
+        } catch(e) {}
+    }
+
+    function validateBeforeSubmit(e) {
+        document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
+        const unanswered = [];
+        document.querySelectorAll('#surveyForm .question-block').forEach(qBlock => {
+            const radios = qBlock.querySelectorAll('input[type="radio"]');
+            if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) unanswered.push(qBlock);
+        });
+        if (unanswered.length > 0) {
+            e.preventDefault();
+            const msg = document.getElementById('validationMsg');
+            msg.textContent = `${unanswered.length} question${unanswered.length > 1 ? 's' : ''} still need${unanswered.length === 1 ? 's' : ''} an answer`;
+            msg.classList.remove('hidden');
+            unanswered.forEach(q => q.classList.add('unanswered-highlight'));
+            const first = unanswered[0];
+            const cat = first.closest('.category-content');
+            if (cat && cat.classList.contains('hidden')) cat.classList.remove('hidden');
+            setTimeout(() => {
+                window.scrollTo({ top: window.scrollY + first.getBoundingClientRect().top - 130, behavior: 'smooth' });
+            }, 100);
+            return;
+        }
+        localStorage.removeItem(DRAFT_KEY);
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting...';
     }
 
     function toggleCategory(btn) {
-        const content = btn.nextElementSibling;
-        const chevron = btn.querySelector('.category-chevron');
-        content.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
+        btn.nextElementSibling.classList.toggle('hidden');
+        btn.querySelector('.category-chevron').classList.toggle('rotate-180');
     }
 
-    // D6: Auto-expand collapsed sections before native validation fires,
-    // so the browser can highlight unanswered required fields inside them.
-    document.getElementById('surveyForm').addEventListener('submit', function(e) {
-        document.querySelectorAll('.category-content.hidden').forEach(el => {
-            el.classList.remove('hidden');
-            const chevron = el.previousElementSibling.querySelector('.category-chevron');
-            if (chevron) chevron.classList.remove('rotate-180');
-        });
-    });
-
-    // Submit loading state — runs after expand so validation still works
-    document.getElementById('surveyForm').addEventListener('submit', function() {
-        // Only show loading if form is valid (all required fields filled)
-        const valid = this.checkValidity();
-        if (valid) {
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Submitting...';
-        }
-    });
+    document.querySelector('[name="respondent_name"]')?.addEventListener('input', saveDraft);
+    document.querySelector('[name="round_id"]')?.addEventListener('change', saveDraft);
+    document.getElementById('surveyForm')?.addEventListener('submit', validateBeforeSubmit);
+    loadDraft();
 </script>
 {% endblock %}

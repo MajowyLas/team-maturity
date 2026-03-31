@@ -58,73 +58,125 @@ class TeamRoundStats:
 class ExecSummary:
     overall_score: float
     response_count: int
-    strengths: list[CategoryScore]
-    improvements: list[CategoryScore]
+    strengths: list[SubcategoryScore]
+    improvements: list[SubcategoryScore]
     previous_overall: float | None
     category_deltas: dict[str, float]  # category -> delta from previous round
 
 
-# ---------------------------------------------------------------------------
-# Bulk aggregation helpers — reduce dashboard load from O(teams×rounds) to O(1)
-# ---------------------------------------------------------------------------
+def get_team_maturity_overview(
+    db: Session, round_id: int
+) -> dict | None:
+    """Aggregate team maturity scores across ALL teams for a round.
 
-
-def _bulk_response_counts(db: Session) -> dict[tuple[int, int], int]:
-    """Return {(team_id, round_id): response_count} for all team/round pairs."""
-    rows = (
-        db.query(
-            Response.team_id,
-            Response.round_id,
-            func.count(Response.id).label("cnt"),
+    Returns a dict mirroring the engineering stats structure:
+    overall_avg, response_count, category_scores, subcategory_scores,
+    strengths (top 3), improvements (bottom 3).
+    """
+    response_count = (
+        db.query(func.count(Response.id))
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
         )
-        .group_by(Response.team_id, Response.round_id)
-        .all()
-    )
-    return {(r.team_id, r.round_id): r.cnt for r in rows}
+        .scalar()
+    ) or 0
 
+    if response_count == 0:
+        return None
 
-def _bulk_category_scores(
-    db: Session,
-) -> dict[tuple[int, int], list[CategoryScore]]:
-    """Return {(team_id, round_id): [CategoryScore]} for all team/round pairs."""
-    rows = (
+    # Category averages
+    category_rows = (
         db.query(
-            Response.team_id,
-            Response.round_id,
             Question.category,
             func.avg(ResponseAnswer.score).label("avg_score"),
-            func.count(ResponseAnswer.score).label("cnt"),
         )
-        .join(ResponseAnswer, ResponseAnswer.response_id == Response.id)
-        .join(Question, Question.id == ResponseAnswer.question_id)
-        .group_by(Response.team_id, Response.round_id, Question.category)
-        .order_by(Response.team_id, Response.round_id, Question.category)
+        .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
+        .join(Response, Response.id == ResponseAnswer.response_id)
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
+        .group_by(Question.category)
+        .order_by(Question.category)
         .all()
     )
-    result: dict[tuple[int, int], list[CategoryScore]] = {}
-    for row in rows:
-        key = (row.team_id, row.round_id)
-        result.setdefault(key, []).append(
-            CategoryScore(
-                category=row.category,
-                avg=round(row.avg_score, 2),
-                count=row.cnt,
-            )
+
+    category_scores = [
+        {"category": row.category, "avg": round(row.avg_score, 2)}
+        for row in category_rows
+    ]
+
+    overall_avg = (
+        round(sum(c["avg"] for c in category_scores) / len(category_scores), 2)
+        if category_scores
+        else 0.0
+    )
+
+    # Subcategory scores for strengths/improvements
+    sub_rows = (
+        db.query(
+            Question.category,
+            Question.subcategory,
+            func.avg(ResponseAnswer.score).label("avg_score"),
         )
-    return result
+        .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
+        .join(Response, Response.id == ResponseAnswer.response_id)
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
+        .group_by(Question.category, Question.subcategory)
+        .order_by(func.avg(ResponseAnswer.score))
+        .all()
+    )
 
+    subcategory_scores = [
+        {
+            "category": row.category,
+            "subcategory": row.subcategory,
+            "avg": round(row.avg_score, 2),
+        }
+        for row in sub_rows
+    ]
 
-def _weighted_overall(cat_scores: list[CategoryScore]) -> float:
-    """Compute true weighted average across all answers (T2 fix for overview fns)."""
-    total_count = sum(c.count for c in cat_scores)
-    if not total_count:
-        return 0.0
-    return round(sum(c.avg * c.count for c in cat_scores) / total_count, 2)
+    strengths = subcategory_scores[-3:][::-1] if len(subcategory_scores) >= 3 else subcategory_scores[::-1]
+    improvements = subcategory_scores[:3]
 
+    # ── Previous round comparison ──
+    previous_round = (
+        db.query(AssessmentRound)
+        .filter(AssessmentRound.id < round_id)
+        .order_by(AssessmentRound.id.desc())
+        .first()
+    )
 
-# ---------------------------------------------------------------------------
-# Single-team detail — used by per-team dashboard views
-# ---------------------------------------------------------------------------
+    previous_overall: float | None = None
+    category_deltas: dict[str, float] = {}
+
+    if previous_round:
+        prev = get_team_maturity_overview(db, previous_round.id)
+        if prev:
+            previous_overall = prev["overall_avg"]
+            prev_cat_map = {c["category"]: c["avg"] for c in prev["category_scores"]}
+            for cat in category_scores:
+                if cat["category"] in prev_cat_map:
+                    category_deltas[cat["category"]] = round(
+                        cat["avg"] - prev_cat_map[cat["category"]], 2
+                    )
+
+    return {
+        "response_count": response_count,
+        "overall_avg": overall_avg,
+        "category_scores": category_scores,
+        "subcategory_scores": subcategory_scores,
+        "strengths": strengths,
+        "improvements": improvements,
+        "previous_overall": previous_overall,
+        "category_deltas": category_deltas,
+    }
 
 
 def get_team_round_stats(
@@ -136,10 +188,14 @@ def get_team_round_stats(
     if not team or not rnd:
         return None
 
-    # Count responses
+    # Count responses (team survey only — exclude engineering)
     response_count = (
         db.query(func.count(Response.id))
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+        )
         .scalar()
     ) or 0
 
@@ -155,7 +211,7 @@ def get_team_round_stats(
             subcategory_scores=[],
         )
 
-    # Subcategory scores
+    # Subcategory scores (team survey only)
     subcategory_rows = (
         db.query(
             Question.category,
@@ -167,7 +223,12 @@ def get_team_round_stats(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
         .group_by(Question.category, Question.subcategory)
         .order_by(Question.category, Question.subcategory)
         .all()
@@ -185,7 +246,7 @@ def get_team_round_stats(
         for row in subcategory_rows
     ]
 
-    # Category scores
+    # Category scores (team survey only)
     category_rows = (
         db.query(
             Question.category,
@@ -194,7 +255,12 @@ def get_team_round_stats(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
+        .filter(
+            Response.team_id == team_id,
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
         .group_by(Question.category)
         .order_by(Question.category)
         .all()
@@ -209,14 +275,11 @@ def get_team_round_stats(
         for row in category_rows
     ]
 
-    # T2 fix: true weighted average across all answers (not average of category averages)
-    _overall_raw = (
-        db.query(func.avg(ResponseAnswer.score))
-        .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
-        .scalar()
+    overall_avg = (
+        round(sum(c.avg for c in category_scores) / len(category_scores), 2)
+        if category_scores
+        else 0.0
     )
-    overall_avg = round(_overall_raw, 2) if _overall_raw is not None else 0.0
 
     return TeamRoundStats(
         team_id=team_id,
@@ -242,7 +305,7 @@ def get_exec_summary(
     if not stats or stats.response_count == 0:
         return None
 
-    sorted_by_score = sorted(stats.category_scores, key=lambda s: s.avg)
+    sorted_by_score = sorted(stats.subcategory_scores, key=lambda s: s.avg)
     strengths = sorted_by_score[-3:][::-1]  # top 3, descending
     improvements = sorted_by_score[:3]  # bottom 3, ascending
 
@@ -278,82 +341,42 @@ def get_exec_summary(
     )
 
 
-# ---------------------------------------------------------------------------
-# Overview functions — refactored to use bulk helpers (T1 fix)
-# ---------------------------------------------------------------------------
-
-
 def get_overview_cards(
     db: Session, round_id: int
 ) -> list[dict]:
-    """Return card data for each team: summary stats for the overview page.
-
-    Uses two bulk queries instead of per-team calls (T1 fix).
-    """
+    """Return card data for each team: summary stats for the overview page."""
     teams = db.query(Team).order_by(Team.name).all()
-
-    # Bulk response counts for this round only
-    count_rows = (
-        db.query(
-            Response.team_id,
-            func.count(Response.id).label("cnt"),
-        )
-        .filter(Response.round_id == round_id)
-        .group_by(Response.team_id)
-        .all()
-    )
-    response_counts: dict[int, int] = {r.team_id: r.cnt for r in count_rows}
-
-    # Bulk category scores for this round only
-    cat_rows = (
-        db.query(
-            Response.team_id,
-            Question.category,
-            func.avg(ResponseAnswer.score).label("avg_score"),
-            func.count(ResponseAnswer.score).label("cnt"),
-        )
-        .join(ResponseAnswer, ResponseAnswer.response_id == Response.id)
-        .join(Question, Question.id == ResponseAnswer.question_id)
-        .filter(Response.round_id == round_id)
-        .group_by(Response.team_id, Question.category)
-        .all()
-    )
-
-    cat_map: dict[int, list[CategoryScore]] = {}
-    for row in cat_rows:
-        cat_map.setdefault(row.team_id, []).append(
-            CategoryScore(
-                category=row.category,
-                avg=round(row.avg_score, 2),
-                count=row.cnt,
-            )
-        )
 
     cards = []
     for team in teams:
-        resp_count = response_counts.get(team.id, 0)
-        cat_scores = sorted(cat_map.get(team.id, []), key=lambda c: c.category)
+        stats = get_team_round_stats(db, team.id, round_id)
+        summary = get_exec_summary(db, team.id, round_id)
 
         card: dict = {
             "team_id": team.id,
             "team_name": team.name,
             "overall": 0.0,
-            "response_count": resp_count,
+            "response_count": 0,
             "top_strength": None,
             "top_improvement": None,
             "category_scores": [],
         }
 
-        if resp_count > 0 and cat_scores:
-            card["overall"] = _weighted_overall(cat_scores)
+        if stats and stats.response_count > 0:
+            card["overall"] = stats.overall_avg
+            card["response_count"] = stats.response_count
             card["category_scores"] = [
-                {"category": c.category, "avg": c.avg} for c in cat_scores
+                {"category": c.category, "avg": c.avg}
+                for c in stats.category_scores
             ]
-            sorted_cats = sorted(cat_scores, key=lambda c: c.avg)
-            s = sorted_cats[-1]
-            card["top_strength"] = {"name": s.category, "avg": s.avg}
-            i = sorted_cats[0]
-            card["top_improvement"] = {"name": i.category, "avg": i.avg}
+
+        if summary:
+            if summary.strengths:
+                s = summary.strengths[0]
+                card["top_strength"] = {"name": s.subcategory, "avg": s.avg}
+            if summary.improvements:
+                i = summary.improvements[0]
+                card["top_improvement"] = {"name": i.subcategory, "avg": i.avg}
 
         cards.append(card)
 
@@ -361,14 +384,17 @@ def get_overview_cards(
 
 
 def get_statement_scores(
-    db: Session, team_id: int, round_id: int
+    db: Session, team_id: int | None, round_id: int
 ) -> list[StatementScore]:
-    """Return average score per individual statement for a team in a round.
+    """Return average score per individual statement for a round.
+
+    When *team_id* is provided, results are scoped to that team.
+    When *team_id* is ``None``, results are department-wide (all teams).
 
     Ordered by question display_order so they group naturally by
     category -> subcategory.
     """
-    rows = (
+    q = (
         db.query(
             Question.id,
             Question.category,
@@ -380,11 +406,15 @@ def get_statement_scores(
         )
         .join(ResponseAnswer, ResponseAnswer.question_id == Question.id)
         .join(Response, Response.id == ResponseAnswer.response_id)
-        .filter(Response.team_id == team_id, Response.round_id == round_id)
-        .group_by(Question.id)
-        .order_by(Question.display_order)
-        .all()
+        .filter(
+            Response.round_id == round_id,
+            Response.assessment_type == "team",
+            Question.assessment_type == "team",
+        )
     )
+    if team_id is not None:
+        q = q.filter(Response.team_id == team_id)
+    rows = q.group_by(Question.id).order_by(Question.display_order).all()
 
     return [
         StatementScore(
@@ -412,7 +442,6 @@ def get_overview_trends(
         ]
     }
     Only includes rounds where at least one team has data.
-    Uses bulk queries instead of per-team/round calls (T1 fix).
     """
     rounds = db.query(AssessmentRound).order_by(AssessmentRound.id).all()
     teams = db.query(Team).order_by(Team.name).all()
@@ -420,17 +449,19 @@ def get_overview_trends(
     if not rounds or not teams:
         return {"round_names": [], "teams": []}
 
-    response_counts = _bulk_response_counts(db)
-    cat_scores_map = _bulk_category_scores(db)
+    # Build a matrix: team -> round -> overall_avg
+    team_round_scores: dict[int, dict[int, float]] = {}
+    active_round_ids: set[int] = set()
 
-    # Compute overall score per (team, round) as weighted average
-    overall: dict[tuple[int, int], float] = {}
-    for key, cats in cat_scores_map.items():
-        if response_counts.get(key, 0) > 0:
-            overall[key] = _weighted_overall(cats)
+    for team in teams:
+        team_round_scores[team.id] = {}
+        for rnd in rounds:
+            stats = get_team_round_stats(db, team.id, rnd.id)
+            if stats and stats.response_count > 0:
+                team_round_scores[team.id][rnd.id] = stats.overall_avg
+                active_round_ids.add(rnd.id)
 
     # Only keep rounds that have at least one team with data
-    active_round_ids: set[int] = {round_id for (_, round_id) in overall}
     active_rounds = [r for r in rounds if r.id in active_round_ids]
 
     if len(active_rounds) < 2:
@@ -442,7 +473,7 @@ def get_overview_trends(
         scores = []
         has_any = False
         for rnd in active_rounds:
-            val = overall.get((team.id, rnd.id))
+            val = team_round_scores[team.id].get(rnd.id)
             scores.append(val)
             if val is not None:
                 has_any = True
@@ -450,80 +481,6 @@ def get_overview_trends(
             team_series.append({"name": team.name, "scores": scores})
 
     return {"round_names": round_names, "teams": team_series}
-
-
-def get_all_teams_trend_summary(db: Session) -> list[dict]:
-    """Return latest score and delta vs previous round for every team that has data.
-
-    Each entry:
-        team_id, team_name, latest_score, latest_round,
-        previous_score, previous_round, delta (None if only one round exists)
-    Uses bulk queries instead of per-team/round calls (T1 fix).
-    """
-    teams = db.query(Team).order_by(Team.name).all()
-    rounds = db.query(AssessmentRound).order_by(AssessmentRound.id).all()
-
-    response_counts = _bulk_response_counts(db)
-    cat_scores_map = _bulk_category_scores(db)
-
-    # Compute overall score per (team, round)
-    overall: dict[tuple[int, int], float] = {}
-    for key, cats in cat_scores_map.items():
-        if response_counts.get(key, 0) > 0:
-            overall[key] = _weighted_overall(cats)
-
-    result = []
-    for team in teams:
-        scored_rounds = []
-        for rnd in rounds:
-            key = (team.id, rnd.id)
-            if key in overall:
-                cat_scores = cat_scores_map.get(key, [])
-                scored_rounds.append(
-                    {
-                        "round_name": rnd.name,
-                        "score": overall[key],
-                        "category_scores": [
-                            {"category": c.category, "avg": c.avg}
-                            for c in cat_scores
-                        ],
-                    }
-                )
-
-        if not scored_rounds:
-            continue
-
-        latest = scored_rounds[-1]
-        previous = scored_rounds[-2] if len(scored_rounds) >= 2 else None
-        delta = (
-            round(latest["score"] - previous["score"], 2) if previous else None
-        )
-
-        # Per-category deltas vs previous round
-        category_deltas: dict[str, float] = {}
-        if previous:
-            prev_cat_map = {c["category"]: c["avg"] for c in previous["category_scores"]}
-            for cat in latest["category_scores"]:
-                if cat["category"] in prev_cat_map:
-                    category_deltas[cat["category"]] = round(
-                        cat["avg"] - prev_cat_map[cat["category"]], 2
-                    )
-
-        result.append(
-            {
-                "team_id": team.id,
-                "team_name": team.name,
-                "latest_score": latest["score"],
-                "latest_round": latest["round_name"],
-                "previous_score": previous["score"] if previous else None,
-                "previous_round": previous["round_name"] if previous else None,
-                "delta": delta,
-                "category_scores": latest["category_scores"],
-                "category_deltas": category_deltas,
-            }
-        )
-
-    return result
 
 
 def get_team_trends(

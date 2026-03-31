@@ -2,235 +2,277 @@
 {% block title %}Admin -- Team Maturity Assessment{% endblock %}
 
 {% block content %}
-<!-- Import result banners -->
-{% if request.query_params.get('imported') %}
-<div class="mb-6 bg-green-50 border border-green-200 rounded-xl px-5 py-4 flex items-start gap-3 animate-fade-in-up">
-    <svg class="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <div>
-        <p class="text-green-800 font-medium text-sm">Import complete</p>
-        <p class="text-green-600 text-sm mt-0.5">
-            {{ request.query_params.get('imported') }} response(s) imported{% if request.query_params.get('skipped') and request.query_params.get('skipped') != '0' %}, {{ request.query_params.get('skipped') }} duplicate(s) skipped{% endif %}.
-        </p>
-    </div>
-</div>
-{% endif %}
-{% if request.query_params.get('import_error') %}
-<div class="mb-6 bg-red-50 border border-red-200 rounded-xl px-5 py-4 flex items-start gap-3 animate-fade-in-up">
-    <svg class="w-5 h-5 text-red-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <p class="text-red-800 font-medium text-sm">Import failed — CSV format not recognised. Use a file from "Download All Data".</p>
-</div>
-{% endif %}
-
-<h1 class="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Admin Panel</h1>
+<h1 class="text-3xl font-bold text-hub-text mb-8 tracking-tight">Admin Panel</h1>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Teams + Survey Links -->
-    <div class="bg-white rounded-2xl shadow-soft border border-gray-100">
-        <div class="p-6 border-b border-gray-100">
-            <h2 class="text-lg font-semibold text-gray-900">Teams & Survey Links</h2>
-            <p class="text-sm text-gray-500 mt-1">Each team has a unique survey link. Copy and share with the team.</p>
-        </div>
-        <div class="p-6">
-            <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 mb-4">
-                <input type="text" name="team_name" required placeholder="New team name..."
-                       class="flex-1 min-w-[150px] rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-                <input type="number" name="member_count" min="1" placeholder="Members"
-                       class="w-24 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-                <button type="submit"
-                        class="px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
-                    Add Team
-                </button>
-            </form>
-            {% if teams %}
-            <ul class="divide-y divide-gray-100">
-                {% for t in teams %}
-                <li class="stagger-item py-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <div>
-                            <span class="font-medium text-gray-900">{{ t.name }}</span>
-                            {% if t.member_count %}
-                            <span class="ml-2 text-xs text-gray-400">({{ t.member_count }} members)</span>
-                            {% endif %}
+    <!-- LEFT COLUMN -->
+    <div class="space-y-8">
+        <!-- Teams -->
+        <div class="bg-hub-card border-2 border-hub-border">
+            <div class="p-6 border-b border-hub-border">
+                <h2 class="text-lg font-semibold text-hub-text">Teams</h2>
+                <p class="text-sm text-hub-muted mt-1">Manage your squads.</p>
+            </div>
+            <div class="p-6">
+                {% if teams %}
+                <ul class="divide-y divide-hub-border mb-4">
+                    {% for t in teams %}
+                    <li class="stagger-item py-3">
+                        <!-- View mode -->
+                        <div id="team-view-{{ t.id }}" class="flex items-center justify-between">
+                            <div>
+                                <span class="font-medium text-hub-text">{{ t.name }}</span>
+                                {% if t.member_count %}
+                                <span class="ml-2 text-xs text-hub-faint">({{ t.member_count }} members)</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="showEditForm({{ t.id }})"
+                                        class="text-xs text-hub-muted hover:text-hub-text font-medium">Edit</button>
+                                {% set resp_count = team_response_counts.get(t.id, 0) %}
+                                <button type="button"
+                                        onclick="confirmDeleteTeam({{ t.id }}, '{{ t.name }}', {{ resp_count }})"
+                                        class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button type="button"
-                                    onclick="openRenameModal({{ t.id }}, '{{ t.name | replace("'", "\\'") }}', {{ t.member_count if t.member_count else 'null' }})"
-                                    class="px-2 py-1 text-xs text-brand-600 hover:text-brand-800 hover:bg-brand-50 rounded-md transition-colors duration-150 font-medium">
-                                Edit
-                            </button>
-                            <form method="POST" action="/admin/teams/{{ t.id }}/delete" class="inline"
-                                  data-team-name="{{ t.name | e }}"
-                                  onsubmit="return confirm('Delete team \'' + this.dataset.teamName + '\' and all its responses? This cannot be undone.')">
-                                <button type="submit"
-                                        class="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-150 font-medium">
-                                    Delete
-                                </button>
+
+                        <!-- Edit mode (hidden by default) -->
+                        <div id="team-edit-{{ t.id }}" class="hidden">
+                            <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
+                                <div class="flex flex-wrap gap-2">
+                                    <input type="text" name="team_name" value="{{ t.name }}" required
+                                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                    <input type="number" name="member_count" min="1" placeholder="Members"
+                                           value="{{ t.member_count or '' }}"
+                                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit"
+                                            class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                                        Save
+                                    </button>
+                                    <button type="button" onclick="hideEditForm({{ t.id }})"
+                                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover transition-all duration-200">
+                                        Cancel
+                                    </button>
+                                </div>
                             </form>
                         </div>
-                    </div>
+
+                        <!-- Hidden delete form -->
+                        <form id="delete-form-{{ t.id }}" method="POST" action="/admin/teams/{{ t.id }}/delete" class="hidden"></form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-hub-muted text-sm text-center py-4 mb-4">No teams yet.</p>
+                {% endif %}
+
+                <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 pt-4 border-t border-hub-border">
+                    <input type="text" name="team_name" required placeholder="New team name..."
+                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <input type="number" name="member_count" min="1" placeholder="Members"
+                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <button type="submit"
+                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                        Add Team
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rounds -->
+        <div class="bg-hub-card border-2 border-hub-border">
+            <div class="p-6 border-b border-hub-border">
+                <h2 class="text-lg font-semibold text-hub-text">Rounds</h2>
+                <p class="text-sm text-hub-muted mt-1">Manage assessment cycles. Active rounds accept responses.</p>
+            </div>
+            <div class="p-6">
+                {% if rounds %}
+                <ul class="divide-y divide-hub-border mb-4">
+                    {% for r in rounds %}
+                    <li class="stagger-item py-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="font-medium text-hub-text">{{ r.name }}</span>
+                                <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
+                                    {% if r.is_active %}border-hub-text text-hub-text{% else %}border-hub-border text-hub-muted{% endif %}">
+                                    {% if r.is_active %}Active{% else %}Closed{% endif %}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-hub-text hover:underline">Export CSV</a>
+                                <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
+                                    <button type="submit" class="text-xs text-hub-muted hover:text-hub-text">
+                                        {% if r.is_active %}Close{% else %}Reopen{% endif %}
+                                    </button>
+                                </form>
+                                <form method="POST" action="/admin/rounds/{{ r.id }}/delete" class="inline"
+                                      id="delete-round-form-{{ r.id }}">
+                                    <button type="button"
+                                            onclick="confirmDeleteRound({{ r.id }}, '{{ r.name }}')"
+                                            class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-hub-muted text-sm text-center py-4 mb-4">No rounds yet.</p>
+                {% endif %}
+
+                <form method="POST" action="/admin/rounds" class="flex gap-2 pt-4 border-t border-hub-border">
+                    <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
+                           class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                    <button type="submit"
+                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                        Create Round
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Survey Links -->
+    <div class="bg-hub-card border-2 border-hub-border self-stretch">
+        <div class="p-6 border-b border-hub-border">
+            <h2 class="text-lg font-semibold text-hub-text">Survey Links</h2>
+            <p class="text-sm text-hub-muted mt-1">Copy and share with your teams.</p>
+        </div>
+        <div class="p-6">
+            {% set active_round = rounds | selectattr('is_active') | first %}
+
+            <!-- Delivery Survey (shared) -->
+            {% if active_round %}
+            <div class="mb-6 pb-6 border-b border-hub-border">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="inline-block w-2.5 h-2.5 bg-blue-600"></span>
+                    <p class="text-xs font-bold text-hub-text uppercase">Delivery Survey</p>
+                </div>
+                <p class="text-xs text-hub-faint mb-2">One link for all teams — share department-wide.</p>
+                <div class="flex items-center gap-2">
+                    <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
+                           id="eng-link-shared"
+                           class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
+                    <button type="button" onclick="copyLink('eng-link-shared', this)"
+                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                        Copy
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Team Surveys (per team) -->
+            <div class="flex items-center gap-2 mb-3">
+                <span class="inline-block w-2.5 h-2.5 bg-accent-500"></span>
+                <p class="text-xs font-bold text-hub-text uppercase">Team Surveys</p>
+            </div>
+            <p class="text-xs text-hub-faint mb-3">One link per team — each tracks responses separately.</p>
+
+            {% if teams %}
+            <ul class="space-y-3">
+                {% for t in teams %}
+                <li>
+                    <p class="text-sm font-medium text-hub-text mb-1">{{ t.name }}</p>
                     <div class="flex items-center gap-2">
                         <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
                                id="link-{{ t.id }}"
-                               class="flex-1 rounded-lg border-gray-200 border bg-gray-50 px-3 py-1.5 text-xs text-gray-600 font-mono">
+                               class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
                         <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                            Copy Link
+                                class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            Copy
                         </button>
                     </div>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-gray-500 text-sm text-center py-4">No teams yet. Add one above.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Assessment Rounds -->
-    <div class="bg-white rounded-2xl shadow-soft border border-gray-100">
-        <div class="p-6 border-b border-gray-100">
-            <h2 class="text-lg font-semibold text-gray-900">Assessment Rounds</h2>
-        </div>
-        <div class="p-6">
-            <form method="POST" action="/admin/rounds" class="flex gap-2 mb-4">
-                <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
-                       class="flex-1 rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-                <button type="submit"
-                        class="px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
-                    Create Round
-                </button>
-            </form>
-            {% if rounds %}
-            <ul class="divide-y divide-gray-100">
-                {% for r in rounds %}
-                <li class="stagger-item py-3 flex items-center justify-between rounded-lg px-2 -mx-2 hover:bg-gray-50 transition-colors duration-150">
-                    <div>
-                        <span class="font-medium text-gray-900">{{ r.name }}</span>
-                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium
-                            {% if r.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
-                            {% if r.is_active %}Active{% else %}Closed{% endif %}
-                        </span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <a href="/admin/export/{{ r.id }}" class="text-xs text-brand-600 hover:underline">Export CSV</a>
-                        <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
-                            <button type="submit" class="text-xs text-gray-500 hover:text-gray-700">
-                                {% if r.is_active %}Close{% else %}Reopen{% endif %}
-                            </button>
-                        </form>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-gray-500 text-sm text-center py-4">No rounds yet. Create one above.</p>
+            <p class="text-hub-muted text-sm text-center py-4">Add teams first to generate survey links.</p>
             {% endif %}
         </div>
     </div>
 </div>
 
 <!-- Data Management -->
-<div class="bg-white rounded-2xl shadow-soft border border-gray-100 mb-8">
-    <div class="p-6 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Data Management</h2>
-        <p class="text-sm text-gray-500 mt-1">Export all data as CSV for backup or Excel analysis, or import a previously exported file.</p>
+<div class="bg-hub-card border-2 border-hub-border mb-8">
+    <div class="p-6 border-b border-hub-border">
+        <h2 class="text-lg font-semibold text-hub-text">Data Management</h2>
+        <p class="text-sm text-hub-muted mt-1">Manage survey questions and database backups.</p>
     </div>
     <div class="p-6">
-        <div class="flex flex-col sm:flex-row gap-6">
-            <!-- Download -->
-            <div class="flex-1">
-                <h3 class="text-sm font-medium text-gray-700 mb-2">Download</h3>
-                <a href="/admin/export-all"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Download All Data (CSV)
-                </a>
-                <p class="text-xs text-gray-400 mt-2">One row per response, all rounds &amp; teams. Ready for Excel pivot tables.</p>
-            </div>
-
-            <!-- Upload / Import -->
-            <div class="flex-1">
-                <h3 class="text-sm font-medium text-gray-700 mb-2">Import</h3>
-                <form method="POST" action="/admin/import" enctype="multipart/form-data" class="flex flex-wrap items-end gap-2">
-                    <label class="flex-1 min-w-[180px]">
-                        <input type="file" name="file" accept=".csv" required
-                               class="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-colors">
-                    </label>
-                    <button type="submit"
-                            class="px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 active:scale-[0.97] shadow-soft transition-all duration-200">
-                        Upload &amp; Import
-                    </button>
-                </form>
-                <p class="text-xs text-gray-400 mt-2">Restores teams, rounds &amp; responses. Duplicates are automatically skipped.</p>
-            </div>
+        <p class="text-xs text-hub-muted mb-4">Download or restore the full database — includes teams, rounds, responses, and questions.</p>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="/admin/data/download-db"
+               class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download maturity.db
+            </a>
+            <form method="POST" action="/admin/data/upload-db" enctype="multipart/form-data"
+                  class="inline-flex items-center gap-2">
+                <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
+                    Upload maturity.db
+                    <input type="file" name="file" accept=".db,.sqlite,.sqlite3" required class="hidden"
+                           onchange="if(confirm('⚠️ This will REPLACE all current data with the uploaded database. This cannot be undone. Continue?')) this.form.submit();">
+                </label>
+            </form>
         </div>
     </div>
 </div>
 
 <!-- Participation Matrix -->
-<!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4 animate-fade-in-up">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Team</h3>
-        <form method="POST" id="renameForm">
-            <div class="mb-3">
-                <label class="block text-sm text-gray-600 mb-1">Team name</label>
-                <input type="text" name="new_name" id="renameInput" required
-                       class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm text-gray-600 mb-1">Number of members <span class="text-gray-400">(optional)</span></label>
-                <input type="number" name="member_count" id="memberCountInput" min="1"
-                       class="w-full rounded-lg border-gray-300 border px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-            </div>
-            <div class="flex gap-2 justify-end">
-                <button type="button" onclick="closeRenameModal()"
-                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors">
-                    Cancel
-                </button>
-                <button type="submit"
-                        class="px-4 py-2 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 active:scale-[0.97] transition-all shadow-soft">
-                    Save
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
 {% if rounds and teams %}
-<div class="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-    <div class="p-6 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Participation Overview</h2>
-        <p class="text-sm text-gray-500 mt-1">Number of responses per team per round.</p>
+{% set visible_limit = 4 %}
+{% set recent_rounds = rounds[:visible_limit] %}
+{% set has_more = rounds | length > visible_limit %}
+<div class="bg-hub-card border-2 border-hub-border overflow-hidden">
+    <div class="p-6 border-b border-hub-border flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-hub-text">Participation Overview</h2>
+            <p class="text-sm text-hub-muted mt-1">Number of responses per team per round.</p>
+        </div>
+        {% if has_more %}
+        <button type="button" onclick="toggleAllRounds()" id="showAllBtn"
+                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+            Show all {{ rounds | length }} rounds
+        </button>
+        {% endif %}
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
-            <thead class="bg-gray-50">
+            <thead class="bg-hub-surface">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Team</th>
-                    {% for r in rounds %}
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ r.name }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-hub-muted uppercase">Team</th>
+                    {% for r in recent_rounds %}
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col">{{ r.name }}</th>
+                    {% endfor %}
+                    {% for r in rounds[visible_limit:] %}
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col-extra hidden">{{ r.name }}</th>
                     {% endfor %}
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-hub-border">
                 {% for t in teams %}
-                <tr class="hover:bg-gray-50 transition-colors duration-150">
-                    <td class="px-4 py-3 font-medium text-gray-900">{{ t.name }}</td>
-                    {% for r in rounds %}
-                    <td class="px-4 py-3 text-center">
+                <tr class="hover:bg-hub-hover transition-colors duration-150">
+                    <td class="px-4 py-3 font-medium text-hub-text">{{ t.name }}</td>
+                    {% for r in recent_rounds %}
+                    <td class="px-4 py-3 text-center round-col">
                         {% set cnt = participation.get((r.id, t.id), 0) %}
                         {% if cnt > 0 %}
-                        <span class="inline-block px-2 py-1 bg-brand-100 text-brand-700 rounded-md text-sm font-medium">{{ cnt }}</span>
+                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
                         {% else %}
-                        <span class="text-gray-300">--</span>
+                        <span class="text-hub-faint">--</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    {% for r in rounds[visible_limit:] %}
+                    <td class="px-4 py-3 text-center round-col-extra hidden">
+                        {% set cnt = participation.get((r.id, t.id), 0) %}
+                        {% if cnt > 0 %}
+                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
+                        {% else %}
+                        <span class="text-hub-faint">--</span>
                         {% endif %}
                     </td>
                     {% endfor %}
@@ -245,42 +287,52 @@
 
 {% block scripts %}
 <script>
+    function showEditForm(teamId) {
+        document.getElementById('team-view-' + teamId).classList.add('hidden');
+        document.getElementById('team-edit-' + teamId).classList.remove('hidden');
+    }
+
+    function hideEditForm(teamId) {
+        document.getElementById('team-edit-' + teamId).classList.add('hidden');
+        document.getElementById('team-view-' + teamId).classList.remove('hidden');
+    }
+
+    function toggleAllRounds() {
+        const extras = document.querySelectorAll('.round-col-extra');
+        const btn = document.getElementById('showAllBtn');
+        const isHidden = extras[0]?.classList.contains('hidden');
+        extras.forEach(el => el.classList.toggle('hidden'));
+        btn.textContent = isHidden ? 'Show recent only' : 'Show all {{ rounds | length }} rounds';
+    }
+
+    function confirmDeleteRound(roundId, roundName) {
+        let msg = 'Delete round "' + roundName + '"?\n\n⚠️ All responses collected in this round will be permanently deleted.';
+        if (confirm(msg)) {
+            document.getElementById('delete-round-form-' + roundId).submit();
+        }
+    }
+
+    function confirmDeleteTeam(teamId, teamName, responseCount) {
+        let msg = 'Delete team "' + teamName + '"?';
+        if (responseCount > 0) {
+            msg += '\n\n⚠️ This team has ' + responseCount + ' response(s) that will also be permanently deleted.';
+        }
+        if (confirm(msg)) {
+            document.getElementById('delete-form-' + teamId).submit();
+        }
+    }
+
     function copyLink(inputId, btn) {
         const input = document.getElementById(inputId);
-        const showCopied = () => {
+        navigator.clipboard.writeText(input.value).then(() => {
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.add('bg-green-100', 'text-green-700', 'copy-success');
+            btn.classList.add('bg-hub-text/15', 'text-hub-text', 'copy-success');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.remove('bg-green-100', 'text-green-700', 'copy-success');
+                btn.classList.remove('bg-hub-text/15', 'text-hub-text', 'copy-success');
             }, 2000);
-        };
-        navigator.clipboard.writeText(input.value).then(showCopied).catch(() => {
-            input.select();
-            document.execCommand('copy');
-            showCopied();
         });
     }
-
-    function openRenameModal(teamId, currentName, currentMembers) {
-        document.getElementById('renameForm').action = `/admin/teams/${teamId}/rename`;
-        document.getElementById('renameInput').value = currentName;
-        document.getElementById('memberCountInput').value = currentMembers ?? '';
-        const modal = document.getElementById('renameModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => document.getElementById('renameInput').select(), 50);
-    }
-
-    function closeRenameModal() {
-        const modal = document.getElementById('renameModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    document.getElementById('renameModal').addEventListener('click', function (e) {
-        if (e.target === this) closeRenameModal();
-    });
 </script>
 {% endblock %}

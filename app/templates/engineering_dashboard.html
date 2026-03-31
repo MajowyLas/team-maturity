@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+{% block title %}Delivery Maturity Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
+        <h1 class="text-3xl font-bold text-hub-text tracking-tight flex items-center gap-2">
+            <span class="inline-block w-3 h-3 bg-blue-600 shrink-0"></span>
+            Delivery Maturity
+        </h1>
+        <p class="text-sm text-hub-muted mt-1">
+            {% if selected_team %}{{ selected_team.name }} — team view{% else %}Department-wide assessment results{% endif %}
+        </p>
+    </div>
+    <div class="flex items-center gap-3 flex-wrap">
+        {% if rounds %}
+        <div class="flex items-center space-x-2">
+            <label class="text-sm text-hub-muted">Round:</label>
+            <select id="roundSelector" onchange="updateDashboardUrl()"
+                    class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
+                {% for r in rounds %}
+                <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
+                    {{ r.name }}{% if r.is_active %} (Active){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        {% if teams %}
+        <div class="flex items-center space-x-2">
+            <label class="text-sm text-hub-muted">Team:</label>
+            <select id="teamSelector" onchange="updateDashboardUrl()"
+                    class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold">
+                <option value="">All (Department)</option>
+                {% for t in teams %}
+                <option value="{{ t.id }}" {% if selected_team and t.id == selected_team.id %}selected{% endif %}>
+                    {{ t.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if not stats %}
+<div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
+    <div class="text-5xl mb-4">🔧</div>
+    <h2 class="text-xl font-semibold text-hub-text mb-2">No Responses Yet</h2>
+    <p class="text-hub-muted mb-4">Use the landing page to generate and share the engineering assessment link.</p>
+</div>
+{% else %}
+
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+            <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#charts" class="hover:text-hub-text transition-colors">Charts</a>
+            <span class="text-hub-faint">&middot;</span>
+            <a href="#details" class="hover:text-hub-text transition-colors">Detailed Area Scores</a>
+        </div>
+        <button type="button" onclick="document.getElementById('maturityModal').classList.remove('hidden')"
+                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+            What do the maturity levels mean?
+        </button>
+    </div>
+</nav>
+
+<!-- Summary Cards -->
+<h2 id="overview" class="text-lg font-bold text-hub-text mb-4 scroll-mt-28">Overview</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
+        <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
+        <p class="text-4xl font-bold
+            {% if stats.overall_avg >= 4.0 %}text-hub-text
+            {% elif stats.overall_avg >= 3.0 %}text-hub-muted
+            {% else %}text-accent-500{% endif %}">
+            {{ "%.1f"|format(stats.overall_avg) }}
+        </p>
+        <p class="text-xs font-semibold mt-1 text-hub-text">
+            {{ maturity_labels.get((stats.overall_avg | round | int), "") }}
+        </p>
+        {% if stats.previous_overall is not none %}
+        {% set delta = stats.overall_avg - stats.previous_overall %}
+        <p class="text-xs mt-1 font-semibold
+            {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
+            {% if delta > 0 %}▲ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}▼ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
+            <span class="font-normal text-hub-faint ml-0.5">vs prev</span>
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6 text-center">
+        <p class="text-sm font-medium text-hub-muted mb-1">Responses</p>
+        <p class="text-4xl font-bold text-hub-text">{{ stats.response_count }}</p>
+        <p class="text-xs text-hub-faint mt-1">participants</p>
+    </div>
+
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
+        <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
+        {% if stats.strengths %}
+        <p class="text-lg font-semibold text-hub-text">{{ stats.strengths[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-hub-text">{{ "%.1f"|format(stats.strengths[0].avg) }}</p>
+        {% endif %}
+    </div>
+
+    <div class="stagger-item bg-hub-card border-2 border-hub-border p-6">
+        <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
+        {% if stats.improvements %}
+        <p class="text-lg font-semibold text-hub-text">{{ stats.improvements[0].subcategory }}</p>
+        <p class="text-2xl font-bold text-accent-500">{{ "%.1f"|format(stats.improvements[0].avg) }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Strengths & Improvements Detail -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Strengths</h3>
+        {% for s in stats.strengths %}
+        <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <div>
+                <span class="text-hub-text">{{ s.subcategory }}</span>
+                <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-hub-muted px-2 py-0.5">
+                    {{ maturity_labels.get((s.avg | round | int), "") }}
+                </span>
+                <span class="text-lg font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Top 3 Improvement Areas</h3>
+        {% for s in stats.improvements %}
+        <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
+            <div>
+                <span class="text-hub-text">{{ s.subcategory }}</span>
+                <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-hub-muted px-2 py-0.5">
+                    {{ maturity_labels.get((s.avg | round | int), "") }}
+                </span>
+                <span class="text-lg font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Charts -->
+<h2 id="charts" class="text-lg font-bold text-hub-text mb-4 scroll-mt-28">Charts</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Category Radar</h3>
+        <div style="height: 350px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="radarChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-hub-card border-2 border-hub-border p-6">
+        <h3 class="text-lg font-semibold text-hub-text mb-4">Category Scores</h3>
+        <div style="height: 350px;">
+            <canvas id="categoryBarChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Trend Chart -->
+{% if trends and trends.round_names | length >= 2 %}
+<div class="bg-hub-card border-2 border-hub-border p-6 mb-8">
+    <h3 class="text-lg font-semibold text-hub-text mb-4">Maturity Trends Across Rounds</h3>
+    <div style="height: 350px;">
+        <canvas id="trendChart"></canvas>
+    </div>
+</div>
+{% endif %}
+
+<!-- Per-Area Detail Scores -->
+{% if grouped_areas %}
+<div class="mb-8">
+    <h2 id="details" class="text-lg font-bold text-hub-text mb-6 scroll-mt-28">Detailed Area Scores</h2>
+
+    {% for category, subcategories in grouped_areas.items() %}
+    <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
+        <!-- Category header -->
+        <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
+                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
+                {% set all_avgs = [] %}
+                {% for areas in subcategories.values() %}{% for a in areas %}{% if all_avgs.append(a.avg) %}{% endif %}{% endfor %}{% endfor %}
+                {% if all_avgs %}
+                {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
+                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
+                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                    <span class="text-hub-muted"> — {{ maturity_labels.get((cat_avg | round | int), "") }}</span>
+                </span>
+                {% endif %}
+            </div>
+            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div class="section-content">
+            {% for subcategory, areas in subcategories.items() %}
+            <div class="border-t border-hub-border">
+                <!-- Subcategory header -->
+                <div class="px-5 py-3 bg-hub-surface">
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
+                        {% set sub_avg = (areas | map(attribute='avg') | sum) / (areas | length) %}
+                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
+                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                            {{ "%.1f"|format(sub_avg) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Areas -->
+                {% for a in areas %}
+                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                            <p class="text-sm text-hub-text leading-relaxed">{{ a.area }}</p>
+                            {% if a.current_description %}
+                            <p class="text-xs text-hub-muted italic mt-1">Current: "{{ a.current_description }}"</p>
+                            {% endif %}
+                        </div>
+                        <div class="shrink-0 flex items-center gap-2">
+                            <span class="text-xs text-hub-muted">{{ a.level_label }}</span>
+                            <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
+                                {% if a.avg >= 3.0 %}border-hub-text text-hub-text
+                                {% else %}border-accent-500 text-accent-500{% endif %}">
+                                {{ "%.1f"|format(a.avg) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endif %}
+
+<!-- Maturity Levels Modal -->
+<div id="maturityModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70" onclick="document.getElementById('maturityModal').classList.add('hidden')"></div>
+    <div class="relative bg-white max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6" style="border: 3px solid #000;">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-lg font-bold text-hub-text">Maturity Levels</h2>
+            <button onclick="document.getElementById('maturityModal').classList.add('hidden')"
+                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-3">
+            {% set colors = {1: "border-accent-500", 2: "border-accent-400", 3: "border-hub-muted", 4: "border-hub-text", 5: "border-hub-text"} %}
+            {% set dot_colors = {1: "bg-accent-500", 2: "bg-accent-500", 3: "bg-black", 4: "bg-black", 5: "bg-black"} %}
+            {% for level, desc in maturity_descriptions.items() %}
+            <div class="border-2 p-3 {{ colors[level] }}">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="flex items-center justify-center w-5 h-5 rounded-full {{ dot_colors[level] }} text-white text-xs font-bold">{{ level }}</span>
+                    <span class="text-sm font-bold text-hub-text">{{ desc.name }}</span>
+                    <span class="text-xs text-hub-muted">— {{ desc.short }}</span>
+                </div>
+                <p class="text-xs text-hub-muted leading-relaxed ml-7">{{ desc.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateDashboardUrl() {
+        const roundId = document.getElementById('roundSelector')?.value || '';
+        const teamId = document.getElementById('teamSelector')?.value || '';
+        let url = '/engineering/dashboard/view?';
+        const params = [];
+        if (roundId) params.push('round_id=' + roundId);
+        if (teamId) params.push('team_id=' + teamId);
+        window.location = url + params.join('&');
+    }
+
+    function toggleSection(btn) {
+        const content = btn.nextElementSibling;
+        const chevron = btn.querySelector('.section-chevron');
+        content.classList.toggle('collapsed');
+        chevron.classList.toggle('rotate-180');
+    }
+
+    function copyLink(inputId, btn) {
+        const input = document.getElementById(inputId);
+        navigator.clipboard.writeText(input.value).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.classList.add('bg-black/15', 'text-hub-text');
+            setTimeout(() => {
+                btn.textContent = orig;
+                btn.classList.remove('bg-black/15', 'text-hub-text');
+            }, 2000);
+        });
+    }
+</script>
+
+{% if stats %}
+<script>
+    const engineeringColors = [
+        'rgba(59, 130, 246, 0.7)',   // blue - Build
+        'rgba(139, 92, 246, 0.7)',   // violet - Test
+        'rgba(16, 185, 129, 0.7)',   // green - Deploy
+        'rgba(245, 158, 11, 0.7)',   // amber - Architecture
+        'rgba(239, 68, 68, 0.7)',    // red - Infra
+        'rgba(236, 72, 153, 0.7)',   // pink - Process
+        'rgba(20, 184, 166, 0.7)',   // teal - Culture
+    ];
+
+    const engineeringBorders = engineeringColors.map(c => c.replace('0.7', '1'));
+
+    // Radar Chart
+    {
+        const labels = [];
+        const values = [];
+        {% for c in stats.category_scores %}
+        labels.push({{ c.category | tojson }});
+        values.push({{ c.avg }});
+        {% endfor %}
+
+        if (labels.length > 0) {
+            new Chart(document.getElementById('radarChart'), {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Delivery Maturity',
+                        data: values,
+                        backgroundColor: 'rgba(255, 0, 0, 0.08)',
+                        borderColor: '#000000',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#FF0000',
+                        pointBorderColor: '#000000',
+                        pointRadius: 6,
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                backdropColor: 'transparent',
+                                color: '#888',
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return value || '';
+                                },
+                                z: 1,
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.12)',
+                            },
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.12)',
+                            },
+                            pointLabels: {
+                                color: '#000',
+                                font: { size: 12, weight: '500' },
+                            },
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    // Category Bar Chart
+    {
+        const labels = [];
+        const values = [];
+        const colors = [];
+        {% for c in stats.category_scores %}
+        labels.push({{ c.category | tojson }});
+        values.push({{ c.avg }});
+        colors.push(engineeringColors[{{ loop.index0 }} % engineeringColors.length]);
+        {% endfor %}
+
+        new Chart(document.getElementById('categoryBarChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: '#FFFFFF',
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                    borderRadius: 0,
+                    barThickness: 28,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                const labels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
+                                return labels[value] || '';
+                            }
+                        }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // Trend Chart (Highlight on Hover)
+    {% if trends and trends.round_names | length >= 2 %}
+    {
+        const trendsData = {{ trends | tojson }};
+        const maturityLabels = {1: 'Base', 2: 'Beginner', 3: 'Intermediate', 4: 'Advanced', 5: 'Expert'};
+        const datasets = [];
+        for (const [cat, scores] of Object.entries(trendsData.categories)) {
+            datasets.push({ label: cat, data: scores });
+        }
+        createHighlightTrendChart('trendChart', trendsData.round_names, datasets, {
+            yLabel: 'Maturity Level',
+            yTickCallback: (v) => maturityLabels[v] || '',
+        });
+    }
+    {% endif %}
+</script>
+{% endif %}
+{% endblock %}

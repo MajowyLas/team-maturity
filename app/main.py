@@ -17,8 +17,8 @@ from app.auth import (
 )
 from app.database import SessionLocal, get_db, init_db
 from app.models import AssessmentRound, Team
-from app.routes import admin, dashboard, survey
-from app.seed import seed_questions
+from app.routes import admin, dashboard, engineering, survey
+from app.seed import seed_engineering_questions, seed_questions
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -29,8 +29,9 @@ async def lifespan(app: FastAPI):
     init_db()
     db = SessionLocal()
     try:
-        count = seed_questions(db)
-        print(f"[OK] Database ready - {count} survey questions loaded")
+        team_count = seed_questions(db)
+        eng_count = seed_engineering_questions(db)
+        print(f"[OK] Database ready - {team_count} team + {eng_count} engineering questions loaded")
     finally:
         db.close()
     yield
@@ -52,14 +53,30 @@ app.add_middleware(AuthMiddleware)
 app.include_router(survey.router)
 app.include_router(dashboard.router)
 app.include_router(admin.router)
+app.include_router(engineering.router)
 
 # Templates for the landing page
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 
 # Make auth_enabled available in ALL template instances (for showing logout link)
 _auth_enabled = APP_PASSWORD is not None
-for _tpl in (templates, survey.templates, dashboard.templates, admin.templates):
+_all_templates = (templates, survey.templates, dashboard.templates, admin.templates, engineering.templates)
+for _tpl in _all_templates:
     _tpl.env.globals["auth_enabled"] = _auth_enabled
+
+
+def _get_nav_teams() -> list:
+    """Fetch teams for the nav dropdown (called on each render)."""
+    db = SessionLocal()
+    try:
+        return db.query(Team).order_by(Team.name).all()
+    finally:
+        db.close()
+
+
+# Register a Jinja2 global function so nav can call it
+for _tpl in _all_templates:
+    _tpl.env.globals["get_nav_teams"] = _get_nav_teams
 
 
 @app.get("/")

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview: Skeuomorphic Revival</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%);
+            background-attachment: fixed;
+            color: #a0aec0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Card surface: dark leather texture via gradient */
+        .card-leather {
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.04);
+            border-right: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow:
+                0px 2px 4px rgba(0,0,0,0.3),
+                0px 8px 24px rgba(0,0,0,0.4);
+            border-radius: 12px;
+        }
+
+        /* Brushed metal nav */
+        .nav-metal {
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 50%, #2d3436 100%);
+            border-bottom: 1px solid rgba(0,0,0,0.4);
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* Pressed/inset panel */
+        .inset-panel {
+            background: linear-gradient(180deg, #0a0a1a 0%, #12122a 100%);
+            box-shadow: inset 0px 2px 8px rgba(0,0,0,0.5), inset 0px -1px 2px rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+
+        /* Button raised */
+        .btn-raised {
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            border-top: 1px solid rgba(255,255,255,0.12);
+            border-bottom: 1px solid rgba(0,0,0,0.4);
+            border-left: 1px solid rgba(255,255,255,0.06);
+            border-right: 1px solid rgba(0,0,0,0.2);
+            box-shadow:
+                0px 2px 4px rgba(0,0,0,0.3),
+                0px 6px 16px rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .btn-raised:hover {
+            background: linear-gradient(180deg, #34495e 0%, #22303c 100%);
+        }
+        .btn-raised:active {
+            box-shadow: inset 0px 2px 6px rgba(0,0,0,0.4);
+            border-top: 1px solid rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Embossed text */
+        .text-embossed {
+            text-shadow: 0px 2px 4px rgba(0,0,0,0.8), 0px -1px 0px rgba(255,255,255,0.1);
+        }
+        .text-debossed {
+            text-shadow: 0px 1px 0px rgba(255,255,255,0.08), 0px -1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Accent glow for important values */
+        .accent-glow-green { color: #27ae60; text-shadow: 0px 0px 8px rgba(39,174,96,0.3); }
+        .accent-glow-amber { color: #f39c12; text-shadow: 0px 0px 8px rgba(243,156,18,0.3); }
+        .accent-glow-red { color: #e74c3c; text-shadow: 0px 0px 8px rgba(231,76,60,0.3); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f23; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #2d3436, #636e72);
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.3);
+        }
+
+        /* Focus rings */
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(243,156,18,0.3), inset 0 1px 4px rgba(0,0,0,0.3);
+            border-color: #f39c12;
+        }
+
+        /* Score bar */
+        .score-track-skeu {
+            background: linear-gradient(180deg, #0a0a1a, #15152a);
+            box-shadow: inset 0px 1px 4px rgba(0,0,0,0.5);
+            border: 1px solid rgba(0,0,0,0.3);
+            border-radius: 4px;
+            height: 8px;
+        }
+        .score-fill-skeu {
+            border-radius: 3px;
+            height: 6px;
+            margin: 1px;
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+        }
+        .score-fill-green {
+            background: linear-gradient(180deg, #2ecc71, #27ae60);
+        }
+        .score-fill-amber {
+            background: linear-gradient(180deg, #f1c40f, #f39c12);
+        }
+
+        /* Radio option skeuomorphic */
+        .radio-option-skeu {
+            background: linear-gradient(180deg, #16213e, #0f0f23);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(0,0,0,0.3);
+            transition: all 0.15s ease;
+        }
+        .radio-option-skeu:hover {
+            background: linear-gradient(180deg, #1a2740, #131328);
+        }
+        input[type="radio"]:checked + .radio-option-skeu {
+            background: linear-gradient(180deg, #1a3020, #0f2018);
+            border-left: 3px solid #27ae60;
+            box-shadow: inset 0px 0px 12px rgba(39,174,96,0.08);
+        }
+
+        /* Divider groove */
+        .groove {
+            border-top: 1px solid rgba(0,0,0,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Indicator LED */
+        .led {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            box-shadow: inset 0 -1px 2px rgba(0,0,0,0.5), 0 0 4px currentColor;
+        }
+        .led-green { background: #27ae60; color: rgba(39,174,96,0.5); }
+        .led-amber { background: #f39c12; color: rgba(243,156,18,0.5); }
+
+        /* Number display - like a gauge */
+        .gauge-number {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- ══════════ NAV BAR (Brushed Metal) ══════════ -->
+    <nav class="nav-metal sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">📊</span>
+                <span class="font-bold text-lg text-embossed" style="color: #dfe6e9;">Team Maturity</span>
+            </div>
+            <div class="flex gap-1">
+                <a href="#" class="btn-raised px-3 py-1.5 text-xs font-medium" style="color: #b2bec3;">Team Maturity</a>
+                <a href="#" class="btn-raised px-3 py-1.5 text-xs font-medium" style="color: #b2bec3;">Engineering</a>
+                <a href="#" class="btn-raised px-3 py-1.5 text-xs font-medium" style="color: #b2bec3;">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- ══════════ STYLE LABEL ══════════ -->
+        <div class="mb-8 pb-4 groove">
+            <p class="text-xs text-debossed" style="color: #718096;">Preview mode: aesthetic only / no functional changes</p>
+            <h1 class="text-2xl font-extrabold text-embossed mt-2" style="color: #dfe6e9;">Skeuomorphic Revival</h1>
+            <p class="text-xs mt-1" style="color: #718096;">Dark leather surfaces / brushed metal nav / beveled edges / tactile depth</p>
+        </div>
+
+        <!-- ══════════ SECTION 1: DASHBOARD HUB ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="led led-green"></div>
+                <h2 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Overview</h2>
+                <div class="flex-1 groove"></div>
+                <span class="text-xs text-debossed" style="color: #718096;">Round: Q1-2026</span>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
+                <div class="card-leather p-6 text-center">
+                    <p class="text-xs font-medium text-debossed mb-1" style="color: #718096;">Overall Maturity</p>
+                    <p class="text-4xl font-bold gauge-number accent-glow-green">3.7</p>
+                    <p class="text-xs mt-1">
+                        <span class="accent-glow-green font-semibold">+0.32</span>
+                        <span style="color: #4a5568;"> vs prev</span>
+                    </p>
+                </div>
+                <div class="card-leather p-6 text-center">
+                    <p class="text-xs font-medium text-debossed mb-1" style="color: #718096;">Responses</p>
+                    <p class="text-4xl font-bold gauge-number text-embossed" style="color: #dfe6e9;">24</p>
+                    <p class="text-xs mt-1" style="color: #4a5568;">participants</p>
+                </div>
+                <div class="card-leather p-6">
+                    <p class="text-xs font-medium text-debossed mb-2" style="color: #718096;">Top Strength</p>
+                    <p class="text-sm font-semibold accent-glow-green">Stakeholders</p>
+                    <p class="text-2xl font-bold gauge-number accent-glow-green">4.2</p>
+                </div>
+                <div class="card-leather p-6">
+                    <p class="text-xs font-medium text-debossed mb-2" style="color: #718096;">Needs Improvement</p>
+                    <p class="text-sm font-semibold accent-glow-amber">Team Autonomy</p>
+                    <p class="text-2xl font-bold gauge-number accent-glow-amber">2.8</p>
+                </div>
+            </div>
+
+            <!-- Category Scores -->
+            <div class="card-leather p-5 mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-semibold text-embossed" style="color: #dfe6e9;">
+                        Category Scores
+                        <span class="font-normal" style="color: #4a5568;">-- change vs previous round</span>
+                    </h3>
+                </div>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Responsiveness</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-green">3.8</p>
+                        <p class="text-xs font-semibold accent-glow-green">+0.15</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Improvement</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-green">4.1</p>
+                        <p class="text-xs font-semibold accent-glow-green">+0.40</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Stakeholders</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-green">4.2</p>
+                        <p class="text-xs font-semibold accent-glow-green">+0.22</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Effectiveness</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-amber">3.2</p>
+                        <p class="text-xs font-semibold accent-glow-red">-0.10</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Autonomy</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-amber">2.8</p>
+                        <p class="text-xs font-semibold" style="color: #4a5568;">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] truncate mb-1" style="color: #718096;">Mgmt Support</p>
+                        <p class="text-lg font-bold gauge-number accent-glow-green">3.9</p>
+                        <p class="text-xs font-semibold accent-glow-green">+0.50</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar + Strengths -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div class="card-leather p-5">
+                        <h3 class="text-sm font-semibold mb-3 accent-glow-green">Top 3 Strengths</h3>
+                        <div class="py-2 groove">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Sprint Goals <span class="text-xs" style="color: #4a5568;">(Stakeholders)</span></span><span class="font-bold gauge-number accent-glow-green">4.5</span></div>
+                        </div>
+                        <div class="py-2 groove">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Quality Mindset <span class="text-xs" style="color: #4a5568;">(Improvement)</span></span><span class="font-bold gauge-number accent-glow-green">4.3</span></div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Release Freq <span class="text-xs" style="color: #4a5568;">(Responsiveness)</span></span><span class="font-bold gauge-number accent-glow-green">4.1</span></div>
+                        </div>
+                    </div>
+                    <div class="card-leather p-5">
+                        <h3 class="text-sm font-semibold mb-3 accent-glow-amber">Top 3 Improvement Areas</h3>
+                        <div class="py-2 groove">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Self-Management <span class="text-xs" style="color: #4a5568;">(Autonomy)</span></span><span class="font-bold gauge-number accent-glow-amber">2.6</span></div>
+                        </div>
+                        <div class="py-2 groove">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Cross-Functional <span class="text-xs" style="color: #4a5568;">(Autonomy)</span></span><span class="font-bold gauge-number accent-glow-amber">3.0</span></div>
+                        </div>
+                        <div class="py-2">
+                            <div class="flex justify-between"><span class="text-sm" style="color: #a0aec0;">Morale <span class="text-xs" style="color: #4a5568;">(Effectiveness)</span></span><span class="font-bold gauge-number accent-glow-amber">3.1</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-leather p-6">
+                    <h3 class="text-sm font-semibold text-embossed mb-3" style="color: #dfe6e9;">Category Overview</h3>
+                    <div style="height: 320px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ TEAM CARDS ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="led led-green"></div>
+                <h2 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Team Deep Dives</h2>
+                <div class="flex-1 groove"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                <!-- Team card 1 -->
+                <div class="card-leather cursor-pointer hover:translate-y-[-2px] transition-transform overflow-hidden">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Team Alpha</h3>
+                            <span class="text-[10px] px-2 py-0.5 btn-raised" style="color: #718096;">8 responses</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold gauge-number accent-glow-green">4.1</p>
+                                <p class="text-[10px]" style="color: #4a5568;">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Responsive</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-green" style="width: 82%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">4.1</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Improve</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-green" style="width: 86%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">4.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Stakehld</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-green" style="width: 90%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">4.5</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Autonomy</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-amber" style="width: 60%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right accent-glow-amber" style="font-size:10px;">3.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 groove" style="background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.25));">
+                        <div class="px-4 py-3" style="border-right: 1px solid rgba(0,0,0,0.3);">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #4a5568;">Strength</p>
+                            <p class="text-xs font-semibold accent-glow-green">Sprint Goals</p>
+                            <p class="text-sm font-bold gauge-number accent-glow-green">4.5</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #4a5568;">To Improve</p>
+                            <p class="text-xs font-semibold accent-glow-amber">Self-Mgmt</p>
+                            <p class="text-sm font-bold gauge-number accent-glow-amber">2.8</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team card 2 -->
+                <div class="card-leather cursor-pointer hover:translate-y-[-2px] transition-transform overflow-hidden">
+                    <div class="p-5 pb-3">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Team Bravo</h3>
+                            <span class="text-[10px] px-2 py-0.5 btn-raised" style="color: #718096;">6 responses</span>
+                        </div>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold gauge-number accent-glow-amber">3.2</p>
+                                <p class="text-[10px]" style="color: #4a5568;">overall</p>
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Responsive</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-amber" style="width: 66%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">3.3</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Improve</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-amber" style="width: 60%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">3.0</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Stakehld</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-green" style="width: 72%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right" style="color: #718096;">3.6</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] w-16 truncate" style="color: #718096;">Autonomy</span>
+                                    <div class="flex-1 score-track-skeu"><div class="score-fill-skeu score-fill-amber" style="width: 54%;"></div></div>
+                                    <span class="text-[10px] font-semibold w-5 text-right accent-glow-amber" style="font-size:10px;">2.7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 groove" style="background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.25));">
+                        <div class="px-4 py-3" style="border-right: 1px solid rgba(0,0,0,0.3);">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #4a5568;">Strength</p>
+                            <p class="text-xs font-semibold accent-glow-green">Review Quality</p>
+                            <p class="text-sm font-bold gauge-number accent-glow-green">3.8</p>
+                        </div>
+                        <div class="px-4 py-3">
+                            <p class="text-[10px] uppercase tracking-wide mb-0.5" style="color: #4a5568;">To Improve</p>
+                            <p class="text-xs font-semibold accent-glow-amber">Cross-Func</p>
+                            <p class="text-sm font-bold gauge-number accent-glow-amber">2.5</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending team -->
+                <div class="card-leather p-5 flex items-center justify-center" style="opacity: 0.6; border-style: dashed;">
+                    <div class="text-center">
+                        <div class="led led-amber mx-auto mb-2"></div>
+                        <p class="text-xs" style="color: #4a5568;">Awaiting Responses</p>
+                        <p class="text-sm mt-1 text-embossed" style="color: #718096;">Team Charlie</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ SECTION 2: SURVEY SAMPLE ══════════ -->
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="led led-green"></div>
+                <h2 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Survey Sample (Team)</h2>
+                <div class="flex-1 groove"></div>
+            </div>
+
+            <!-- Info card -->
+            <div class="card-leather p-6 mb-5">
+                <h2 class="text-sm font-bold text-embossed mb-4" style="color: #dfe6e9;">
+                    <span class="inline-flex items-center justify-center w-5 h-5 mr-1" style="background: linear-gradient(135deg, #f39c12, #e74c3c); border-radius: 6px; font-size: 10px; color: white;">?</span>
+                    About you
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5" style="color: #718096;">Round</label>
+                        <select class="w-full px-3 py-2.5 text-sm inset-panel" style="color: #a0aec0;">
+                            <option>Q1-2026</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1.5" style="color: #718096;">Your name</label>
+                        <input type="text" placeholder="e.g. Anna M." class="w-full px-3 py-2.5 text-sm inset-panel" style="color: #a0aec0;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="card-leather p-4 mb-5">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">📋</span>
+                        <span class="text-sm" style="color: #718096;">Ready when you are!</span>
+                    </div>
+                    <span class="text-xs font-medium" style="color: #4a5568;">0 / 20</span>
+                </div>
+                <div class="score-track-skeu" style="height: 10px;">
+                    <div class="score-fill-skeu" style="width: 40%; height: 8px; background: linear-gradient(90deg, #f39c12, #e74c3c, #9b59b6);"></div>
+                </div>
+            </div>
+
+            <!-- Question category -->
+            <div class="card-leather mb-5 overflow-hidden">
+                <div class="p-5 flex items-center justify-between cursor-pointer" style="border-bottom: 1px solid rgba(0,0,0,0.3);">
+                    <div class="flex items-center gap-3">
+                        <span class="w-1.5 h-7 rounded-full" style="background: linear-gradient(180deg, #f39c12, #e67e22);"></span>
+                        <h2 class="text-base font-bold text-embossed" style="color: #dfe6e9;">Stakeholders</h2>
+                    </div>
+                    <svg class="w-4 h-4" style="color: #4a5568;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="p-5">
+                    <h3 class="text-[11px] font-bold uppercase tracking-widest mb-3 pb-2" style="color: #f39c12; border-bottom: 1px solid rgba(0,0,0,0.2);">Sprint Goals</h3>
+
+                    <!-- Question with 1-5 score buttons -->
+                    <div class="mb-5">
+                        <p class="text-sm mb-3 leading-relaxed" style="color: #a0aec0;">Sprint goals are clearly defined and the team understands what success looks like.</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] w-14 shrink-0 text-right" style="color: #4a5568;">disagree</span>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="demo_s1" value="1" class="sr-only peer">
+                                <div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised
+                                    peer-checked:shadow-none" style="color: #4a5568; border-radius: 8px;">
+                                    1
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="demo_s1" value="2" class="sr-only peer">
+                                <div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">
+                                    2
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="demo_s1" value="3" class="sr-only peer" checked>
+                                <div class="w-11 h-11 flex items-center justify-center text-sm font-bold" style="color: #dfe6e9; border-radius: 8px; background: linear-gradient(180deg, #9b59b6, #8e44ad); box-shadow: inset 0px 2px 4px rgba(255,255,255,0.1), 0 0 12px rgba(155,89,182,0.3); border: 1px solid rgba(155,89,182,0.5);">
+                                    3
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="demo_s1" value="4" class="sr-only peer">
+                                <div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">
+                                    4
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="demo_s1" value="5" class="sr-only peer">
+                                <div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">
+                                    5
+                                </div>
+                            </label>
+                            <span class="text-[10px] w-14 shrink-0" style="color: #4a5568;">agree</span>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div>
+                        <p class="text-sm mb-3 leading-relaxed" style="color: #a0aec0;">Stakeholders actively participate in sprint reviews and provide useful feedback.</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] w-14 shrink-0 text-right" style="color: #4a5568;">disagree</span>
+                            <label class="relative cursor-pointer"><input type="radio" name="demo_s2" value="1" class="sr-only peer"><div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">1</div></label>
+                            <label class="relative cursor-pointer"><input type="radio" name="demo_s2" value="2" class="sr-only peer"><div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">2</div></label>
+                            <label class="relative cursor-pointer"><input type="radio" name="demo_s2" value="3" class="sr-only peer"><div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">3</div></label>
+                            <label class="relative cursor-pointer"><input type="radio" name="demo_s2" value="4" class="sr-only peer"><div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">4</div></label>
+                            <label class="relative cursor-pointer"><input type="radio" name="demo_s2" value="5" class="sr-only peer"><div class="w-11 h-11 flex items-center justify-center text-sm font-bold btn-raised" style="color: #4a5568; border-radius: 8px;">5</div></label>
+                            <span class="text-[10px] w-14 shrink-0" style="color: #4a5568;">agree</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="text-center py-6">
+                <button class="btn-raised px-10 py-4 text-lg font-bold" style="color: #dfe6e9; background: linear-gradient(180deg, #9b59b6 0%, #7d3c98 50%, #6c3483 100%); border-top: 1px solid rgba(255,255,255,0.15);">
+                    Pieroguje! 🥟
+                </button>
+                <p class="text-xs mt-3 text-debossed" style="color: #4a5568;">your perspective shapes the team</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        Chart.defaults.color = '#718096';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+        new Chart(document.getElementById('radarChart'), {
+            type: 'radar',
+            data: {
+                labels: ['Responsiveness', 'Improvement', 'Stakeholders', 'Effectiveness', 'Autonomy', 'Mgmt Support'],
+                datasets: [{
+                    label: 'Team Maturity',
+                    data: [3.8, 4.1, 4.2, 3.2, 2.8, 3.9],
+                    backgroundColor: 'rgba(243,156,18,0.1)',
+                    borderColor: '#f39c12',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#f39c12',
+                    pointRadius: 4,
+                    pointBorderColor: '#f39c12',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true, max: 5,
+                        ticks: { stepSize: 1, backdropColor: 'transparent', color: '#4a5568', font: { size: 9 } },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        angleLines: { color: 'rgba(255,255,255,0.04)' },
+                        pointLabels: { color: '#718096', font: { size: 10, weight: '500' } },
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

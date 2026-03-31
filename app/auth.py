@@ -1,8 +1,8 @@
 """Simple shared-password authentication.
 
 Protected routes: /, /admin, /dashboard (and sub-routes).
-Open routes: /survey/{token} (team members fill these without a password),
-             /static, /login, /logout.
+Open routes: /survey/{token}, /engineering/{token} (respondents fill
+             these without a password), /static, /login, /logout.
 
 Set APP_PASSWORD env var to enable. When unset, all routes are open
 (convenient for local development).
@@ -22,6 +22,8 @@ APP_PASSWORD: str | None = os.environ.get("APP_PASSWORD") or None
 _COOKIE_NAME = "maturity_auth"
 
 # Routes that do NOT require a password (prefixes).
+# Engineering token-based URLs: /engineering/{token} and /engineering/{token}/thanks
+# Dashboard at /engineering/dashboard/view is protected (requires auth).
 _PUBLIC_PREFIXES = ("/survey/", "/login", "/logout", "/static/")
 
 
@@ -70,6 +72,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         # Skip auth for public routes
         if any(path.startswith(prefix) for prefix in _PUBLIC_PREFIXES):
+            return await call_next(request)
+
+        # Engineering token-based survey URLs are public:
+        # /engineering/{token} and /engineering/{token}/thanks
+        # But /engineering/dashboard/view is protected.
+        if path.startswith("/engineering/") and not path.startswith("/engineering/dashboard"):
             return await call_next(request)
 
         # Skip if no password is configured
