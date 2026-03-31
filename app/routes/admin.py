@@ -184,6 +184,25 @@ def download_database():
     )
 
 
+@router.post("/data/upload-db")
+async def upload_database(file: UploadFile = File(...)):
+    """Upload a SQLite database to replace the current one.
+
+    Creates a backup of the existing DB before overwriting.
+    """
+    # Back up existing DB
+    backup_path = DB_PATH.with_suffix(".db.bak")
+    if DB_PATH.exists():
+        shutil.copy2(DB_PATH, backup_path)
+
+    # Write uploaded file
+    contents = await file.read()
+    with open(DB_PATH, "wb") as f:
+        f.write(contents)
+
+    return RedirectResponse(url="/admin", status_code=303)
+
+
 @router.get("/data/download-questions/{assessment_type}")
 def download_questions_csv(assessment_type: str, db: Session = Depends(get_db)):
     """Download questions as CSV (team or engineering)."""
