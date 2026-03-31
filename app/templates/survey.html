@@ -91,7 +91,7 @@
                                 {% for score in range(1, 6) %}
                                 <label class="relative cursor-pointer">
                                     <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                           class="sr-only peer" onchange="updateProgress()">
+                                           class="sr-only peer" onchange="updateProgress(event)">
                                     <div class="w-10 h-10 border-2 border-hub-border flex items-center justify-center
                                                 text-sm font-black text-hub-faint
                                                 peer-checked:border-black peer-checked:bg-black peer-checked:text-white
@@ -146,7 +146,7 @@
     ];
     let lastMilestone = -1;
 
-    function updateProgress() {
+    function updateProgress(event) {
         const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
         const pct = Math.round((answered / totalQuestions) * 100);
 
@@ -176,33 +176,38 @@
         if (answered === totalQuestions) document.getElementById('validationMsg')?.classList.add('hidden');
 
         saveDraft();
-        scrollToNextUnanswered();
+        scrollByTwoQuestions(event);
     }
 
-    function scrollToNextUnanswered() {
-        const allBlocks = document.querySelectorAll('#surveyForm .question-block');
-        for (const block of allBlocks) {
-            const radios = block.querySelectorAll('input[type="radio"]');
-            if (radios.length > 0 && !block.querySelector('input[type="radio"]:checked')) {
-                const catContent = block.closest('.category-content');
-                if (catContent && catContent.classList.contains('hidden')) {
-                    catContent.classList.remove('hidden');
-                    const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
-                    if (chevron) chevron.classList.add('rotate-180');
-                }
-                const rect = block.getBoundingClientRect();
-                const threshold = window.innerHeight * 0.85;
-                if (rect.top > threshold || rect.top < 0) {
-                    setTimeout(() => {
-                        window.scrollTo({ top: window.scrollY + block.getBoundingClientRect().top - 130, behavior: 'smooth' });
-                    }, 600);
-                }
-                return;
-            }
+    function scrollByTwoQuestions(event) {
+        const radio = event?.target;
+        if (!radio) return;
+        const currentBlock = radio.closest('.question-block');
+        if (!currentBlock) return;
+
+        const allBlocks = Array.from(document.querySelectorAll('#surveyForm .question-block'));
+        const currentIdx = allBlocks.indexOf(currentBlock);
+        if (currentIdx === -1) return;
+
+        const targetIdx = Math.min(currentIdx + 2, allBlocks.length - 1);
+        const targetBlock = allBlocks[targetIdx];
+
+        const catContent = targetBlock.closest('.category-content');
+        if (catContent && catContent.classList.contains('hidden')) {
+            catContent.classList.remove('hidden');
+            const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
+            if (chevron) chevron.classList.add('rotate-180');
         }
-        setTimeout(() => {
-            document.getElementById('submitBtn')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 300);
+
+        const rect = targetBlock.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight || rect.top < 0) {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: window.scrollY + targetBlock.getBoundingClientRect().top - 130,
+                    behavior: 'smooth'
+                });
+            }, 200);
+        }
     }
 
     function saveDraft() {
