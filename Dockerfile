@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir \
     "fastapi>=0.115.0" \
     "uvicorn[standard]>=0.32.0" \
     "sqlalchemy>=2.0.0" \
-    "jinja2>=3.1.0" \
+    "jinja2>=3.1.0,<3.1.5" \
     "python-multipart>=0.0.9"
 
 # Render sets PORT; default 8000 for local docker testing
