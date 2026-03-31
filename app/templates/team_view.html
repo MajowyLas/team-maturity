@@ -33,7 +33,22 @@
 </div>
 {% else %}
 
+<!-- Section navigation -->
+<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
+        <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#team-maturity" class="hover:text-hub-text transition-colors">Team Maturity</a>
+        <span class="text-hub-faint">&middot;</span>
+        <a href="#delivery-maturity" class="hover:text-hub-text transition-colors">Delivery Maturity</a>
+    </div>
+</nav>
+
 <!-- ═══════ COMBINED SUMMARY ═══════ -->
+<div class="flex items-center gap-3 mb-5">
+    <h2 id="overview" class="text-lg font-bold text-hub-text scroll-mt-28">Overview</h2>
+    <div class="flex-1 h-px bg-hub-border"></div>
+</div>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <!-- Team Maturity Score -->
     <div class="stagger-item bg-hub-card border-2 border-hub-border p-5">
@@ -147,7 +162,7 @@
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-6 pb-3 border-b border-hub-border">
         <span class="text-xl">📊</span>
-        <h2 class="text-2xl font-bold text-hub-text">Team Maturity Survey</h2>
+        <h2 id="team-maturity" class="text-2xl font-bold text-hub-text scroll-mt-28">Team Maturity Survey</h2>
         <span class="text-sm text-hub-faint">{{ stats.response_count }} responses</span>
     </div>
 
@@ -243,7 +258,7 @@
 <div class="mb-10">
     <div class="flex items-center gap-3 mb-6 pb-3 border-b border-hub-border">
         <span class="text-xl">🔧</span>
-        <h2 class="text-2xl font-bold text-hub-text">Delivery Maturity</h2>
+        <h2 id="delivery-maturity" class="text-2xl font-bold text-hub-text scroll-mt-28">Delivery Maturity</h2>
         <span class="text-sm text-hub-faint">{{ eng_stats.response_count }} responses · {{ maturity_labels.get((eng_stats.overall_avg | round | int), "") }}</span>
     </div>
 
