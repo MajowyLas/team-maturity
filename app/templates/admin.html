@@ -23,7 +23,26 @@
                 </button>
             </form>
             {% set active_round = rounds | selectattr('is_active') | first %}
+
+            <!-- Delivery Survey Link (shared across all teams) -->
+            {% if active_round %}
+            <div class="mb-5 pb-5 border-b-2 border-hub-border">
+                <p class="text-xs font-bold text-hub-muted uppercase mb-2">Delivery Survey — one link for all teams</p>
+                <div class="flex items-center gap-2">
+                    <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
+                           id="eng-link-shared"
+                           class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
+                    <button type="button" onclick="copyLink('eng-link-shared', this)"
+                            class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                        Copy
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Team Survey Links (per team) -->
             {% if teams %}
+            <p class="text-xs font-bold text-hub-muted uppercase mb-3">Team Surveys — one link per team</p>
             <ul class="divide-y divide-hub-border">
                 {% for t in teams %}
                 <li class="stagger-item py-4">
@@ -45,29 +64,14 @@
                                         class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
                             </div>
                         </div>
-                        <div class="space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-hub-faint uppercase shrink-0 w-20">Team</span>
-                                <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
-                                       id="link-{{ t.id }}"
-                                       class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
-                                <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                        class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                                    Copy
-                                </button>
-                            </div>
-                            {% if active_round %}
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-hub-faint uppercase shrink-0 w-20">Delivery</span>
-                                <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
-                                       id="eng-link-{{ t.id }}"
-                                       class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
-                                <button type="button" onclick="copyLink('eng-link-{{ t.id }}', this)"
-                                        class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
-                                    Copy
-                                </button>
-                            </div>
-                            {% endif %}
+                        <div class="flex items-center gap-2">
+                            <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
+                                   id="link-{{ t.id }}"
+                                   class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1 text-xs text-hub-muted font-mono">
+                            <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
+                                    class="px-2 py-1 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                Copy
+                            </button>
                         </div>
                     </div>
 
