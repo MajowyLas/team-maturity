@@ -2,10 +2,10 @@
 {% block title %}Delivery Maturity Assessment{% endblock %}
 
 {% block nav %}
-<nav class="sticky top-0 z-50 bg-black">
+<nav class="sticky top-0 z-50 bg-white border-b border-hub-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center h-14">
-            <span class="font-black text-lg tracking-tight uppercase text-white">Maturity_</span>
+            <span class="font-bold text-lg tracking-tight text-hub-text">Maturity</span>
         </div>
     </div>
 </nav>
@@ -14,23 +14,16 @@
 {% block content %}
 <div id="surveyApp" class="min-h-[calc(100vh-3.5rem)] flex flex-col">
 
-    <!-- Milestone toast -->
-    <div id="milestoneToast" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none opacity-0 transition-all duration-500 -translate-y-4">
-        <div class="bg-black text-white px-5 py-3 border-2 border-hub-border shadow-lg flex items-center gap-3">
-            <span id="milestoneEmoji" class="text-2xl"></span>
-            <span id="milestoneMsg" class="text-sm font-bold"></span>
-        </div>
-    </div>
 
     <!-- Draft recovery -->
     <div id="draftBanner" class="hidden fixed top-16 left-0 right-0 z-30 flex justify-center px-4">
-        <div class="border-2 border-hub-border bg-white p-4 flex items-center justify-between gap-4 max-w-lg w-full shadow-lg">
+        <div class="border border-hub-border bg-white rounded-xl p-4 flex items-center justify-between gap-4 max-w-lg w-full shadow-lg">
             <div class="flex items-center gap-2">
                 <span class="text-lg">💾</span>
-                <p class="text-sm text-hub-muted">Unfinished session — <strong id="draftCount" class="text-hub-text font-black">0</strong> answers cached.</p>
+                <p class="text-sm text-hub-muted">Unfinished session — <strong id="draftCount" class="text-hub-text font-semibold">0</strong> answers cached.</p>
             </div>
             <div class="flex gap-2 shrink-0">
-                <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+                <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-brand-600 text-white text-xs font-medium rounded-lg hover:bg-brand-700 transition">Restore</button>
                 <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
             </div>
         </div>
@@ -42,25 +35,25 @@
         <div id="introScreen" class="flex-1 flex items-center justify-center px-4">
             <div class="max-w-md w-full">
                 <div class="mb-8 text-center">
-                    <div class="text-4xl mb-4 font-black text-hub-text">///</div>
-                    <h1 class="text-2xl font-black text-hub-text tracking-tight uppercase">Delivery Maturity Assessment</h1>
+                    <div class="text-4xl mb-4 text-brand-500">✦</div>
+                    <h1 class="text-2xl font-bold text-hub-text tracking-tight">Delivery Maturity Assessment</h1>
                     <p class="text-hub-muted text-sm mt-2">Pick the maturity level that best describes where we are today. Honesty helps us grow!</p>
-                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
-                        <span class="w-2 h-2 bg-accent-500"></span>
-                        <span class="text-xs font-black text-hub-text uppercase">{{ round.name }}</span>
+                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border border-hub-border rounded-full bg-brand-50">
+                        <span class="w-2 h-2 bg-brand-500 rounded-full"></span>
+                        <span class="text-xs font-semibold text-brand-700">{{ round.name }}</span>
                     </div>
                 </div>
 
                 <div class="space-y-4 mb-8">
                     <div>
-                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
+                        <label class="block text-xs font-medium text-hub-muted mb-1.5">Your name</label>
                         <input type="text" name="respondent_name" id="respondentName" required placeholder="e.g. Jane Smith"
-                               class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
+                               class="w-full border border-hub-border rounded-lg bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your team</label>
+                        <label class="block text-xs font-medium text-hub-muted mb-1.5">Your team</label>
                         <select name="team_id" required id="teamSelect"
-                                class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
+                                class="w-full border border-hub-border rounded-lg bg-white px-3 py-2.5 text-sm text-hub-text font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                             <option value="" disabled selected class="text-hub-faint">— choose your squad —</option>
                             {% for t in teams %}
                             <option value="{{ t.id }}">{{ t.name }}</option>
@@ -70,15 +63,15 @@
                 </div>
 
                 <button type="button" id="startBtn"
-                        class="w-full px-6 py-4 bg-black text-white font-black uppercase tracking-wide text-sm
-                               hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
-                               border-2 border-black hover:border-hub-muted disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                        class="w-full px-6 py-3.5 bg-brand-600 text-white font-semibold rounded-lg text-sm
+                               hover:bg-brand-700 active:scale-[0.98] transition-all duration-200
+                               disabled:opacity-40 disabled:cursor-not-allowed shadow-soft" disabled>
                     Let's Go!
                 </button>
                 <p class="text-hub-faint text-xs mt-3 text-center">{{ total_questions }} questions · takes about 10 min</p>
 
                 <div class="mt-4 text-center">
-                    <span class="text-xs text-hub-faint">Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">Enter</kbd> to start</span>
+                    <span class="text-xs text-hub-faint">Press <kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">Enter</kbd> to start</span>
                 </div>
             </div>
         </div>
@@ -87,46 +80,47 @@
         <div id="questionScreen" class="hidden flex-1 flex flex-col">
 
             <!-- Top bar: progress -->
-            <div class="bg-black text-white px-4 py-3 sticky top-14 z-10">
+            <div class="bg-white border-b border-hub-border px-4 py-3 sticky top-14 z-10">
                 <div class="max-w-3xl mx-auto">
                     <div class="flex items-center justify-between mb-1.5">
                         <div class="flex items-center gap-2">
-                            <span id="questionCategory" class="text-xs font-bold uppercase text-white/60 truncate"></span>
+                            <span id="questionCategory" class="text-xs font-medium text-hub-muted truncate"></span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span id="progressMsg" class="text-xs text-white/50 hidden sm:inline transition-opacity duration-300"></span>
-                            <span id="progressText" class="text-xs font-bold tabular-nums shrink-0">
+                            <span id="progressText" class="text-xs font-semibold text-hub-muted tabular-nums shrink-0">
                                 <span id="progressCount">0</span> / {{ total_questions }}
                             </span>
                         </div>
                     </div>
-                    <div class="relative w-full bg-white/20 h-1.5 overflow-hidden">
-                        <div id="progressBar" class="h-1.5 bg-accent-500 transition-all duration-500 ease-out" style="width: 0%"></div>
+                    <div class="relative w-full bg-hub-hover rounded-full h-2 overflow-visible">
+                        <div id="progressBar" class="h-2 bg-brand-500 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                        <!-- Dino mascot canvas -->
+                        <canvas id="dinoMascot" width="36" height="32" style="position:absolute;top:-26px;pointer-events:none;image-rendering:pixelated;transition:left 0.5s ease-out;" class="z-20"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- Question area -->
             <div class="flex-1 flex items-center justify-center px-4 py-8">
-                <div class="max-w-2xl w-full border-2 border-hub-border p-8 md:p-10">
+                <div class="max-w-2xl w-full border border-hub-border rounded-xl shadow-card p-8 md:p-10 bg-white">
                     <!-- Question counter + subcategory -->
                     <div class="flex items-center justify-between mb-6">
-                        <span id="questionNumber" class="text-xs font-black text-hub-faint uppercase tracking-widest"></span>
+                        <span id="questionNumber" class="text-xs font-semibold text-hub-faint tracking-wide"></span>
                         <span id="questionSubcategory" class="text-xs text-hub-faint"></span>
                     </div>
 
                     <!-- Question text -->
-                    <p id="questionText" class="text-lg font-bold text-hub-text leading-relaxed mb-8 transition-opacity duration-200"></p>
+                    <p id="questionText" class="text-lg font-semibold text-hub-text leading-relaxed mb-8 transition-opacity duration-200"></p>
 
                     <!-- Maturity level options (stacked) -->
-                    <div id="answerLevels" class="space-y-0 border-2 border-hub-border overflow-hidden mb-8">
+                    <div id="answerLevels" class="space-y-0 border border-hub-border rounded-xl overflow-hidden mb-8">
                         <!-- Rendered by JS per question -->
                     </div>
 
                     <!-- Divider -->
                     <div class="border-t border-hub-border pt-5">
                         <div class="flex items-center justify-between text-xs text-hub-faint">
-                            <span>Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">1</kbd>–<kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">5</kbd> to answer</span>
+                            <span>Press <kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">1</kbd>–<kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">5</kbd> to answer</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" id="prevBtn" class="hover:text-hub-text transition disabled:opacity-30" disabled>
                                     <span class="flex items-center gap-1">
@@ -165,29 +159,28 @@
         <!-- ==================== SCREEN: SUBMIT ==================== -->
         <div id="submitScreen" class="hidden flex-1 flex items-center justify-center px-4">
             <div class="max-w-md w-full text-center">
-                <div class="text-5xl mb-4 font-black" id="finishEmoji">
-                    <span class="text-accent-500">✓</span>
+                <div class="text-5xl mb-4" id="finishEmoji">
+                    <span class="text-brand-500">✓</span>
                 </div>
-                <h2 class="text-2xl font-black text-hub-text uppercase mb-2">Assessment Complete!</h2>
+                <h2 class="text-2xl font-bold text-hub-text mb-2">Assessment Complete!</h2>
                 <p class="text-hub-muted text-sm mb-6">All {{ total_questions }} questions reviewed. Nice work!</p>
 
                 <!-- Validation message -->
-                <div id="validationMsg" class="hidden mb-4 border-2 border-accent-500 bg-accent-50 p-4 text-sm text-accent-600 font-bold"></div>
+                <div id="validationMsg" class="hidden mb-4 border border-brand-200 bg-brand-50 rounded-lg p-4 text-sm text-brand-600 font-medium"></div>
 
-                <div id="unansweredNotice" class="hidden mb-4 border-2 border-hub-border p-4">
-                    <p class="text-sm text-hub-muted"><span id="unansweredCount" class="font-black text-accent-500">0</span> questions still unanswered.</p>
-                    <button type="button" id="goToUnanswered" class="mt-2 text-xs font-bold text-hub-text underline hover:text-accent-500 transition">Go back and answer them</button>
+                <div id="unansweredNotice" class="hidden mb-4 border border-hub-border rounded-lg p-4">
+                    <p class="text-sm text-hub-muted"><span id="unansweredCount" class="font-semibold text-brand-600">0</span> questions still unanswered.</p>
+                    <button type="button" id="goToUnanswered" class="mt-2 text-xs font-medium text-hub-text underline hover:text-brand-600 transition">Go back and answer them</button>
                 </div>
 
                 <button type="submit" id="submitBtn"
-                        class="w-full px-8 py-4 bg-black text-white font-black uppercase tracking-wide text-sm
-                               border-2 border-black hover:bg-hub-muted hover:border-hub-muted
-                               active:scale-[0.97] transition-all duration-200">
+                        class="w-full px-8 py-4 bg-brand-600 text-white font-semibold rounded-lg text-sm
+                               hover:bg-brand-700 active:scale-[0.98] transition-all duration-200 shadow-soft">
                     Submit Assessment
                 </button>
                 <p class="text-hub-faint text-xs mt-2 font-medium">your input drives improvement</p>
 
-                <button type="button" id="reviewBtn" class="mt-4 text-xs font-bold text-hub-faint hover:text-hub-text transition underline">
+                <button type="button" id="reviewBtn" class="mt-4 text-xs font-medium text-hub-faint hover:text-hub-text transition underline">
                     ← Review answers
                 </button>
             </div>
@@ -201,26 +194,6 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'eng_draft_{{ token }}';
 
-    // Milestones (brutal style)
-    const MILESTONES = [
-        { at: 1,   emoji: '▸', msg: 'First one down!' },
-        { at: 25,  emoji: '■□□□', msg: 'Quarter done — solid!' },
-        { at: 50,  emoji: '■■□□', msg: 'Halfway through!' },
-        { at: 75,  emoji: '■■■□', msg: 'Almost there!' },
-        { at: 90,  emoji: '■■■■', msg: 'Final stretch!' },
-        { at: 100, emoji: '✓', msg: 'All done!' },
-    ];
-
-    const PROGRESS_MSGS = [
-        { at: 0,  msg: 'Take your time' },
-        { at: 10, msg: 'Good start!' },
-        { at: 25, msg: 'Nice pace!' },
-        { at: 50, msg: 'Halfway there!' },
-        { at: 75, msg: 'Almost done!' },
-        { at: 90, msg: 'Last few!' },
-    ];
-
-    let lastMilestoneAt = -1;
 
     // Build questions array with level descriptions
     const questions = [];
@@ -262,24 +235,123 @@
     const answerLevels = document.getElementById('answerLevels');
     const progressBar = document.getElementById('progressBar');
     const progressCount = document.getElementById('progressCount');
-    const progressMsg = document.getElementById('progressMsg');
     const prevBtn = document.getElementById('prevBtn');
     const skipBtn = document.getElementById('skipBtn');
     const reviewBtn = document.getElementById('reviewBtn');
     const submitBtn = document.getElementById('submitBtn');
 
-    // === Milestone toast ===
-    function showMilestone(emoji, msg) {
-        const toast = document.getElementById('milestoneToast');
-        document.getElementById('milestoneEmoji').textContent = emoji;
-        document.getElementById('milestoneMsg').textContent = msg;
-        toast.classList.remove('opacity-0', '-translate-y-4');
-        toast.classList.add('opacity-100', 'translate-y-0');
-        setTimeout(() => {
-            toast.classList.add('opacity-0', '-translate-y-4');
-            toast.classList.remove('opacity-100', 'translate-y-0');
-        }, 2000);
+    // === Pixel dino mascot on progress bar ===
+    const dinoCanvas = document.getElementById('dinoMascot');
+    const dinoCtx = dinoCanvas ? dinoCanvas.getContext('2d') : null;
+    let dinoPrevPct = 0;
+    let dinoRunning = false;
+    let dinoFrame = 0;
+    let dinoFacing = 'front'; // 'right' when running, 'front' when idle
+    let dinoIdleTimer = null;
+    let dinoAnimId = null;
+
+    const S = 2; // pixel scale for mini dino
+    const dinoRun1 = [
+        '  .##  ',
+        '  .### ',
+        '  .##  ',
+        '#.##   ',
+        '####   ',
+        ' ###   ',
+        ' ##    ',
+        ' #.#   ',
+    ];
+    const dinoRun2 = [
+        '  .##  ',
+        '  .### ',
+        '  .##  ',
+        '#.##   ',
+        '####   ',
+        ' ###   ',
+        '  ##   ',
+        ' #. #  ',
+    ];
+    const dinoLook1 = [
+        ' .##. ',
+        ' #..# ',
+        ' #### ',
+        '  ##  ',
+        ' #### ',
+        '  ##  ',
+        ' #  # ',
+        ' #  # ',
+    ];
+    const dinoLook2 = [
+        ' .##. ',
+        ' #..# ',
+        ' #### ',
+        '  ##  ',
+        ' #### ',
+        '  ##  ',
+        ' #  # ',
+        '  #  #',
+    ];
+
+    function drawMiniSprite(ctx, sprite, x, y, bodyColor) {
+        for (let row = 0; row < sprite.length; row++) {
+            for (let col = 0; col < sprite[row].length; col++) {
+                if (sprite[row][col] === '#') {
+                    ctx.fillStyle = bodyColor;
+                    ctx.fillRect(x + col * S, y + row * S, S, S);
+                } else if (sprite[row][col] === '.') {
+                    ctx.fillStyle = '#c084fc'; // purple accent for eyes/details
+                    ctx.fillRect(x + col * S, y + row * S, S, S);
+                }
+            }
+        }
     }
+
+    function animateDino() {
+        if (!dinoCtx) return;
+        dinoCtx.clearRect(0, 0, 36, 32);
+        dinoFrame++;
+
+        let sprite;
+        if (dinoFacing === 'front') {
+            sprite = Math.floor(dinoFrame / 25) % 2 === 0 ? dinoLook1 : dinoLook2;
+        } else {
+            sprite = Math.floor(dinoFrame / 8) % 2 === 0 ? dinoRun1 : dinoRun2;
+        }
+
+        // Shadow
+        dinoCtx.fillStyle = 'rgba(0,0,0,0.05)';
+        dinoCtx.fillRect(4, 28, 7 * S + 2, 2);
+
+        drawMiniSprite(dinoCtx, sprite, 4, 12, '#6366f1');
+        dinoAnimId = requestAnimationFrame(animateDino);
+    }
+
+    function startDinoAnim() {
+        if (!dinoAnimId) animateDino();
+    }
+
+    function updateDinoPosition(pct) {
+        if (!dinoCanvas) return;
+        const barContainer = dinoCanvas.parentElement;
+        if (!barContainer) return;
+        const barWidth = barContainer.offsetWidth;
+        const dinoLeft = (pct / 100) * barWidth - 10;
+        dinoCanvas.style.left = Math.max(0, dinoLeft) + 'px';
+
+        if (pct > dinoPrevPct) {
+            dinoFacing = 'right';
+            dinoRunning = true;
+            clearTimeout(dinoIdleTimer);
+            dinoIdleTimer = setTimeout(() => {
+                dinoFacing = 'front';
+                dinoRunning = false;
+            }, 800);
+        }
+        dinoPrevPct = pct;
+    }
+
+    startDinoAnim();
+
 
     // === Start button logic ===
     function checkCanStart() {
@@ -298,10 +370,10 @@
         showQuestion(0);
     }
 
-    // === Highlight **key phrases** in red ===
+    // === Highlight **key phrases** ===
     function renderHighlight(text) {
         const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="text-accent-500">$1</strong>');
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="text-brand-600">$1</strong>');
     }
 
     // === Question rendering ===
@@ -319,7 +391,7 @@
             questionText.style.opacity = '1';
         }, 150);
 
-        // Render level options (brutal: black/white)
+        // Render level options
         const currentAnswer = answers[`q_${q.id}`];
         answerLevels.innerHTML = '';
         q.levels.forEach(level => {
@@ -329,11 +401,11 @@
             row.dataset.score = level.score;
             row.className = `block w-full text-left px-3 py-2.5 border-b border-hub-hover last:border-b-0
                 transition-all duration-150 cursor-pointer
-                ${isSelected ? 'bg-black text-white' : 'hover:bg-hub-hover'}`;
+                ${isSelected ? 'bg-brand-600 text-white' : 'hover:bg-brand-50'}`;
             row.innerHTML = `
                 <div class="flex items-center">
-                    <span class="shrink-0 text-xs font-black ${isSelected ? 'text-white/60' : 'text-hub-faint'} w-3 text-right mr-2">${level.score}</span>
-                    <span class="shrink-0 text-xs font-black w-[3rem] ${isSelected ? 'text-white/80' : 'text-hub-faint'}">${level.label}</span>
+                    <span class="shrink-0 text-xs font-semibold ${isSelected ? 'text-white/60' : 'text-hub-faint'} w-3 text-right mr-2">${level.score}</span>
+                    <span class="shrink-0 text-xs font-semibold w-[3rem] ${isSelected ? 'text-white/80' : 'text-hub-faint'}">${level.label}</span>
                     <span class="shrink-0 ${isSelected ? 'text-white/30' : 'text-hub-border'} mx-2">|</span>
                     <span class="text-xs ${isSelected ? 'text-white/90' : 'text-hub-muted'} leading-snug">${level.description}</span>
                 </div>`;
@@ -354,17 +426,17 @@
         const radio = document.querySelector(`input[name="q_${q.id}"][value="${score}"]`);
         if (radio) radio.checked = true;
 
-        // Visual feedback (brutal: black/white)
+        // Visual feedback
         answerLevels.querySelectorAll('button').forEach(row => {
             const s = parseInt(row.dataset.score);
             const isSelected = s === score;
             row.className = `block w-full text-left px-3 py-2.5 border-b border-hub-hover last:border-b-0
                 transition-all duration-150 cursor-pointer
-                ${isSelected ? 'bg-black text-white' : 'hover:bg-hub-hover'}`;
+                ${isSelected ? 'bg-brand-600 text-white' : 'hover:bg-brand-50'}`;
             const spans = row.querySelectorAll('span');
             if (spans.length >= 4) {
-                spans[0].className = `shrink-0 text-xs font-black ${isSelected ? 'text-white/60' : 'text-hub-faint'} w-3 text-right mr-2`;
-                spans[1].className = `shrink-0 text-xs font-black w-[3rem] ${isSelected ? 'text-white/80' : 'text-hub-faint'}`;
+                spans[0].className = `shrink-0 text-xs font-semibold ${isSelected ? 'text-white/60' : 'text-hub-faint'} w-3 text-right mr-2`;
+                spans[1].className = `shrink-0 text-xs font-semibold w-[3rem] ${isSelected ? 'text-white/80' : 'text-hub-faint'}`;
                 spans[2].className = `shrink-0 ${isSelected ? 'text-white/30' : 'text-hub-border'} mx-2`;
                 spans[3].className = `text-xs ${isSelected ? 'text-white/90' : 'text-hub-muted'} leading-snug`;
             }
@@ -390,25 +462,8 @@
         progressBar.style.width = pct + '%';
         progressCount.textContent = answered;
 
-        // Encouraging message
-        let currentMsgObj = PROGRESS_MSGS[0];
-        for (const m of PROGRESS_MSGS) { if (pct >= m.at) currentMsgObj = m; }
-        if (progressMsg) {
-            progressMsg.style.opacity = '0';
-            setTimeout(() => {
-                progressMsg.textContent = currentMsgObj.msg;
-                progressMsg.style.opacity = '1';
-            }, 150);
-        }
-
-        // Milestones
-        for (const m of MILESTONES) {
-            if (pct >= m.at && m.at > lastMilestoneAt) {
-                lastMilestoneAt = m.at;
-                showMilestone(m.emoji, m.msg);
-                break;
-            }
-        }
+        // Update dino mascot position
+        updateDinoPosition(pct);
     }
 
     // === Navigation ===

@@ -67,8 +67,9 @@
         <div class="bg-white rounded-xl border border-hub-border shadow-card p-5 hover:shadow-card-hover transition-shadow">
             <p class="text-xs font-medium text-hub-faint uppercase tracking-wider mb-3">Overall Maturity</p>
             <p class="text-4xl font-bold
-                {% if overview_stats.overall_avg >= 3.0 %}text-hub-text
-                {% else %}text-warn-600{% endif %}">
+                {% if overview_stats.overall_avg >= 4.0 %}text-good-600
+                {% elif overview_stats.overall_avg >= 3.0 %}text-warn-600
+                {% else %}text-bad-600{% endif %}">
                 {{ "%.1f"|format(overview_stats.overall_avg) }}
             </p>
             {% if overview_stats.previous_overall is not none %}
@@ -121,9 +122,9 @@
             <div class="text-center p-3 rounded-lg bg-hub-hover/50 hover:bg-hub-hover transition">
                 <p class="text-xs text-hub-faint font-medium truncate mb-1" title="{{ cat.category }}">{{ cat.category }}</p>
                 <p class="text-2xl font-bold
-                    {% if cat.avg >= 3.5 %}text-good-600
-                    {% elif cat.avg >= 3.0 %}text-hub-text
-                    {% else %}text-warn-600{% endif %}">
+                    {% if cat.avg >= 4.0 %}text-good-600
+                    {% elif cat.avg >= 3.0 %}text-warn-600
+                    {% else %}text-bad-600{% endif %}">
                     {{ "%.1f"|format(cat.avg) }}
                 </p>
                 {% if cat.category in overview_stats.category_deltas %}
@@ -224,9 +225,9 @@
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
                 <span class="text-xs font-medium px-2 py-0.5 rounded-full
-                    {% if cat_avg >= 3.5 %}text-good-600 bg-good-50
-                    {% elif cat_avg >= 3.0 %}text-hub-muted bg-hub-hover
-                    {% else %}text-warn-600 bg-warn-50{% endif %}">
+                    {% if cat_avg >= 4.0 %}text-good-600 bg-good-50
+                    {% elif cat_avg >= 3.0 %}text-warn-600 bg-warn-50
+                    {% else %}text-bad-600 bg-bad-50{% endif %}">
                     {{ "%.1f"|format(cat_avg) }}
                 </span>
                 {% endif %}
@@ -245,8 +246,9 @@
                         <h4 class="text-xs font-medium text-hub-faint">{{ subcategory }}</h4>
                         {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
                         <span class="text-xs font-semibold
-                            {% if sub_avg >= 3.0 %}text-good-600
-                            {% else %}text-warn-600{% endif %}">
+                            {% if sub_avg >= 4.0 %}text-good-600
+                            {% elif sub_avg >= 3.0 %}text-warn-600
+                            {% else %}text-bad-600{% endif %}">
                             {{ "%.1f"|format(sub_avg) }}
                         </span>
                     </div>
@@ -258,9 +260,9 @@
                     <div class="flex items-start justify-between gap-4">
                         <p class="flex-1 text-sm text-hub-muted group-hover:text-hub-text transition">{{ s.statement }}</p>
                         <span class="shrink-0 text-sm font-semibold
-                            {% if s.avg >= 3.5 %}text-good-600
-                            {% elif s.avg >= 3.0 %}text-hub-text
-                            {% else %}text-warn-600{% endif %}">
+                            {% if s.avg >= 4.0 %}text-good-600
+                            {% elif s.avg >= 3.0 %}text-warn-600
+                            {% else %}text-bad-600{% endif %}">
                             {{ "%.1f"|format(s.avg) }}
                         </span>
                     </div>
@@ -292,8 +294,9 @@
                     <span class="text-xs text-hub-faint bg-hub-hover px-2 py-0.5 rounded-full shrink-0 ml-2">{{ card.response_count }} responses</span>
                 </div>
                 <p class="text-3xl font-bold leading-none
-                    {% if card.overall >= 3.0 %}text-hub-text
-                    {% else %}text-warn-600{% endif %}">
+                    {% if card.overall >= 4.0 %}text-good-600
+                    {% elif card.overall >= 3.0 %}text-warn-600
+                    {% else %}text-bad-600{% endif %}">
                     {{ "%.1f"|format(card.overall) }}
                 </p>
             </div>

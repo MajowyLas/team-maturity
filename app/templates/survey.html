@@ -2,10 +2,10 @@
 {% block title %}Team Health Check — {{ team.name }}{% endblock %}
 
 {% block nav %}
-<nav class="sticky top-0 z-50 bg-black">
+<nav class="sticky top-0 z-50 bg-white border-b border-hub-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center h-14">
-            <span class="font-black text-lg tracking-tight uppercase text-white">Maturity_</span>
+            <span class="font-bold text-lg tracking-tight text-hub-text">Maturity</span>
         </div>
     </div>
 </nav>
@@ -14,23 +14,16 @@
 {% block content %}
 <div id="surveyApp" class="min-h-[calc(100vh-3.5rem)] flex flex-col">
 
-    <!-- Milestone toast -->
-    <div id="milestoneToast" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none opacity-0 transition-all duration-500 -translate-y-4">
-        <div class="bg-black text-white px-5 py-3 border-2 border-hub-border shadow-lg flex items-center gap-3">
-            <span id="milestoneEmoji" class="text-2xl"></span>
-            <span id="milestoneMsg" class="text-sm font-bold"></span>
-        </div>
-    </div>
 
     <!-- Draft recovery -->
     <div id="draftBanner" class="hidden fixed top-16 left-0 right-0 z-30 flex justify-center px-4">
-        <div class="border-2 border-hub-border bg-white p-4 flex items-center justify-between gap-4 max-w-lg w-full shadow-lg">
+        <div class="border border-hub-border bg-white rounded-xl p-4 flex items-center justify-between gap-4 max-w-lg w-full shadow-lg">
             <div class="flex items-center gap-2">
-                <span class="font-black text-hub-text">[DRAFT]</span>
-                <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-accent-500 font-black">0</strong> saved answers.</p>
+                <span class="font-semibold text-hub-text">[DRAFT]</span>
+                <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-brand-600 font-semibold">0</strong> saved answers.</p>
             </div>
             <div class="flex gap-2 shrink-0">
-                <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+                <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-brand-600 text-white text-xs font-medium rounded-lg hover:bg-brand-700 transition">Restore</button>
                 <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
             </div>
         </div>
@@ -38,8 +31,8 @@
 
     {% if not rounds %}
     <div class="flex-1 flex items-center justify-center">
-        <div class="border-2 border-hub-border p-8 text-center">
-            <p class="text-hub-text font-bold">No active rounds right now.</p>
+        <div class="border border-hub-border rounded-xl p-8 text-center shadow-card">
+            <p class="text-hub-text font-semibold">No active rounds right now.</p>
             <p class="text-hub-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
         </div>
     </div>
@@ -50,41 +43,41 @@
         <div id="introScreen" class="flex-1 flex items-center justify-center px-4">
             <div class="max-w-md w-full">
                 <div class="mb-8 text-center">
-                    <div class="text-4xl mb-4 font-black text-hub-text">///</div>
-                    <h1 class="text-3xl font-black text-hub-text tracking-tight uppercase">Team Health Check</h1>
+                    <div class="text-4xl mb-4 text-brand-500">✦</div>
+                    <h1 class="text-3xl font-bold text-hub-text tracking-tight">Team Health Check</h1>
                     <p class="text-hub-muted text-sm mt-2">Your honest perspective helps the team grow. No wrong answers!</p>
-                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
-                        <span class="w-2 h-2 bg-accent-500"></span>
-                        <span class="text-xs font-black text-hub-text uppercase">{{ team.name }}</span>
+                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border border-hub-border rounded-full bg-brand-50">
+                        <span class="w-2 h-2 bg-brand-500 rounded-full"></span>
+                        <span class="text-xs font-semibold text-brand-700">{{ team.name }}</span>
                     </div>
                 </div>
 
                 <div class="space-y-4 mb-8">
                     <div>
-                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Round</label>
-                        <select name="round_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
+                        <label class="block text-xs font-medium text-hub-muted mb-1.5">Round</label>
+                        <select name="round_id" required class="w-full border border-hub-border rounded-lg bg-white px-3 py-2.5 text-sm text-hub-text font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                             {% for r in rounds %}
                             <option value="{{ r.id }}">{{ r.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
+                        <label class="block text-xs font-medium text-hub-muted mb-1.5">Your name</label>
                         <input type="text" name="respondent_name" id="respondentName" required placeholder="e.g. Anna M."
-                               class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
+                               class="w-full border border-hub-border rounded-lg bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     </div>
                 </div>
 
                 <button type="button" id="startBtn"
-                        class="w-full px-6 py-4 bg-black text-white font-black uppercase tracking-wide text-sm
-                               hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
-                               border-2 border-black hover:border-hub-muted disabled:opacity-40 disabled:cursor-not-allowed">
+                        class="w-full px-6 py-3.5 bg-brand-600 text-white font-semibold rounded-lg text-sm
+                               hover:bg-brand-700 active:scale-[0.98] transition-all duration-200
+                               disabled:opacity-40 disabled:cursor-not-allowed shadow-soft">
                     Let's Go!
                 </button>
                 <p class="text-hub-faint text-xs mt-3 text-center">{{ total_questions }} questions · takes about 5 min</p>
 
                 <div class="mt-4 text-center">
-                    <span class="text-xs text-hub-faint">Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">Enter</kbd> to start</span>
+                    <span class="text-xs text-hub-faint">Press <kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">Enter</kbd> to start</span>
                 </div>
             </div>
         </div>
@@ -93,44 +86,45 @@
         <div id="questionScreen" class="hidden flex-1 flex flex-col">
 
             <!-- Top bar: progress -->
-            <div class="bg-black text-white px-4 py-3 sticky top-14 z-10">
+            <div class="bg-white border-b border-hub-border px-4 py-3 sticky top-14 z-10">
                 <div class="max-w-3xl mx-auto">
                     <div class="flex items-center justify-between mb-1.5">
                         <div class="flex items-center gap-2">
-                            <span id="questionCategory" class="text-xs font-bold uppercase text-white/60 truncate"></span>
+                            <span id="questionCategory" class="text-xs font-medium text-hub-muted truncate"></span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span id="progressMsg" class="text-xs text-white/50 hidden sm:inline transition-opacity duration-300"></span>
-                            <span id="progressText" class="text-xs font-bold tabular-nums shrink-0">0 / {{ total_questions }}</span>
+                            <span id="progressText" class="text-xs font-semibold text-hub-muted tabular-nums shrink-0">0 / {{ total_questions }}</span>
                         </div>
                     </div>
-                    <div class="relative w-full bg-white/20 h-1.5 overflow-hidden">
-                        <div id="progressBar" class="h-1.5 bg-accent-500 transition-all duration-500 ease-out" style="width: 0%"></div>
+                    <div class="relative w-full bg-hub-hover rounded-full h-2 overflow-visible">
+                        <div id="progressBar" class="h-2 bg-brand-500 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                        <!-- Blob mascot canvas -->
+                        <canvas id="blobMascot" width="40" height="36" style="position:absolute;top:-30px;pointer-events:none;image-rendering:auto;transition:left 0.5s ease-out;" class="z-20"></canvas>
                     </div>
                 </div>
             </div>
 
             <!-- Question area -->
             <div class="flex-1 flex items-center justify-center px-4 py-8">
-                <div class="max-w-xl w-full border-2 border-hub-border p-8 md:p-10">
+                <div class="max-w-xl w-full border border-hub-border rounded-xl shadow-card p-8 md:p-10 bg-white">
                     <!-- Question counter + subcategory -->
                     <div class="flex items-center justify-between mb-6">
-                        <span id="questionNumber" class="text-xs font-black text-hub-faint uppercase tracking-widest"></span>
+                        <span id="questionNumber" class="text-xs font-semibold text-hub-faint tracking-wide"></span>
                         <span id="questionSubcategory" class="text-xs text-hub-faint"></span>
                     </div>
 
                     <!-- Question text -->
-                    <p id="questionText" class="text-xl font-bold text-hub-text leading-relaxed mb-10 transition-opacity duration-200"></p>
+                    <p id="questionText" class="text-xl font-semibold text-hub-text leading-relaxed mb-10 transition-opacity duration-200"></p>
 
-                    <!-- Answer options with brutal face scale -->
+                    <!-- Answer options -->
                     <div class="mb-8">
                         <div class="flex items-end justify-center gap-3 sm:gap-4" id="answerButtons">
                             <!-- Rendered by JS -->
                         </div>
-                        <!-- Minimal face labels (SVG, brutal style) -->
+                        <!-- Face labels -->
                         <div class="flex justify-center mt-3 gap-3 sm:gap-4">
                             <div class="w-12 flex justify-center" title="Strongly disagree">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-accent-500">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-brand-400">
                                     <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M6.5 14.5 C8 12, 12 12, 13.5 14.5"/>
                                 </svg>
                             </div>
@@ -150,7 +144,7 @@
                                 </svg>
                             </div>
                             <div class="w-12 flex justify-center" title="Strongly agree">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-black">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-brand-600">
                                     <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M6 12 C7.5 15, 12.5 15, 14 12"/>
                                 </svg>
                             </div>
@@ -160,7 +154,7 @@
                     <!-- Divider -->
                     <div class="border-t border-hub-border pt-5">
                         <div class="flex items-center justify-between text-xs text-hub-faint">
-                            <span>Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">1</kbd>–<kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">5</kbd> to answer</span>
+                            <span>Press <kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">1</kbd>–<kbd class="px-1.5 py-0.5 border border-hub-border rounded text-hub-muted font-mono text-[10px]">5</kbd> to answer</span>
                             <div class="flex items-center gap-4">
                                 <button type="button" id="prevBtn" class="hover:text-hub-text transition disabled:opacity-30" disabled>
                                     <span class="flex items-center gap-1">
@@ -199,29 +193,28 @@
         <!-- ==================== SCREEN: SUBMIT ==================== -->
         <div id="submitScreen" class="hidden flex-1 flex items-center justify-center px-4">
             <div class="max-w-md w-full text-center">
-                <div class="text-5xl mb-4 font-black" id="finishEmoji">
-                    <span class="text-accent-500">✓</span>
+                <div class="text-5xl mb-4" id="finishEmoji">
+                    <span class="text-brand-500">✓</span>
                 </div>
-                <h2 class="text-2xl font-black text-hub-text uppercase mb-2">You nailed it!</h2>
+                <h2 class="text-2xl font-bold text-hub-text mb-2">You nailed it!</h2>
                 <p class="text-hub-muted text-sm mb-6">All {{ total_questions }} questions answered. Your team thanks you!</p>
 
                 <!-- Validation message -->
-                <div id="validationMsg" class="hidden mb-4 border-2 border-accent-500 bg-accent-50 p-4 text-sm text-accent-600 font-bold"></div>
+                <div id="validationMsg" class="hidden mb-4 border border-brand-200 bg-brand-50 rounded-lg p-4 text-sm text-brand-600 font-medium"></div>
 
-                <div id="unansweredNotice" class="hidden mb-4 border-2 border-hub-border p-4">
-                    <p class="text-sm text-hub-muted"><span id="unansweredCount" class="font-black text-accent-500">0</span> questions still unanswered.</p>
-                    <button type="button" id="goToUnanswered" class="mt-2 text-xs font-bold text-hub-text underline hover:text-accent-500 transition">Go back and answer them</button>
+                <div id="unansweredNotice" class="hidden mb-4 border border-hub-border rounded-lg p-4">
+                    <p class="text-sm text-hub-muted"><span id="unansweredCount" class="font-semibold text-brand-600">0</span> questions still unanswered.</p>
+                    <button type="button" id="goToUnanswered" class="mt-2 text-xs font-medium text-hub-text underline hover:text-brand-600 transition">Go back and answer them</button>
                 </div>
 
                 <button type="submit" id="submitBtn"
-                        class="w-full px-10 py-4 bg-black text-white font-black uppercase tracking-wide text-lg
-                               hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
-                               border-2 border-black hover:border-hub-muted">
+                        class="w-full px-10 py-4 bg-brand-600 text-white font-semibold rounded-lg text-lg
+                               hover:bg-brand-700 active:scale-[0.98] transition-all duration-200 shadow-soft">
                     Submit Assessment
                 </button>
                 <p class="text-hub-faint text-xs mt-3 font-medium">your perspective shapes the team</p>
 
-                <button type="button" id="reviewBtn" class="mt-4 text-xs font-bold text-hub-faint hover:text-hub-text transition underline">
+                <button type="button" id="reviewBtn" class="mt-4 text-xs font-medium text-hub-faint hover:text-hub-text transition underline">
                     ← Review answers
                 </button>
             </div>
@@ -236,29 +229,6 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'survey_draft_{{ team.token }}';
 
-    // Milestones with brutal-fun messages
-    const MILESTONES = [
-        { at: 1,   emoji: '▸', msg: 'Great start!' },
-        { at: 25,  emoji: '■□□□', msg: 'Quarter done — nice pace!' },
-        { at: 50,  emoji: '■■□□', msg: 'Halfway! You\'re on fire!' },
-        { at: 75,  emoji: '■■■□', msg: 'Almost there, keep it up!' },
-        { at: 90,  emoji: '■■■■', msg: 'Final stretch!' },
-        { at: 100, emoji: '✓', msg: 'All done — amazing!' },
-    ];
-
-    // Encouraging messages for progress bar
-    const PROGRESS_MSGS = [
-        { at: 0,  msg: 'Every answer matters' },
-        { at: 10, msg: 'You\'re warming up!' },
-        { at: 25, msg: 'Nice flow!' },
-        { at: 40, msg: 'Keep that momentum' },
-        { at: 50, msg: 'Halfway hero!' },
-        { at: 65, msg: 'On a roll!' },
-        { at: 75, msg: 'The finish line is close' },
-        { at: 90, msg: 'Just a few more!' },
-    ];
-
-    let lastMilestoneAt = -1;
 
     // Build questions array from DOM
     const questions = [];
@@ -292,24 +262,157 @@
     const answerButtons = document.getElementById('answerButtons');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
-    const progressMsg = document.getElementById('progressMsg');
     const prevBtn = document.getElementById('prevBtn');
     const skipBtn = document.getElementById('skipBtn');
     const reviewBtn = document.getElementById('reviewBtn');
     const submitBtn = document.getElementById('submitBtn');
 
-    // === Milestone toast ===
-    function showMilestone(emoji, msg) {
-        const toast = document.getElementById('milestoneToast');
-        document.getElementById('milestoneEmoji').textContent = emoji;
-        document.getElementById('milestoneMsg').textContent = msg;
-        toast.classList.remove('opacity-0', '-translate-y-4');
-        toast.classList.add('opacity-100', 'translate-y-0');
-        setTimeout(() => {
-            toast.classList.add('opacity-0', '-translate-y-4');
-            toast.classList.remove('opacity-100', 'translate-y-0');
-        }, 2000);
+    // === Blob mascot on progress bar ===
+    const blobCanvas = document.getElementById('blobMascot');
+    const blobCtx = blobCanvas ? blobCanvas.getContext('2d') : null;
+    let blobPrevPct = 0;
+    let blobRunning = false;
+    let blobFrame = 0;
+    let blobFacing = 'front'; // 'right' when running, 'front' when idle
+    let blobIdleTimer = null;
+    let blobAnimId = null;
+
+    function drawMiniBlob(ctx, x, y, frame, facing, blinking) {
+        const sc = 0.55; // scale factor for mini blob
+        const walkCycle = Math.sin(frame * 0.18);
+        const bounce = facing === 'front'
+            ? Math.sin(frame * 0.08) * 1
+            : Math.abs(Math.sin(frame * 0.18)) * 3;
+        const tilt = facing === 'front' ? 0 : walkCycle * 0.1;
+
+        ctx.save();
+        ctx.translate(x, y - bounce);
+        ctx.scale(sc, sc);
+        ctx.rotate(tilt);
+
+        // Shadow
+        ctx.fillStyle = 'rgba(99,102,241,0.1)';
+        ctx.beginPath();
+        ctx.ellipse(0, 24 + bounce * 0.5, 18, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Feet
+        const stepL = Math.sin(frame * 0.18) * (facing === 'front' ? 0 : 3);
+        const stepR = Math.sin(frame * 0.18 + Math.PI) * (facing === 'front' ? 0 : 3);
+        ctx.fillStyle = '#4f46e5';
+        ctx.beginPath(); ctx.ellipse(-7 + stepL, 18, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(7 + stepR, 18, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Body
+        ctx.fillStyle = '#6366f1';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Belly
+        ctx.fillStyle = '#a5b4fc';
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.ellipse(0, 3, 10, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        if (facing === 'front') {
+            const eyeY = -4;
+            [-7, 7].forEach(ex => {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.ellipse(ex, eyeY, 5, blinking ? 1.2 : 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                if (!blinking) {
+                    ctx.fillStyle = '#312e81';
+                    ctx.beginPath();
+                    ctx.ellipse(ex, eyeY + 1, 2.8, 3.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(ex + 1.2, eyeY - 1.2, 1.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            // Cheeks
+            ctx.fillStyle = '#c084fc';
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath(); ctx.ellipse(-13, 3, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(13, 3, 4.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Smile
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(1, 4, 4, 0.1, Math.PI - 0.4);
+            ctx.stroke();
+        } else {
+            // Side face (running right)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(6, -4, 4.5, 5.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#312e81';
+            ctx.beginPath();
+            ctx.ellipse(7.5, -3, 2.5, 3.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(8.5, -5, 1, 0, Math.PI * 2);
+            ctx.fill();
+            // Cheek
+            ctx.fillStyle = '#c084fc';
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath(); ctx.ellipse(12, 2, 4, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            // Smile
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(7, 3, 3, 0, Math.PI * 0.6);
+            ctx.stroke();
+        }
+
+        ctx.restore();
     }
+
+    function animateBlob() {
+        if (!blobCtx) return;
+        blobCtx.clearRect(0, 0, 40, 36);
+        blobFrame++;
+        const blinking = blobFacing === 'front' && (Math.floor(blobFrame / 40) % 8 === 7);
+        drawMiniBlob(blobCtx, 20, 26, blobFrame, blobFacing, blinking);
+        blobAnimId = requestAnimationFrame(animateBlob);
+    }
+
+    function startBlobAnim() {
+        if (!blobAnimId) animateBlob();
+    }
+
+    function updateBlobPosition(pct) {
+        if (!blobCanvas) return;
+        const barContainer = blobCanvas.parentElement;
+        if (!barContainer) return;
+        const barWidth = barContainer.offsetWidth;
+        const blobLeft = (pct / 100) * barWidth - 12;
+        blobCanvas.style.left = Math.max(0, blobLeft) + 'px';
+
+        if (pct > blobPrevPct) {
+            // Progress advancing — run!
+            blobFacing = 'right';
+            blobRunning = true;
+            clearTimeout(blobIdleTimer);
+            blobIdleTimer = setTimeout(() => {
+                blobFacing = 'front';
+                blobRunning = false;
+            }, 800);
+        }
+        blobPrevPct = pct;
+    }
+
+    startBlobAnim();
+
 
     // === Start button logic ===
     function checkCanStart() {
@@ -328,11 +431,10 @@
         showQuestion(0);
     }
 
-    // === Highlight **key phrases** in red ===
+    // === Highlight **key phrases** ===
     function renderHighlight(text) {
-        // Escape HTML first, then convert **text** to red bold
         const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="text-accent-500">$1</strong>');
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="text-brand-600">$1</strong>');
     }
 
     // === Question rendering ===
@@ -350,7 +452,7 @@
             questionText.style.opacity = '1';
         }, 150);
 
-        // Render answer buttons (brutal: black/white)
+        // Render answer buttons
         const currentAnswer = answers[`q_${q.id}`];
         answerButtons.innerHTML = '';
         for (let score = 1; score <= 5; score++) {
@@ -358,11 +460,11 @@
             btn.type = 'button';
             btn.dataset.score = score;
             const isSelected = currentAnswer == score;
-            btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
+            btn.className = `w-12 h-12 rounded-lg border flex items-center justify-center text-sm font-semibold
                 transition-all duration-150 active:scale-90
                 ${isSelected
-                    ? 'border-black bg-black text-white'
-                    : 'border-hub-border text-hub-faint hover:border-hub-text hover:bg-hub-hover'}`;
+                    ? 'border-brand-500 bg-brand-600 text-white shadow-glow'
+                    : 'border-hub-border text-hub-faint hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600'}`;
             btn.textContent = score;
             btn.addEventListener('click', () => selectAnswer(score));
             answerButtons.appendChild(btn);
@@ -381,16 +483,16 @@
         const radio = document.querySelector(`input[name="q_${q.id}"][value="${score}"]`);
         if (radio) radio.checked = true;
 
-        // Visual feedback (brutal: black/white with bounce)
+        // Visual feedback
         answerButtons.querySelectorAll('button').forEach(btn => {
             const s = parseInt(btn.dataset.score);
             if (s === score) {
-                btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
-                    transition-all duration-150 active:scale-90 border-black bg-black text-white scale-110`;
+                btn.className = `w-12 h-12 rounded-lg border flex items-center justify-center text-sm font-semibold
+                    transition-all duration-150 active:scale-90 border-brand-500 bg-brand-600 text-white shadow-glow scale-110`;
                 setTimeout(() => btn.classList.remove('scale-110'), 200);
             } else {
-                btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
-                    transition-all duration-150 active:scale-90 border-hub-border text-hub-faint hover:border-hub-text hover:bg-hub-hover`;
+                btn.className = `w-12 h-12 rounded-lg border flex items-center justify-center text-sm font-semibold
+                    transition-all duration-150 active:scale-90 border-hub-border text-hub-faint hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600`;
             }
         });
 
@@ -414,25 +516,8 @@
         progressBar.style.width = pct + '%';
         progressText.textContent = `${answered} / ${totalQuestions}`;
 
-        // Update encouraging message
-        let currentMsg = PROGRESS_MSGS[0];
-        for (const m of PROGRESS_MSGS) { if (pct >= m.at) currentMsg = m; }
-        if (progressMsg) {
-            progressMsg.style.opacity = '0';
-            setTimeout(() => {
-                progressMsg.textContent = currentMsg.msg;
-                progressMsg.style.opacity = '1';
-            }, 150);
-        }
-
-        // Check milestones
-        for (const m of MILESTONES) {
-            if (pct >= m.at && m.at > lastMilestoneAt) {
-                lastMilestoneAt = m.at;
-                showMilestone(m.emoji, m.msg);
-                break;
-            }
-        }
+        // Update blob mascot position
+        updateBlobPosition(pct);
     }
 
     // === Navigation ===

@@ -199,19 +199,29 @@ def get_area_details(
         .all()
     )
 
-    return [
-        {
+    results = []
+    for row in rows:
+        avg = round(row.avg_score, 2)
+        level_int = int(round(row.avg_score))
+        # Build level descriptions dict from row columns for reliable lookup
+        level_descs = {
+            1: row.level_1 or "",
+            2: row.level_2 or "",
+            3: row.level_3 or "",
+            4: row.level_4 or "",
+            5: row.level_5 or "",
+        }
+        results.append({
             "question_id": row.id,
             "category": row.category,
             "subcategory": row.subcategory,
             "area": row.statement,
-            "avg": round(row.avg_score, 2),
+            "avg": avg,
             "count": row.cnt,
-            "level_label": MATURITY_LABELS.get(round(row.avg_score), ""),
-            "current_description": getattr(row, f"level_{round(row.avg_score)}", ""),
-        }
-        for row in rows
-    ]
+            "level_label": MATURITY_LABELS.get(level_int, ""),
+            "current_description": level_descs.get(level_int, ""),
+        })
+    return results
 
 
 def get_engineering_trends(

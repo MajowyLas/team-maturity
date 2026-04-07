@@ -75,9 +75,9 @@
     <div class="stagger-item bg-white rounded-xl border border-hub-border shadow-card p-6 text-center">
         <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
         <p class="text-4xl font-bold
-            {% if stats.overall_avg >= 3.5 %}text-good-600
-            {% elif stats.overall_avg >= 3.0 %}text-hub-text
-            {% else %}text-warn-600{% endif %}">
+            {% if stats.overall_avg >= 4.0 %}text-good-600
+            {% elif stats.overall_avg >= 3.0 %}text-warn-600
+            {% else %}text-bad-600{% endif %}">
             {{ "%.1f"|format(stats.overall_avg) }}
         </p>
         <p class="text-xs font-semibold mt-1 text-hub-text">
@@ -198,9 +198,9 @@
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
                 <span class="px-2.5 py-0.5 text-sm font-semibold rounded-lg
-                    {% if cat_avg >= 3.5 %}bg-good-50 text-good-600
-                    {% elif cat_avg >= 3.0 %}bg-hub-hover text-hub-text
-                    {% else %}bg-warn-50 text-warn-600{% endif %}">
+                    {% if cat_avg >= 4.0 %}bg-good-50 text-good-600
+                    {% elif cat_avg >= 3.0 %}bg-warn-50 text-warn-600
+                    {% else %}bg-bad-50 text-bad-600{% endif %}">
                     {{ "%.1f"|format(cat_avg) }}
                     <span class="font-normal text-hub-muted ml-1">{{ maturity_labels.get((cat_avg | round | int), "") }}</span>
                 </span>
@@ -220,9 +220,9 @@
                         <h4 class="text-sm font-semibold text-hub-muted">{{ subcategory }}</h4>
                         {% set sub_avg = (areas | map(attribute='avg') | sum) / (areas | length) %}
                         <span class="px-2 py-0.5 text-xs font-semibold rounded-md
-                            {% if sub_avg >= 3.5 %}bg-good-50 text-good-600
-                            {% elif sub_avg >= 3.0 %}bg-hub-hover text-hub-text
-                            {% else %}bg-warn-50 text-warn-600{% endif %}">
+                            {% if sub_avg >= 4.0 %}bg-good-50 text-good-600
+                            {% elif sub_avg >= 3.0 %}bg-warn-50 text-warn-600
+                            {% else %}bg-bad-50 text-bad-600{% endif %}">
                             {{ "%.1f"|format(sub_avg) }}
                         </span>
                     </div>
@@ -241,9 +241,9 @@
                         <div class="shrink-0 flex items-center gap-2">
                             <span class="text-xs text-hub-muted">{{ a.level_label }}</span>
                             <span class="px-2 py-0.5 text-xs font-semibold rounded-md
-                                {% if a.avg >= 3.5 %}text-good-600
-                                {% elif a.avg >= 3.0 %}text-hub-text
-                                {% else %}text-warn-600{% endif %}">
+                                {% if a.avg >= 4.0 %}text-good-600
+                                {% elif a.avg >= 3.0 %}text-warn-600
+                                {% else %}text-bad-600{% endif %}">
                                 {{ "%.1f"|format(a.avg) }}
                             </span>
                         </div>
