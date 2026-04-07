@@ -6,7 +6,7 @@
     <title>{% block title %}Team Maturity Assessment{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
@@ -20,50 +20,45 @@
                     },
                     colors: {
                         brand: {
-                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
-                            300: '#86efac', 400: '#4ade80', 500: '#4CB648',
-                            600: '#3d9c3a', 700: '#2d7a2a', 800: '#1f5e1d',
-                            900: '#14532d',
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe',
+                            300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1',
+                            600: '#4f46e5', 700: '#4338ca', 800: '#3730a3',
+                            900: '#312e81',
                         },
                         accent: {
-                            50: '#fff5f5', 100: '#ffe3e3', 200: '#ffc9c9',
-                            300: '#ffa8a8', 400: '#CC0000', 500: '#FF0000',
-                            600: '#e60000', 700: '#cc0000',
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe',
+                            300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1',
+                            600: '#4f46e5', 700: '#4338ca',
                         },
-                        forest: {
-                            300: '#4a9c5e',
-                            400: '#2D7A3F',
-                            500: '#1a6b30',
-                            600: '#0A6622',
+                        good: {
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
+                            500: '#22c55e', 600: '#16a34a',
+                        },
+                        warn: {
+                            50: '#fff7ed', 100: '#ffedd5',
+                            500: '#f97316', 600: '#ea580c',
+                        },
+                        bad: {
+                            50: '#fef2f2', 100: '#fee2e2',
+                            500: '#ef4444', 600: '#dc2626',
                         },
                         hub: {
-                            bg: '#FFFFFF',
-                            surface: '#FFFFFF',
-                            card: '#FFFFFF',
-                            hover: '#F5F5F5',
-                            border: '#000000',
-                            border2: '#000000',
-                            text: '#000000',
-                            muted: '#555555',
-                            faint: '#888888',
+                            bg: '#f8fafc',
+                            surface: '#ffffff',
+                            card: '#ffffff',
+                            hover: '#f1f5f9',
+                            border: '#e2e8f0',
+                            border2: '#cbd5e1',
+                            text: '#0f172a',
+                            muted: '#64748b',
+                            faint: '#94a3b8',
                         },
                     },
-                    borderRadius: {
-                        'none': '0px',
-                        'sm': '0px',
-                        DEFAULT: '0px',
-                        'md': '0px',
-                        'lg': '0px',
-                        'xl': '0px',
-                        '2xl': '0px',
-                        '3xl': '0px',
-                        'full': '0px',
-                    },
                     boxShadow: {
-                        'soft': 'none',
-                        'card': 'none',
-                        'card-hover': 'none',
-                        'glow': 'none',
+                        'soft': '0 1px 2px rgba(0,0,0,0.04)',
+                        'card': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)',
+                        'card-hover': '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+                        'glow': '0 0 0 3px rgba(99,102,241,0.15)',
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.3s ease-out',
@@ -89,34 +84,38 @@
         }
     </script>
     <script>
-        // Chart.js defaults — white brutal
-        Chart.defaults.color = '#000000';
-        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
+        // Chart.js defaults — clean minimal
+        Chart.defaults.color = '#334155';
+        Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.06)';
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.padding = 10;
     </script>
 </head>
-<body class="min-h-screen flex flex-col font-sans" style="background: #FFFFFF; color: #000000;">
+<body class="min-h-screen flex flex-col font-sans bg-hub-bg text-hub-text">
     {% block nav %}
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-black">
+    <nav class="sticky top-0 z-50 bg-white border-b border-hub-border">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14">
-                <a href="/" class="flex items-center">
-                    <span class="font-black text-lg tracking-tight uppercase text-white">Maturity_</span>
-                </a>
-                <div class="flex items-center">
-                    <div class="flex space-x-1">
-                        <a href="/dashboard" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                <div class="flex items-center gap-8">
+                    <a href="/" class="flex items-center">
+                        <span class="font-bold text-lg text-hub-text tracking-tight">Maturity</span>
+                    </a>
+                    <div class="flex items-center gap-1">
+                        <a href="/dashboard" class="nav-link px-3 py-1.5 text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover rounded-lg transition-all duration-150">
                             Team
                         </a>
-                        <a href="/engineering/dashboard/view" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                        <a href="/engineering/dashboard/view" class="nav-link px-3 py-1.5 text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover rounded-lg transition-all duration-150">
                             Delivery
                         </a>
-                        <a href="/admin" class="px-3 py-2 text-sm font-bold text-white/60 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                        <a href="/admin" class="nav-link px-3 py-1.5 text-sm font-medium text-hub-muted hover:text-hub-text hover:bg-hub-hover rounded-lg transition-all duration-150">
                             Admin
                         </a>
                     </div>
+                </div>
+                <div class="flex items-center">
                     {% if auth_enabled %}
-                    <a href="/logout" class="ml-4 px-3 py-2 text-sm font-bold text-white/40 hover:text-white uppercase tracking-wide transition-colors duration-150">
+                    <a href="/logout" class="px-3 py-1.5 text-sm font-medium text-hub-faint hover:text-hub-muted rounded-lg transition-colors duration-150">
                         Sign Out
                     </a>
                     {% endif %}
@@ -127,12 +126,12 @@
     {% endblock %}
 
     <!-- Main content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in w-full">
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in w-full">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-hub-border mt-10">
+    <footer class="border-t border-hub-border mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
             <span class="text-xs text-hub-faint">Built for DataFeedWatch</span>
             <span class="text-xs text-hub-faint">Maturity Assessment Tool</span>
@@ -143,13 +142,12 @@
         // Nav active state
         (function() {
             const path = window.location.pathname;
-            const links = document.querySelectorAll('nav a[href]');
-            links.forEach(link => {
+            document.querySelectorAll('nav .nav-link').forEach(link => {
                 const href = link.getAttribute('href');
                 if (href === '/') return;
                 if (path.startsWith(href)) {
-                    link.classList.remove('text-white/60');
-                    link.classList.add('text-white', 'border-b-2', 'border-white');
+                    link.classList.remove('text-hub-muted');
+                    link.classList.add('text-brand-600', 'bg-brand-50', 'font-semibold');
                 }
             });
         })();

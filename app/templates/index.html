@@ -5,15 +5,15 @@
 <div class="max-w-3xl mx-auto py-12">
 
     <div class="text-center mb-12 animate-fade-in-up">
-        <h1 class="text-5xl font-black text-hub-text mb-2">Know Where You Stand</h1>
-        <p class="text-2xl font-bold text-hub-text mb-3">Measure. Improve. Repeat.</p>
+        <h1 class="text-5xl font-bold text-hub-text mb-2">Know Where You Stand</h1>
+        <p class="text-2xl font-semibold text-hub-text mb-3">Measure. Improve. Repeat.</p>
         <p class="text-base text-hub-muted">Run maturity assessments across your teams and track progress over time.</p>
     </div>
 
-    <!-- ───── Stepper indicator ───── -->
+    <!-- Stepper indicator -->
     <div class="flex items-center justify-center mb-10" id="stepIndicator">
         <div class="flex items-center">
-            <span id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white">1</span>
+            <span id="dot1" class="step-dot w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-brand-600 text-white">1</span>
             <span class="text-xs ml-2 font-medium text-hub-muted">Team</span>
         </div>
         <div class="w-16 h-0.5 bg-hub-border mx-3 step-line" id="line1"></div>
@@ -28,17 +28,16 @@
         </div>
     </div>
 
-    <!-- ═══════ STEP 1 — Team ═══════ -->
-    <div id="step1" class="bg-hub-card border-2 border-hub-border p-8">
+    <!-- STEP 1 — Team -->
+    <div id="step1" class="bg-white rounded-xl border border-hub-border shadow-card p-8">
         {% if teams %}
-        <!-- Teams already exist: choose or create -->
         <h2 class="text-xl font-semibold text-hub-text mb-1">Select or create a team</h2>
         <p class="text-sm text-hub-muted mb-6">Pick an existing team or add a new one.</p>
 
         <div class="space-y-2 mb-6" id="teamList">
             {% for t in teams %}
             <button type="button" onclick="selectTeam({{ t.id }}, '{{ t.token }}', this)"
-                    class="team-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 flex items-center justify-between">
+                    class="team-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border border-hub-border hover:border-brand-300 hover:shadow-soft transition-all duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ t.name }}</span>
                     {% if t.member_count %}
@@ -55,10 +54,9 @@
         <div class="border-t border-hub-border pt-4">
             <button type="button" onclick="showNewTeamForm()"
                     id="newTeamToggle"
-                    class="text-sm text-hub-muted font-medium hover:underline">+ Create a new team</button>
+                    class="text-sm text-brand-600 font-medium hover:text-brand-700 transition-colors">+ Create a new team</button>
         </div>
         {% else %}
-        <!-- No teams yet: prompt to create -->
         <div class="text-center py-4">
             <div class="text-5xl mb-4">👥</div>
             <h2 class="text-xl font-semibold text-hub-text mb-2">Create your first team</h2>
@@ -66,32 +64,32 @@
         </div>
         {% endif %}
 
-        <!-- New team form (shown inline) -->
-        <div id="newTeamForm" class="{% if teams %}hidden{% endif %} mt-4 bg-hub-surface rounded-lg p-5 border-2 border-hub-border">
-            <h3 class="text-sm font-semibold text-hub-text uppercase tracking-wide mb-4">New Team</h3>
+        <!-- New team form -->
+        <div id="newTeamForm" class="{% if teams %}hidden{% endif %} mt-4 bg-hub-bg rounded-lg p-5 border border-hub-border">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">New Team</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-hub-text mb-1">Team Name</label>
                     <input type="text" id="teamNameInput" placeholder="e.g. Platform Team"
-                           class="w-full rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-4 py-2.5 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                           class="w-full rounded-lg border border-hub-border bg-white text-hub-text px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-hub-text mb-1">Number of Team Members</label>
                     <input type="number" id="memberCountInput" min="1" placeholder="e.g. 8"
-                           class="w-full rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-4 py-2.5 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                           class="w-full rounded-lg border border-hub-border bg-white text-hub-text px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                 </div>
                 <div id="teamError" class="hidden text-sm text-red-600"></div>
                 <button type="button" onclick="createTeam()"
                         id="createTeamBtn"
-                        class="w-full px-4 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="w-full px-4 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-colors">
                     Create Team
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ STEP 2 — Session ═══════ -->
-    <div id="step2" class="hidden bg-hub-card rounded-2xl border-2 border-hub-border p-8 mt-6">
+    <!-- STEP 2 — Session -->
+    <div id="step2" class="hidden bg-white rounded-xl border border-hub-border shadow-card p-8 mt-6">
         {% if rounds %}
         <h2 class="text-xl font-semibold text-hub-text mb-1">Select or create a session</h2>
         <p class="text-sm text-hub-muted mb-6">Choose an active assessment session or start a new one.</p>
@@ -100,10 +98,10 @@
             {% for r in rounds %}
             {% if r.is_active %}
             <button type="button" onclick="selectRound({{ r.id }}, '{{ r.engineering_token }}', this)"
-                    class="round-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 flex items-center justify-between">
+                    class="round-btn cursor-pointer w-full text-left px-5 py-3.5 rounded-xl border border-hub-border hover:border-brand-300 hover:shadow-soft transition-all duration-200 flex items-center justify-between">
                 <div>
                     <span class="font-medium text-hub-text">{{ r.name }}</span>
-                    <span class="ml-2 px-2 py-0.5 text-xs font-bold border-2 border-hub-text text-hub-text uppercase">Active</span>
+                    <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-good-50 text-good-600">Active</span>
                 </div>
                 <svg class="w-5 h-5 text-hub-faint check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -116,7 +114,7 @@
         <div class="border-t border-hub-border pt-4">
             <button type="button" onclick="showNewRoundForm()"
                     id="newRoundToggle"
-                    class="text-sm text-hub-muted font-medium hover:underline">+ Create a new session</button>
+                    class="text-sm text-brand-600 font-medium hover:text-brand-700 transition-colors">+ Create a new session</button>
         </div>
         {% else %}
         <div class="text-center py-4">
@@ -127,26 +125,26 @@
         {% endif %}
 
         <!-- New round form -->
-        <div id="newRoundForm" class="{% if rounds %}hidden{% endif %} mt-4 bg-hub-surface rounded-lg p-5 border-2 border-hub-border">
-            <h3 class="text-sm font-semibold text-hub-text uppercase tracking-wide mb-4">New Session</h3>
+        <div id="newRoundForm" class="{% if rounds %}hidden{% endif %} mt-4 bg-hub-bg rounded-lg p-5 border border-hub-border">
+            <h3 class="text-sm font-semibold text-hub-text mb-4">New Session</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-hub-text mb-1">Session Name</label>
                     <input type="text" id="roundNameInput" placeholder="e.g. Q1 2026"
-                           class="w-full rounded-lg border-hub-border2 border bg-hub-surface text-hub-text px-4 py-2.5 text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500">
+                           class="w-full rounded-lg border border-hub-border bg-white text-hub-text px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                 </div>
                 <div id="roundError" class="hidden text-sm text-red-600"></div>
                 <button type="button" onclick="createRound()"
                         id="createRoundBtn"
-                        class="w-full px-4 py-2.5 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200">
+                        class="w-full px-4 py-2.5 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-colors">
                     Create Session
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ STEP 3 — Pick survey & copy link ═══════ -->
-    <div id="step3" class="hidden bg-hub-card rounded-2xl border-2 border-hub-border p-8 mt-6">
+    <!-- STEP 3 — Pick survey & copy link -->
+    <div id="step3" class="hidden bg-white rounded-xl border border-hub-border shadow-card p-8 mt-6">
         <h2 class="text-xl font-semibold text-hub-text mb-1">Pick a survey</h2>
         <p class="text-sm text-hub-muted mb-6">Choose the assessment type, then copy and share the link.</p>
 
@@ -154,7 +152,7 @@
             <!-- Team Maturity -->
             <button type="button" onclick="selectSurvey('team')"
                     id="surveyBtn-team"
-                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border border-hub-border hover:border-brand-300 hover:shadow-soft transition-all duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">📊</span>
                     <span class="font-semibold text-hub-text text-lg">Team Maturity</span>
@@ -165,7 +163,7 @@
             <!-- Delivery Maturity -->
             <button type="button" onclick="selectSurvey('engineering')"
                     id="surveyBtn-engineering"
-                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border-2 border-hub-border hover:border-hub-muted transition-colors duration-200">
+                    class="survey-btn cursor-pointer text-left p-5 rounded-xl border border-hub-border hover:border-brand-300 hover:shadow-soft transition-all duration-200">
                 <div class="flex items-center gap-3 mb-2">
                     <span class="text-2xl">🔧</span>
                     <span class="font-semibold text-hub-text text-lg">Delivery Maturity</span>
@@ -174,19 +172,19 @@
             </button>
         </div>
 
-        <!-- Link output (hidden until survey selected) -->
+        <!-- Link output -->
         <div id="linkSection" class="hidden">
-            <div class="bg-hub-card border-2 border-hub-border p-6">
+            <div class="bg-hub-bg rounded-xl border border-hub-border p-6">
                 <div class="text-center mb-4">
                     <div class="text-3xl mb-2">🔗</div>
                     <p class="text-sm text-hub-muted">Send this link to <strong id="shareSummary"></strong></p>
                 </div>
                 <div class="flex items-center gap-2 max-w-xl mx-auto">
                     <input type="text" readonly id="surveyLinkOutput"
-                           class="flex-1 rounded-lg border-hub-border border bg-hub-surface px-4 py-3 text-sm text-hub-text font-mono">
+                           class="flex-1 rounded-lg border border-hub-border bg-white px-4 py-3 text-sm text-hub-text font-mono">
                     <button type="button" onclick="copyShareLink()"
                             id="copyBtn"
-                            class="px-5 py-3 bg-black text-white rounded-xl text-sm font-semibold hover:bg-hub-text active:scale-[0.97] shadow-soft hover:shadow-card transition-all duration-200 whitespace-nowrap">
+                            class="px-5 py-3 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-colors whitespace-nowrap">
                         Copy Link
                     </button>
                 </div>
@@ -194,11 +192,11 @@
         </div>
 
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="/dashboard" class="px-5 py-2.5 bg-hub-surface border-2 border-hub-border text-hub-text rounded-xl text-sm font-medium hover:bg-hub-hover hover:border-hub-border2 hover:shadow-soft active:scale-[0.97] transition-all duration-200">
+            <a href="/dashboard" class="px-5 py-2.5 bg-white border border-hub-border text-hub-text rounded-lg text-sm font-medium hover:bg-hub-hover hover:shadow-soft transition-all duration-200">
                 Go to Dashboard
             </a>
             <button type="button" onclick="resetFlow()"
-                    class="px-5 py-2.5 text-hub-muted text-sm font-medium hover:underline">
+                    class="px-5 py-2.5 text-hub-muted text-sm font-medium hover:text-hub-text transition-colors">
                 Start over
             </button>
         </div>
@@ -209,26 +207,24 @@
 
 {% block scripts %}
 <script>
-    // ─── State ───
+    // State
     let selectedTeamId = null;
     let selectedTeamToken = null;
     let selectedRoundId = null;
     let selectedEngToken = null;
 
-    // ─── Step 1: Team selection ───
+    // Step 1: Team selection
 
     function selectTeam(teamId, token, btn) {
         selectedTeamId = teamId;
         selectedTeamToken = token;
-        // Highlight selected
         document.querySelectorAll('.team-btn').forEach(b => {
-            b.classList.remove('border-hub-text', 'bg-hub-hover');
+            b.classList.remove('border-brand-500', 'bg-brand-50', 'shadow-soft');
             b.querySelector('.check-icon').classList.add('hidden');
         });
-        btn.classList.add('border-hub-text', 'bg-hub-hover');
+        btn.classList.add('border-brand-500', 'bg-brand-50', 'shadow-soft');
         btn.querySelector('.check-icon').classList.remove('hidden');
-        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-hub-muted');
-        // Move to step 2
+        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-brand-600');
         setTimeout(() => goToStep(2), 300);
     }
 
@@ -268,7 +264,6 @@
                 btn.textContent = 'Create Team';
                 return;
             }
-            // Use the newly created team
             selectedTeamId = data.id;
             selectedTeamToken = data.token;
             goToStep(2);
@@ -280,18 +275,18 @@
         }
     }
 
-    // ─── Step 2: Session selection ───
+    // Step 2: Session selection
 
     function selectRound(roundId, engToken, btn) {
         selectedRoundId = roundId;
         selectedEngToken = engToken;
         document.querySelectorAll('.round-btn').forEach(b => {
-            b.classList.remove('border-hub-text', 'bg-hub-hover');
+            b.classList.remove('border-brand-500', 'bg-brand-50', 'shadow-soft');
             b.querySelector('.check-icon').classList.add('hidden');
         });
-        btn.classList.add('border-hub-text', 'bg-hub-hover');
+        btn.classList.add('border-brand-500', 'bg-brand-50', 'shadow-soft');
         btn.querySelector('.check-icon').classList.remove('hidden');
-        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-hub-muted');
+        btn.querySelector('.check-icon').classList.replace('text-hub-faint', 'text-brand-600');
         setTimeout(() => goToStep(3), 300);
     }
 
@@ -341,18 +336,17 @@
         }
     }
 
-    // ─── Step 3: Survey selection ───
+    // Step 3: Survey selection
 
     function selectSurvey(type) {
         const base = '{{ base_url }}';
         let link, summary;
 
-        // Highlight selected card
         document.querySelectorAll('.survey-btn').forEach(b => {
-            b.classList.remove('border-hub-text', 'bg-hub-hover', 'shadow-soft');
+            b.classList.remove('border-brand-500', 'bg-brand-50', 'shadow-soft');
         });
         const btn = document.getElementById('surveyBtn-' + type);
-        btn.classList.add('border-hub-text', 'bg-hub-hover', 'shadow-soft');
+        btn.classList.add('border-brand-500', 'bg-brand-50', 'shadow-soft');
 
         if (type === 'team') {
             link = base + '/survey/' + selectedTeamToken;
@@ -365,30 +359,27 @@
         document.getElementById('surveyLinkOutput').value = link;
         document.getElementById('shareSummary').textContent = summary;
 
-        // Show link section with animation
         const linkSection = document.getElementById('linkSection');
         linkSection.classList.remove('hidden');
         linkSection.classList.add('step-panel');
     }
 
-    // ─── Step navigation ───
+    // Step navigation
 
     function goToStep(step) {
-        // Hide all steps
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.add('hidden');
 
-        // Update dots
         for (let i = 1; i <= 3; i++) {
             const dot = document.getElementById('dot' + i);
             const label = document.getElementById('label' + i);
             if (i < step) {
-                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white';
+                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-brand-600 text-white';
                 dot.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
                 if (label) label.className = 'text-xs ml-2 font-medium text-hub-muted';
             } else if (i === step) {
-                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-black text-white';
+                dot.className = 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-brand-600 text-white';
                 dot.textContent = i;
                 if (label) label.className = 'text-xs ml-2 font-medium text-hub-muted';
             } else {
@@ -397,25 +388,22 @@
                 if (label) label.className = 'text-xs ml-2 font-medium text-hub-faint';
             }
         }
-        // Update lines
-        document.getElementById('line1').className = step > 1 ? 'w-16 h-0.5 bg-black mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
-        document.getElementById('line2').className = step > 2 ? 'w-16 h-0.5 bg-black mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
+        document.getElementById('line1').className = step > 1 ? 'w-16 h-0.5 bg-brand-600 mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
+        document.getElementById('line2').className = step > 2 ? 'w-16 h-0.5 bg-brand-600 mx-3' : 'w-16 h-0.5 bg-hub-border mx-3';
 
-        // Show current step with entrance animation
         const panel = document.getElementById('step' + step);
         panel.classList.remove('hidden');
         panel.classList.add('step-panel');
 
-        // Reset link section when entering step 3
         if (step === 3) {
             document.getElementById('linkSection').classList.add('hidden');
             document.querySelectorAll('.survey-btn').forEach(b => {
-                b.classList.remove('border-hub-text', 'bg-hub-hover', 'shadow-soft');
+                b.classList.remove('border-brand-500', 'bg-brand-50', 'shadow-soft');
             });
         }
     }
 
-    // ─── Utility ───
+    // Utility
 
     function copyShareLink() {
         const input = document.getElementById('surveyLinkOutput');
@@ -423,11 +411,9 @@
             const btn = document.getElementById('copyBtn');
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.replace('bg-accent-600', 'bg-hub-text');
             btn.classList.add('copy-success');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.replace('bg-hub-text', 'bg-accent-600');
                 btn.classList.remove('copy-success');
             }, 2000);
         };

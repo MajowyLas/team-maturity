@@ -4,13 +4,13 @@
  * This file holds shared defaults and utility functions.
  */
 
-// Set global Chart.js defaults
+// Set global Chart.js defaults — clean minimal
 if (typeof Chart !== 'undefined') {
     Chart.defaults.font.family = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
     Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#000000';
-    Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.15)';
-    Chart.defaults.plugins.tooltip.cornerRadius = 0;
+    Chart.defaults.color = '#334155';
+    Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.06)';
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
     Chart.defaults.plugins.tooltip.padding = 10;
 }
 

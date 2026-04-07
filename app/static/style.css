@@ -1,29 +1,32 @@
-/* ===== Team Maturity Assessment — White Brutal Styles ===== */
+/* ===== Team Maturity Assessment — Clean Minimal Styles ===== */
 
 /* --- GLOBAL TRANSITIONS --- */
 button, a, input, select, textarea {
     transition: all 0.15s ease;
 }
 
-button:active:not(:disabled),
-a.btn-press:active {
-    transform: scale(0.97);
+button:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
-/* --- FOCUS RINGS (brutal: black outline) --- */
+/* --- FOCUS RINGS (clean: indigo outline) --- */
 input:focus, select:focus, textarea:focus {
     outline: none;
-    box-shadow: 0 0 0 2px #000;
-    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    border-color: #6366f1;
 }
 
-/* --- CARD SYSTEM (brutal: flat, bordered) --- */
+/* --- CARD SYSTEM (clean: subtle border + shadow) --- */
 .card {
     background: #FFF;
-    border-radius: 0;
-    border: 2px solid #000;
-    box-shadow: none;
-    transition: border-color 0.15s ease;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
 }
 
 /* --- ACCORDION --- */
@@ -35,7 +38,7 @@ input:focus, select:focus, textarea:focus {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* CSS-based collapse for smooth accordion (team_dashboard) */
+/* CSS-based collapse for smooth accordion */
 .section-content {
     max-height: 2000px;
     opacity: 1;
@@ -50,7 +53,7 @@ input:focus, select:focus, textarea:focus {
 
 /* --- RADIO BUTTONS (Survey) --- */
 input[type="radio"]:focus + div {
-    box-shadow: 0 0 0 2px #000;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 input[type="radio"]:checked + div {
@@ -86,7 +89,6 @@ input[type="radio"]:checked + div {
 .peer:checked ~ div > span {
     color: inherit !important;
 }
-
 
 .stagger-item:nth-child(1) { animation-delay: 0.03s; }
 .stagger-item:nth-child(2) { animation-delay: 0.06s; }
@@ -139,9 +141,9 @@ input[type="radio"]:checked + div {
 
 /* --- UNANSWERED QUESTION HIGHLIGHT --- */
 .unanswered-highlight {
-    border-left: 3px solid #FF0000;
-    background: rgba(255, 0, 0, 0.04);
-    border-radius: 0;
+    border-left: 3px solid #6366f1;
+    background: rgba(99, 102, 241, 0.04);
+    border-radius: 0.5rem;
     padding: 0.5rem 0.75rem;
     transition: all 0.2s ease;
 }
@@ -152,18 +154,18 @@ input[type="radio"]:checked + div {
     background: transparent;
 }
 
-/* --- TYPOGRAPHY (Brutal: tighter, heavier) --- */
-h1 { letter-spacing: -0.03em; font-weight: 900; }
-h2 { letter-spacing: -0.02em; font-weight: 900; }
-h3 { letter-spacing: -0.01em; font-weight: 700; }
+/* --- TYPOGRAPHY (clean: relaxed, lighter) --- */
+h1 { letter-spacing: -0.02em; font-weight: 700; }
+h2 { letter-spacing: -0.01em; font-weight: 700; }
+h3 { font-weight: 600; }
 
 p, li, td { line-height: 1.6; }
 
-/* --- SCROLLBAR (brutal: stark) --- */
+/* --- SCROLLBAR (clean: subtle) --- */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #FFF; }
-::-webkit-scrollbar-thumb { background: #000; border-radius: 0; }
-::-webkit-scrollbar-thumb:hover { background: #333; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* --- REDUCED MOTION (a11y) --- */
 @media (prefers-reduced-motion: reduce) {

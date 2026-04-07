@@ -63,6 +63,7 @@ _auth_enabled = APP_PASSWORD is not None
 _all_templates = (templates, survey.templates, dashboard.templates, admin.templates, engineering.templates)
 for _tpl in _all_templates:
     _tpl.env.globals["auth_enabled"] = _auth_enabled
+    _tpl.env.auto_reload = True
 
 
 def _get_nav_teams() -> list:

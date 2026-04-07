@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Admin -- Team Maturity Assessment{% endblock %}
+{% block title %}Admin — Team Maturity Assessment{% endblock %}
 
 {% block content %}
 <h1 class="text-3xl font-bold text-hub-text mb-8 tracking-tight">Admin Panel</h1>
@@ -8,7 +8,7 @@
     <!-- LEFT COLUMN -->
     <div class="space-y-8">
         <!-- Teams -->
-        <div class="bg-hub-card border-2 border-hub-border">
+        <div class="bg-white rounded-xl border border-hub-border shadow-card">
             <div class="p-6 border-b border-hub-border">
                 <h2 class="text-lg font-semibold text-hub-text">Teams</h2>
                 <p class="text-sm text-hub-muted mt-1">Manage your squads.</p>
@@ -28,31 +28,31 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <button type="button" onclick="showEditForm({{ t.id }})"
-                                        class="text-xs text-hub-muted hover:text-hub-text font-medium">Edit</button>
+                                        class="text-xs text-hub-muted hover:text-brand-600 font-medium transition-colors">Edit</button>
                                 {% set resp_count = team_response_counts.get(t.id, 0) %}
                                 <button type="button"
                                         onclick="confirmDeleteTeam({{ t.id }}, '{{ t.name }}', {{ resp_count }})"
-                                        class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                                        class="text-xs text-red-400 hover:text-red-600 font-medium transition-colors">Delete</button>
                             </div>
                         </div>
 
                         <!-- Edit mode (hidden by default) -->
                         <div id="team-edit-{{ t.id }}" class="hidden">
-                            <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-2">
+                            <form method="POST" action="/admin/teams/{{ t.id }}/edit" class="space-y-3">
                                 <div class="flex flex-wrap gap-2">
                                     <input type="text" name="team_name" value="{{ t.name }}" required
-                                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                           class="flex-1 min-w-[150px] border border-hub-border bg-white text-hub-text px-3 py-2 text-sm rounded-lg focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                                     <input type="number" name="member_count" min="1" placeholder="Members"
                                            value="{{ t.member_count or '' }}"
-                                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                                           class="w-24 border border-hub-border bg-white text-hub-text px-3 py-2 text-sm rounded-lg focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                                 </div>
                                 <div class="flex gap-2">
                                     <button type="submit"
-                                            class="px-3 py-1.5 bg-accent-600 text-white text-xs font-black uppercase hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                                            class="px-3 py-1.5 bg-brand-600 text-white text-xs font-medium rounded-lg hover:bg-brand-700 transition-colors">
                                         Save
                                     </button>
                                     <button type="button" onclick="hideEditForm({{ t.id }})"
-                                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover transition-all duration-200">
+                                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-medium rounded-lg border border-hub-border hover:bg-hub-border/50 transition-colors">
                                         Cancel
                                     </button>
                                 </div>
@@ -70,11 +70,11 @@
 
                 <form method="POST" action="/admin/teams" class="flex flex-wrap gap-2 pt-4 border-t border-hub-border">
                     <input type="text" name="team_name" required placeholder="New team name..."
-                           class="flex-1 min-w-[150px] border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                           class="flex-1 min-w-[150px] border border-hub-border bg-white text-hub-text px-3 py-2 text-sm rounded-lg focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                     <input type="number" name="member_count" min="1" placeholder="Members"
-                           class="w-24 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                           class="w-24 border border-hub-border bg-white text-hub-text px-3 py-2 text-sm rounded-lg focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                     <button type="submit"
-                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                            class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors">
                         Add Team
                     </button>
                 </form>
@@ -82,7 +82,7 @@
         </div>
 
         <!-- Rounds -->
-        <div class="bg-hub-card border-2 border-hub-border">
+        <div class="bg-white rounded-xl border border-hub-border shadow-card">
             <div class="p-6 border-b border-hub-border">
                 <h2 class="text-lg font-semibold text-hub-text">Rounds</h2>
                 <p class="text-sm text-hub-muted mt-1">Manage assessment cycles. Active rounds accept responses.</p>
@@ -93,17 +93,18 @@
                     {% for r in rounds %}
                     <li class="stagger-item py-3">
                         <div class="flex items-center justify-between">
-                            <div>
+                            <div class="flex items-center gap-2">
                                 <span class="font-medium text-hub-text">{{ r.name }}</span>
-                                <span class="ml-2 px-2 py-0.5 text-xs font-bold uppercase border-2
-                                    {% if r.is_active %}border-hub-text text-hub-text{% else %}border-hub-border text-hub-muted{% endif %}">
-                                    {% if r.is_active %}Active{% else %}Closed{% endif %}
-                                </span>
+                                {% if r.is_active %}
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-good-50 text-good-600">Active</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-hub-hover text-hub-muted">Closed</span>
+                                {% endif %}
                             </div>
                             <div class="flex items-center space-x-3">
-                                <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-hub-text hover:underline">Export CSV</a>
+                                <a href="/admin/export/{{ r.id }}" class="text-xs text-hub-muted hover:text-brand-600 transition-colors">Export CSV</a>
                                 <form method="POST" action="/admin/rounds/{{ r.id }}/toggle" class="inline">
-                                    <button type="submit" class="text-xs text-hub-muted hover:text-hub-text">
+                                    <button type="submit" class="text-xs text-hub-muted hover:text-hub-text transition-colors">
                                         {% if r.is_active %}Close{% else %}Reopen{% endif %}
                                     </button>
                                 </form>
@@ -111,7 +112,7 @@
                                       id="delete-round-form-{{ r.id }}">
                                     <button type="button"
                                             onclick="confirmDeleteRound({{ r.id }}, '{{ r.name }}')"
-                                            class="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+                                            class="text-xs text-red-400 hover:text-red-600 font-medium transition-colors">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -124,9 +125,9 @@
 
                 <form method="POST" action="/admin/rounds" class="flex gap-2 pt-4 border-t border-hub-border">
                     <input type="text" name="round_name" required placeholder="Round name (e.g. Q1 2026)..."
-                           class="flex-1 border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm focus:ring-2 focus:ring-black">
+                           class="flex-1 border border-hub-border bg-white text-hub-text px-3 py-2 text-sm rounded-lg focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20">
                     <button type="submit"
-                            class="px-4 py-2.5 bg-black text-white text-sm font-black uppercase tracking-wide hover:bg-accent-500 active:scale-[0.97] transition-all duration-150">
+                            class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors">
                         Create Round
                     </button>
                 </form>
@@ -135,7 +136,7 @@
     </div>
 
     <!-- RIGHT COLUMN: Survey Links -->
-    <div class="bg-hub-card border-2 border-hub-border self-stretch">
+    <div class="bg-white rounded-xl border border-hub-border shadow-card self-stretch">
         <div class="p-6 border-b border-hub-border">
             <h2 class="text-lg font-semibold text-hub-text">Survey Links</h2>
             <p class="text-sm text-hub-muted mt-1">Copy and share with your teams.</p>
@@ -147,16 +148,16 @@
             {% if active_round %}
             <div class="mb-6 pb-6 border-b border-hub-border">
                 <div class="flex items-center gap-2 mb-2">
-                    <span class="inline-block w-2.5 h-2.5 bg-blue-600"></span>
-                    <p class="text-xs font-bold text-hub-text uppercase">Delivery Survey</p>
+                    <span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>
+                    <p class="text-xs font-semibold text-hub-text">Delivery Survey</p>
                 </div>
                 <p class="text-xs text-hub-faint mb-2">One link for all teams — share department-wide.</p>
                 <div class="flex items-center gap-2">
                     <input type="text" readonly value="{{ base_url }}/engineering/{{ active_round.engineering_token }}"
                            id="eng-link-shared"
-                           class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
+                           class="flex-1 border border-hub-border bg-hub-bg px-3 py-2 text-xs text-hub-muted font-mono rounded-lg">
                     <button type="button" onclick="copyLink('eng-link-shared', this)"
-                            class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                            class="px-3 py-2 bg-hub-hover text-hub-muted text-xs font-medium rounded-lg border border-hub-border hover:bg-hub-border/50 transition-colors whitespace-nowrap">
                         Copy
                     </button>
                 </div>
@@ -165,8 +166,8 @@
 
             <!-- Team Surveys (per team) -->
             <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block w-2.5 h-2.5 bg-accent-500"></span>
-                <p class="text-xs font-bold text-hub-text uppercase">Team Surveys</p>
+                <span class="inline-block w-2 h-2 rounded-full bg-brand-500"></span>
+                <p class="text-xs font-semibold text-hub-text">Team Surveys</p>
             </div>
             <p class="text-xs text-hub-faint mb-3">One link per team — each tracks responses separately.</p>
 
@@ -178,9 +179,9 @@
                     <div class="flex items-center gap-2">
                         <input type="text" readonly value="{{ base_url }}/survey/{{ t.token }}"
                                id="link-{{ t.id }}"
-                               class="flex-1 border-2 border-hub-border bg-hub-surface px-2 py-1.5 text-xs text-hub-muted font-mono">
+                               class="flex-1 border border-hub-border bg-hub-bg px-3 py-2 text-xs text-hub-muted font-mono rounded-lg">
                         <button type="button" onclick="copyLink('link-{{ t.id }}', this)"
-                                class="px-3 py-1.5 bg-hub-hover text-hub-muted text-xs font-bold uppercase border-2 border-hub-border hover:bg-hub-hover active:scale-[0.97] transition-all duration-200 whitespace-nowrap">
+                                class="px-3 py-2 bg-hub-hover text-hub-muted text-xs font-medium rounded-lg border border-hub-border hover:bg-hub-border/50 transition-colors whitespace-nowrap">
                             Copy
                         </button>
                     </div>
@@ -195,7 +196,7 @@
 </div>
 
 <!-- Data Management -->
-<div class="bg-hub-card border-2 border-hub-border mb-8">
+<div class="bg-white rounded-xl border border-hub-border shadow-card mb-8">
     <div class="p-6 border-b border-hub-border">
         <h2 class="text-lg font-semibold text-hub-text">Data Management</h2>
         <p class="text-sm text-hub-muted mt-1">Manage survey questions and database backups.</p>
@@ -204,13 +205,13 @@
         <p class="text-xs text-hub-muted mb-4">Download or restore the full database — includes teams, rounds, responses, and questions.</p>
         <div class="flex flex-wrap items-center gap-2">
             <a href="/admin/data/download-db"
-               class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200">
+               class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium border border-hub-border hover:bg-hub-border/50 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Download maturity.db
             </a>
             <form method="POST" action="/admin/data/upload-db" enctype="multipart/form-data"
                   class="inline-flex items-center gap-2">
-                <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium hover:bg-hub-border active:scale-[0.97] transition-all duration-200 cursor-pointer">
+                <label class="inline-flex items-center gap-1.5 px-4 py-2 bg-hub-hover text-hub-text rounded-lg text-sm font-medium border border-hub-border hover:bg-hub-border/50 transition-colors cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m4-8l-4-4m0 0L16 8m4-4v12"/></svg>
                     Upload maturity.db
                     <input type="file" name="file" accept=".db,.sqlite,.sqlite3" required class="hidden"
@@ -226,7 +227,7 @@
 {% set visible_limit = 4 %}
 {% set recent_rounds = rounds[:visible_limit] %}
 {% set has_more = rounds | length > visible_limit %}
-<div class="bg-hub-card border-2 border-hub-border overflow-hidden">
+<div class="bg-white rounded-xl border border-hub-border shadow-card overflow-hidden">
     <div class="p-6 border-b border-hub-border flex items-center justify-between">
         <div>
             <h2 class="text-lg font-semibold text-hub-text">Participation Overview</h2>
@@ -234,35 +235,35 @@
         </div>
         {% if has_more %}
         <button type="button" onclick="toggleAllRounds()" id="showAllBtn"
-                class="text-xs text-hub-muted hover:text-hub-text font-medium hover:underline">
+                class="text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
             Show all {{ rounds | length }} rounds
         </button>
         {% endif %}
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
-            <thead class="bg-hub-surface">
+            <thead class="bg-hub-bg">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-hub-muted uppercase">Team</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-hub-muted">Team</th>
                     {% for r in recent_rounds %}
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col">{{ r.name }}</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted round-col">{{ r.name }}</th>
                     {% endfor %}
                     {% for r in rounds[visible_limit:] %}
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted uppercase round-col-extra hidden">{{ r.name }}</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-hub-muted round-col-extra hidden">{{ r.name }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody class="divide-y divide-hub-border">
                 {% for t in teams %}
-                <tr class="hover:bg-hub-hover transition-colors duration-150">
+                <tr class="hover:bg-hub-hover/50 transition-colors duration-150">
                     <td class="px-4 py-3 font-medium text-hub-text">{{ t.name }}</td>
                     {% for r in recent_rounds %}
                     <td class="px-4 py-3 text-center round-col">
                         {% set cnt = participation.get((r.id, t.id), 0) %}
                         {% if cnt > 0 %}
-                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-50 text-brand-600 text-sm font-semibold">{{ cnt }}</span>
                         {% else %}
-                        <span class="text-hub-faint">--</span>
+                        <span class="text-hub-faint">—</span>
                         {% endif %}
                     </td>
                     {% endfor %}
@@ -270,9 +271,9 @@
                     <td class="px-4 py-3 text-center round-col-extra hidden">
                         {% set cnt = participation.get((r.id, t.id), 0) %}
                         {% if cnt > 0 %}
-                        <span class="inline-block px-2 py-1 border-2 border-hub-border text-hub-text text-sm font-bold">{{ cnt }}</span>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-brand-50 text-brand-600 text-sm font-semibold">{{ cnt }}</span>
                         {% else %}
-                        <span class="text-hub-faint">--</span>
+                        <span class="text-hub-faint">—</span>
                         {% endif %}
                     </td>
                     {% endfor %}
@@ -327,10 +328,10 @@
         navigator.clipboard.writeText(input.value).then(() => {
             const orig = btn.textContent;
             btn.textContent = 'Copied!';
-            btn.classList.add('bg-hub-text/15', 'text-hub-text', 'copy-success');
+            btn.classList.add('bg-brand-50', 'text-brand-600', 'border-brand-200', 'copy-success');
             setTimeout(() => {
                 btn.textContent = orig;
-                btn.classList.remove('bg-hub-text/15', 'text-hub-text', 'copy-success');
+                btn.classList.remove('bg-brand-50', 'text-brand-600', 'border-brand-200', 'copy-success');
             }, 2000);
         });
     }

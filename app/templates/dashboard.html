@@ -5,17 +5,14 @@
 <div class="flex items-center justify-between mb-8">
     <div>
         <a href="/" class="text-sm text-hub-muted hover:text-hub-text hover:underline mb-1 inline-block">&larr; Home</a>
-        <h1 class="text-3xl font-bold text-hub-text tracking-tight flex items-center gap-2">
-            <span class="inline-block w-3 h-3 bg-accent-500 shrink-0"></span>
-            Team Maturity
-        </h1>
+        <h1 class="text-2xl font-bold text-hub-text tracking-tight">Team Maturity</h1>
         <p class="text-sm text-hub-muted mt-1">Team-wide assessment results</p>
     </div>
     {% if rounds %}
     <div class="flex items-center space-x-2">
         <label class="text-sm text-hub-muted">Round:</label>
         <select id="roundSelector" onchange="window.location='/dashboard?round_id='+this.value"
-                class="border-2 border-hub-border bg-hub-surface text-hub-text px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-black">
+                class="border border-hub-border bg-white text-hub-text px-3 py-1.5 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
             {% for r in rounds %}
             <option value="{{ r.id }}" {% if selected_round and r.id == selected_round.id %}selected{% endif %}>
                 {{ r.name }}{% if r.is_active %} (Active){% endif %}
@@ -30,7 +27,7 @@
 
 {% if has_data %}
 <!-- Section navigation -->
-<nav class="sticky top-14 z-40 bg-white border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+<nav class="sticky top-14 z-40 bg-hub-bg border-b border-hub-border py-2 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-1 text-xs font-medium text-hub-muted">
             <a href="#overview" class="hover:text-hub-text transition-colors">Overview</a>
@@ -50,90 +47,90 @@
 {% endif %}
 
 {% if not cards or not has_data %}
-<div class="bg-hub-card border-2 border-hub-border p-12 text-center animate-fade-in-up">
+<div class="bg-white rounded-xl border border-hub-border shadow-card p-12 text-center animate-fade-in-up">
     <div class="text-5xl mb-4">📊</div>
     <h2 class="text-xl font-semibold text-hub-text mb-2">No Data Yet</h2>
     <p class="text-hub-muted mb-6">Once teams submit their assessments, results will appear here.</p>
-    <a href="/admin" class="text-hub-muted font-medium hover:underline hover:text-hub-text">Set up teams and rounds</a>
+    <a href="/admin" class="text-brand-600 font-medium hover:underline">Set up teams and rounds</a>
 </div>
 {% else %}
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     SECTION 1: Bird's Eye View — high-level KPIs & category scores
+     SECTION 1: Overview — high-level KPIs & category scores
      ═══════════════════════════════════════════════════════════════════════ -->
 {% if overview_stats %}
 <div class="mb-10">
-    <div class="flex items-center gap-3 mb-5">
-        <h2 id="overview" class="text-lg font-bold text-hub-text scroll-mt-28">Overview</h2>
-        <div class="flex-1 h-px bg-hub-border"></div>
-    </div>
+    <h2 id="overview" class="text-sm font-semibold text-hub-muted mb-4 scroll-mt-28">Overview</h2>
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
-            <p class="text-sm font-medium text-hub-muted mb-1">Overall Maturity</p>
+        <div class="bg-white rounded-xl border border-hub-border shadow-card p-5 hover:shadow-card-hover transition-shadow">
+            <p class="text-xs font-medium text-hub-faint uppercase tracking-wider mb-3">Overall Maturity</p>
             <p class="text-4xl font-bold
                 {% if overview_stats.overall_avg >= 3.0 %}text-hub-text
-                {% else %}text-accent-500{% endif %}">
+                {% else %}text-warn-600{% endif %}">
                 {{ "%.1f"|format(overview_stats.overall_avg) }}
             </p>
             {% if overview_stats.previous_overall is not none %}
             {% set delta = overview_stats.overall_avg - overview_stats.previous_overall %}
-            <p class="text-xs mt-1 font-semibold
-                {% if delta > 0 %}text-hub-text{% elif delta < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
-                {% if delta > 0 %}▲ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}▼ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
-                <span class="font-normal text-hub-faint ml-0.5">vs prev</span>
-            </p>
+            <div class="mt-2 flex items-center gap-1">
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                    {% if delta > 0 %}text-good-600 bg-good-50
+                    {% elif delta < 0 %}text-bad-600 bg-bad-50
+                    {% else %}text-hub-faint bg-hub-hover{% endif %}">
+                    {% if delta > 0 %}↑ +{{ "%.2f"|format(delta) }}{% elif delta < 0 %}↓ {{ "%.2f"|format(delta) }}{% else %}— no change{% endif %}
+                </span>
+                <span class="text-xs text-hub-faint">vs prev</span>
+            </div>
             {% else %}
-            <p class="text-xs text-hub-faint mt-1">across all teams</p>
+            <p class="text-xs text-hub-faint mt-2">across all teams</p>
             {% endif %}
         </div>
 
-        <div class="bg-hub-card border-2 border-hub-border p-6 text-center">
-            <p class="text-sm font-medium text-hub-muted mb-1">Responses</p>
+        <div class="bg-white rounded-xl border border-hub-border shadow-card p-5 hover:shadow-card-hover transition-shadow">
+            <p class="text-xs font-medium text-hub-faint uppercase tracking-wider mb-3">Responses</p>
             <p class="text-4xl font-bold text-hub-text">{{ overview_stats.response_count }}</p>
-            <p class="text-xs text-hub-faint mt-1">participants</p>
+            <p class="text-xs text-hub-faint mt-2">participants</p>
         </div>
 
-        <div class="bg-hub-card border-2 border-hub-border p-6">
-            <p class="text-sm font-medium text-hub-muted mb-2">Top Strength</p>
+        <div class="bg-white rounded-xl border border-hub-border shadow-card p-5 hover:shadow-card-hover transition-shadow">
+            <p class="text-xs font-medium text-hub-faint uppercase tracking-wider mb-3">Top Strength</p>
             {% if overview_stats.strengths %}
-            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.strengths[0].subcategory }}</p>
-            <p class="text-3xl font-bold text-hub-text">{{ "%.1f"|format(overview_stats.strengths[0].avg) }}</p>
+            <p class="text-4xl font-bold text-good-600">{{ "%.1f"|format(overview_stats.strengths[0].avg) }}</p>
+            <p class="text-sm font-medium text-hub-muted mt-2">{{ overview_stats.strengths[0].subcategory }}</p>
             {% endif %}
         </div>
 
-        <div class="bg-hub-card border-2 border-hub-border p-6">
-            <p class="text-sm font-medium text-hub-muted mb-2">Needs Improvement</p>
+        <div class="bg-white rounded-xl border border-hub-border shadow-card p-5 hover:shadow-card-hover transition-shadow">
+            <p class="text-xs font-medium text-hub-faint uppercase tracking-wider mb-3">Needs Improvement</p>
             {% if overview_stats.improvements %}
-            <p class="text-sm font-semibold text-hub-text">{{ overview_stats.improvements[0].subcategory }}</p>
-            <p class="text-3xl font-bold text-accent-500">{{ "%.1f"|format(overview_stats.improvements[0].avg) }}</p>
+            <p class="text-4xl font-bold text-warn-600">{{ "%.1f"|format(overview_stats.improvements[0].avg) }}</p>
+            <p class="text-sm font-medium text-hub-muted mt-2">{{ overview_stats.improvements[0].subcategory }}</p>
             {% endif %}
         </div>
     </div>
 
     <!-- Category Scores with Deltas -->
     {% if overview_stats.category_deltas %}
-    <div class="bg-hub-card border-2 border-hub-border p-5">
-        <div class="mb-3">
-            <h3 class="text-sm font-semibold text-hub-text">Category Scores
-                <span class="font-normal text-hub-faint">— change vs previous round</span>
-            </h3>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="bg-white rounded-xl border border-hub-border shadow-card p-6">
+        <h3 class="text-sm font-semibold text-hub-text mb-4">Category Scores
+            <span class="font-normal text-hub-faint">— change vs previous round</span>
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {% for cat in overview_stats.category_scores %}
-            <div class="text-center">
-                <p class="text-xs text-hub-muted truncate mb-1" title="{{ cat.category }}">{{ cat.category }}</p>
-                <p class="text-lg font-bold
-                    {% if cat.avg >= 3.0 %}text-hub-text
-                    {% else %}text-accent-500{% endif %}">
+            <div class="text-center p-3 rounded-lg bg-hub-hover/50 hover:bg-hub-hover transition">
+                <p class="text-xs text-hub-faint font-medium truncate mb-1" title="{{ cat.category }}">{{ cat.category }}</p>
+                <p class="text-2xl font-bold
+                    {% if cat.avg >= 3.5 %}text-good-600
+                    {% elif cat.avg >= 3.0 %}text-hub-text
+                    {% else %}text-warn-600{% endif %}">
                     {{ "%.1f"|format(cat.avg) }}
                 </p>
                 {% if cat.category in overview_stats.category_deltas %}
                 {% set d = overview_stats.category_deltas[cat.category] %}
-                <p class="text-xs font-semibold
-                    {% if d > 0 %}text-hub-text{% elif d < 0 %}text-accent-500{% else %}text-hub-faint{% endif %}">
-                    {% if d > 0 %}▲ +{{ "%.2f"|format(d) }}{% elif d < 0 %}▼ {{ "%.2f"|format(d) }}{% else %}—{% endif %}
+                <p class="text-xs font-medium mt-0.5
+                    {% if d > 0 %}text-good-600{% elif d < 0 %}text-bad-500{% else %}text-hub-faint{% endif %}">
+                    {% if d > 0 %}+{{ "%.2f"|format(d) }}{% elif d < 0 %}{{ "%.2f"|format(d) }}{% else %}—{% endif %}
                 </p>
                 {% endif %}
             </div>
@@ -147,42 +144,49 @@
      SECTION 2: Deep Dive — strengths, improvements, radar, trends
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="mb-10">
-    <div class="flex items-center gap-3 mb-5">
-        <h2 id="breakdown" class="text-lg font-bold text-hub-text scroll-mt-28">Category Breakdown</h2>
-        <div class="flex-1 h-px bg-hub-border"></div>
-    </div>
+    <h2 id="breakdown" class="text-sm font-semibold text-hub-muted mb-4 scroll-mt-28">Category Breakdown</h2>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <!-- Left: Strengths + Improvements stacked -->
         <div class="space-y-4">
-            <div class="bg-hub-card border-2 border-hub-border p-5">
-                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Strengths</h3>
+            <div class="bg-white rounded-xl border border-hub-border shadow-card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-good-500"></div>
+                    <h3 class="text-sm font-semibold text-hub-text">Top 3 Strengths</h3>
+                </div>
+                <div class="space-y-2">
                 {% for s in overview_stats.strengths %}
-                <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
-                    <div>
-                        <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-                        <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-good-50/50 hover:bg-good-50 transition">
+                        <div>
+                            <span class="text-sm font-medium text-hub-text">{{ s.subcategory }}</span>
+                            <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+                        </div>
+                        <span class="text-lg font-bold text-good-600">{{ "%.1f"|format(s.avg) }}</span>
                     </div>
-                    <span class="text-base font-bold text-hub-text">{{ "%.1f"|format(s.avg) }}</span>
-                </div>
                 {% endfor %}
+                </div>
             </div>
-            <div class="bg-hub-card border-2 border-hub-border p-5">
-                <h3 class="text-base font-semibold text-hub-text mb-3">Top 3 Improvement Areas</h3>
-                {% for s in overview_stats.improvements %}
-                <div class="flex items-center justify-between py-2 {% if not loop.last %}border-b border-hub-border{% endif %}">
-                    <div>
-                        <span class="text-sm text-hub-text">{{ s.subcategory }}</span>
-                        <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
-                    </div>
-                    <span class="text-base font-bold text-accent-500">{{ "%.1f"|format(s.avg) }}</span>
+            <div class="bg-white rounded-xl border border-hub-border shadow-card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-warn-500"></div>
+                    <h3 class="text-sm font-semibold text-hub-text">Top 3 Improvement Areas</h3>
                 </div>
+                <div class="space-y-2">
+                {% for s in overview_stats.improvements %}
+                    <div class="flex items-center justify-between p-3 rounded-lg bg-warn-50/50 hover:bg-warn-50 transition">
+                        <div>
+                            <span class="text-sm font-medium text-hub-text">{{ s.subcategory }}</span>
+                            <span class="text-xs text-hub-faint ml-1">({{ s.category }})</span>
+                        </div>
+                        <span class="text-lg font-bold text-warn-600">{{ "%.1f"|format(s.avg) }}</span>
+                    </div>
                 {% endfor %}
+                </div>
             </div>
         </div>
         <!-- Right: Category Radar -->
-        <div class="bg-hub-card border-2 border-hub-border p-6">
-            <h3 class="text-base font-semibold text-hub-text mb-3">Category Overview</h3>
+        <div class="bg-white rounded-xl border border-hub-border shadow-card p-6">
+            <h3 class="text-sm font-semibold text-hub-text mb-3">Category Overview</h3>
             <div style="height: 340px; display: flex; align-items: center; justify-content: center;">
                 <canvas id="overviewRadarChart"></canvas>
             </div>
@@ -191,8 +195,8 @@
 
     <!-- Maturity Trends -->
     {% if overview_trends and overview_trends.round_names | length >= 2 %}
-    <div class="bg-hub-card border-2 border-hub-border p-6 animate-fade-in">
-        <h3 class="text-base font-semibold text-hub-text mb-4">Maturity Trends</h3>
+    <div class="bg-white rounded-xl border border-hub-border shadow-card p-6 animate-fade-in">
+        <h3 class="text-sm font-semibold text-hub-text mb-4">Maturity Trends</h3>
         <div style="height: 300px;">
             <canvas id="overviewTrendChart"></canvas>
         </div>
@@ -202,32 +206,32 @@
 {% endif %}
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     SECTION 2b: Detailed Statement Scores — collapsible per-statement breakdown
+     SECTION 2b: Detailed Statement Scores
      ═══════════════════════════════════════════════════════════════════════ -->
 {% if grouped_statements %}
 <div class="mb-10">
-    <div class="flex items-center gap-3 mb-5">
-        <h2 id="details" class="text-lg font-bold text-hub-text scroll-mt-28">Detailed Statement Scores</h2>
-        <div class="flex-1 h-px bg-hub-border"></div>
-    </div>
+    <h2 id="details" class="text-sm font-semibold text-hub-muted mb-4 scroll-mt-28">Statement Scores</h2>
 
+    <div class="bg-white rounded-xl border border-hub-border shadow-card overflow-hidden">
     {% for category, subcategories in grouped_statements.items() %}
-    <div class="bg-hub-card border-2 border-hub-border mb-6 overflow-hidden">
         <!-- Category header -->
         <button type="button" onclick="toggleSection(this)" aria-label="Toggle section"
-                class="cursor-pointer w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200">
+                class="cursor-pointer w-full flex items-center justify-between px-6 py-4 text-left hover:bg-hub-hover transition-all duration-200 {% if not loop.first %}border-t border-hub-border{% endif %}">
             <div class="flex items-center gap-3">
-                <h3 class="text-lg font-bold text-hub-text">{{ category }}</h3>
+                <h3 class="text-sm font-semibold text-hub-text">{{ category }}</h3>
                 {% set all_avgs = [] %}
                 {% for stmts in subcategories.values() %}{% for s in stmts %}{% if all_avgs.append(s.avg) %}{% endif %}{% endfor %}{% endfor %}
                 {% if all_avgs %}
                 {% set cat_avg = (all_avgs | sum) / (all_avgs | length) %}
-                <span class="px-2.5 py-0.5 text-sm font-black border-2 border-hub-border">
-                    <span class="{% if cat_avg >= 3.0 %}text-hub-text{% else %}text-accent-500{% endif %}">{{ "%.1f"|format(cat_avg) }}</span>
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full
+                    {% if cat_avg >= 3.5 %}text-good-600 bg-good-50
+                    {% elif cat_avg >= 3.0 %}text-hub-muted bg-hub-hover
+                    {% else %}text-warn-600 bg-warn-50{% endif %}">
+                    {{ "%.1f"|format(cat_avg) }}
                 </span>
                 {% endif %}
             </div>
-            <svg class="section-chevron w-5 h-5 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="section-chevron w-4 h-4 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
@@ -236,13 +240,13 @@
             {% for subcategory, statements in subcategories.items() %}
             <div class="border-t border-hub-border">
                 <!-- Subcategory header -->
-                <div class="px-5 py-3 bg-hub-surface">
-                    <div class="flex items-center gap-3">
-                        <h4 class="text-sm font-semibold text-hub-muted uppercase tracking-wide">{{ subcategory }}</h4>
+                <div class="px-6 py-2.5 bg-hub-hover/50">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-medium text-hub-faint">{{ subcategory }}</h4>
                         {% set sub_avg = (statements | map(attribute='avg') | sum) / (statements | length) %}
-                        <span class="px-1.5 py-0.5 rounded text-xs font-bold border-2
-                            {% if sub_avg >= 3.0 %}border-hub-text text-hub-text
-                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                        <span class="text-xs font-semibold
+                            {% if sub_avg >= 3.0 %}text-good-600
+                            {% else %}text-warn-600{% endif %}">
                             {{ "%.1f"|format(sub_avg) }}
                         </span>
                     </div>
@@ -250,12 +254,13 @@
 
                 <!-- Statements -->
                 {% for s in statements %}
-                <div class="px-5 py-3 {% if not loop.last %}border-b border-hub-border{% endif %} hover:bg-accent-500/5 transition">
+                <div class="px-6 py-3 {% if not loop.last %}border-b border-hub-border/50{% endif %} hover:bg-hub-hover/30 transition group">
                     <div class="flex items-start justify-between gap-4">
-                        <p class="flex-1 text-sm text-hub-text leading-relaxed">{{ s.statement }}</p>
-                        <span class="shrink-0 px-1.5 py-0.5 rounded text-xs font-bold border-2
-                            {% if s.avg >= 3.0 %}border-hub-text text-hub-text
-                            {% else %}border-accent-500 text-accent-500{% endif %}">
+                        <p class="flex-1 text-sm text-hub-muted group-hover:text-hub-text transition">{{ s.statement }}</p>
+                        <span class="shrink-0 text-sm font-semibold
+                            {% if s.avg >= 3.5 %}text-good-600
+                            {% elif s.avg >= 3.0 %}text-hub-text
+                            {% else %}text-warn-600{% endif %}">
                             {{ "%.1f"|format(s.avg) }}
                         </span>
                     </div>
@@ -264,53 +269,50 @@
             </div>
             {% endfor %}
         </div>
-    </div>
     {% endfor %}
+    </div>
 </div>
 {% endif %}
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     SECTION 3: Team Deep Dives — clickable cards linking to team view
+     SECTION 3: Team Deep Dives
      ═══════════════════════════════════════════════════════════════════════ -->
 <div class="mb-8">
-    <div class="flex items-center gap-3 mb-5">
-        <h2 id="teams" class="text-lg font-bold text-hub-text scroll-mt-28">Team Deep Dives</h2>
-        <div class="flex-1 h-px bg-hub-border"></div>
-    </div>
+    <h2 id="teams" class="text-sm font-semibold text-hub-muted mb-4 scroll-mt-28">Team Deep Dives</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
         {% for card in cards %}
         {% if card.response_count > 0 %}
         <a href="/dashboard/team/{{ card.team_id }}{% if selected_round %}?round_id={{ selected_round.id }}{% endif %}"
-           class="stagger-item group block bg-hub-card border-2 border-hub-border hover:border-hub-muted transition-colors duration-200 overflow-hidden">
+           class="stagger-item group block bg-white rounded-xl border border-hub-border shadow-card hover:shadow-card-hover hover:border-brand-500/30 transition-all duration-200 overflow-hidden">
 
-            <!-- Header: Team name + score + response count -->
-            <div class="px-4 pt-4 pb-3">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-sm font-black text-hub-text uppercase tracking-wide truncate">{{ card.team_name }}</h3>
-                    <span class="text-xs font-bold text-hub-muted shrink-0 ml-2">{{ card.response_count }} responses</span>
+            <div class="px-5 pt-5 pb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold text-hub-text group-hover:text-brand-600 transition truncate">{{ card.team_name }}</h3>
+                    <span class="text-xs text-hub-faint bg-hub-hover px-2 py-0.5 rounded-full shrink-0 ml-2">{{ card.response_count }} responses</span>
                 </div>
-                <p class="text-4xl font-black leading-none
+                <p class="text-3xl font-bold leading-none
                     {% if card.overall >= 3.0 %}text-hub-text
-                    {% else %}text-accent-500{% endif %}">
-                    {{ "%.1f"|format(card.overall) }}<span class="text-base text-hub-faint font-normal"> / 5</span>
+                    {% else %}text-warn-600{% endif %}">
+                    {{ "%.1f"|format(card.overall) }}
                 </p>
             </div>
 
-            <!-- Footer: Strength | Improve -->
-            <div class="grid grid-cols-2 divide-x divide-hub-border border-t-2 border-hub-border">
-                <div class="px-3 py-2">
-                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">STRENGTH</p>
+            <div class="grid grid-cols-2 gap-3 px-5 pb-4 pt-3 border-t border-hub-border">
+                <div>
+                    <p class="text-[10px] font-medium text-hub-faint uppercase mb-0.5">Strength</p>
                     {% if card.top_strength %}
-                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }} {{ "%.1f"|format(card.top_strength.avg) }}</p>
+                    <p class="text-xs font-medium text-hub-text truncate" title="{{ card.top_strength.name }}">{{ card.top_strength.name }}</p>
+                    <p class="text-xs font-semibold text-good-600">{{ "%.1f"|format(card.top_strength.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
                 </div>
-                <div class="px-3 py-2">
-                    <p class="text-xs font-black uppercase tracking-wider text-hub-faint">IMPROVE</p>
+                <div>
+                    <p class="text-[10px] font-medium text-hub-faint uppercase mb-0.5">Improve</p>
                     {% if card.top_improvement %}
-                    <p class="text-xs font-semibold text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }} {{ "%.1f"|format(card.top_improvement.avg) }}</p>
+                    <p class="text-xs font-medium text-hub-text truncate" title="{{ card.top_improvement.name }}">{{ card.top_improvement.name }}</p>
+                    <p class="text-xs font-semibold text-warn-600">{{ "%.1f"|format(card.top_improvement.avg) }}</p>
                     {% else %}
                     <p class="text-xs text-hub-faint">--</p>
                     {% endif %}
@@ -321,7 +323,6 @@
         {% endfor %}
     </div>
 
-    <!-- Teams with no responses yet -->
     {% set pending_teams = cards | selectattr("response_count", "eq", 0) | list %}
     {% if pending_teams %}
     <div class="py-4 opacity-60">
@@ -337,12 +338,12 @@
 
 <!-- Category Descriptions Modal -->
 <div id="categoryModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70" onclick="document.getElementById('categoryModal').classList.add('hidden')"></div>
-    <div class="relative bg-white border-3 border-hub-border max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" style="border-width: 3px;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('categoryModal').classList.add('hidden')"></div>
+    <div class="relative bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto p-6 border border-hub-border">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-hub-text">Category Descriptions</h2>
+            <h2 class="text-lg font-semibold text-hub-text">Category Descriptions</h2>
             <button onclick="document.getElementById('categoryModal').classList.add('hidden')"
-                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1">
+                    aria-label="Close modal" class="text-hub-faint hover:text-hub-muted p-1 rounded-lg hover:bg-hub-hover transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -406,14 +407,14 @@
                 datasets: [{
                     label: 'Team Maturity',
                     data: values,
-                    backgroundColor: 'rgba(255, 0, 0, 0.08)',
-                    borderColor: '#000000',
+                    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                    borderColor: '#6366f1',
                     borderWidth: 2,
-                    pointBackgroundColor: '#FF0000',
-                    pointBorderColor: '#000000',
-                    pointRadius: 6,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointRadius: 5,
                     pointBorderWidth: 2,
-                    pointHoverRadius: 8,
+                    pointHoverRadius: 7,
                 }]
             },
             options: {
@@ -426,12 +427,12 @@
                         ticks: {
                             stepSize: 1,
                             backdropColor: 'transparent',
-                            color: '#888',
-                            font: { size: 10, weight: 'bold' },
+                            color: '#94a3b8',
+                            font: { size: 10, weight: '500' },
                         },
-                        grid: { color: 'rgba(0, 0, 0, 0.12)' },
-                        angleLines: { color: 'rgba(0, 0, 0, 0.12)' },
-                        pointLabels: { color: '#000', font: { size: 10, weight: '700' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.06)' },
+                        angleLines: { color: 'rgba(0, 0, 0, 0.06)' },
+                        pointLabels: { color: '#334155', font: { size: 10, weight: '600' } },
                     }
                 },
                 plugins: { legend: { display: false } }

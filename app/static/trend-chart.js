@@ -5,15 +5,15 @@
  * Mouse leave restores all colors.
  */
 function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
-    const colors = ['#000000', '#CC0000', '#0044AA', '#555555', '#884400', '#660066', '#006666', '#333333'];
-    const GRAY = '#d4d4d4';
-    const GRAY_POINT = '#bbb';
+    const colors = ['#6366f1', '#22c55e', '#3b82f6', '#f97316', '#ef4444', '#a855f7', '#14b8a6', '#64748b'];
+    const GRAY = '#e2e8f0';
+    const GRAY_POINT = '#cbd5e1';
     const yMax = opts.yMax || 5;
     const yLabel = opts.yLabel || 'Score';
     const yTickCallback = opts.yTickCallback || null;
 
     let activeIndex = -1;
-    let sticky = false; // true = highlight locked by click
+    let sticky = false;
 
     const chartDatasets = datasets.map((ds, i) => ({
         label: ds.label,
@@ -21,11 +21,11 @@ function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
         borderColor: colors[i % colors.length],
         backgroundColor: 'transparent',
         pointBackgroundColor: colors[i % colors.length],
-        pointBorderColor: '#000',
-        pointBorderWidth: 1.5,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
         tension: 0.3,
         fill: false,
-        borderWidth: 1.5,
+        borderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
         _color: colors[i % colors.length],
@@ -45,7 +45,11 @@ function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
                     beginAtZero: true,
                     max: yMax,
                     title: { display: true, text: yLabel },
+                    grid: { color: 'rgba(0, 0, 0, 0.06)' },
                     ...(yTickCallback ? { ticks: { stepSize: 1, callback: yTickCallback } } : {}),
+                },
+                x: {
+                    grid: { color: 'rgba(0, 0, 0, 0.04)' },
                 },
             },
             plugins: {
@@ -66,17 +70,14 @@ function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
                             }));
                         },
                     },
-                    // Hover over legend label = temporary highlight
                     onHover(e, legendItem) {
                         if (sticky) return;
                         if (legendItem) highlight(legendItem.datasetIndex);
                     },
-                    // Leave legend = reset (unless sticky)
                     onLeave() {
                         if (sticky) return;
                         resetHighlight();
                     },
-                    // Click legend = toggle sticky highlight
                     onClick(e, legendItem) {
                         if (!legendItem) return;
                         const idx = legendItem.datasetIndex;
@@ -115,9 +116,9 @@ function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
                 ds.borderColor = ds._color;
                 ds.borderWidth = 3;
                 ds.pointBackgroundColor = ds._color;
-                ds.pointBorderColor = '#000';
+                ds.pointBorderColor = '#fff';
                 ds.pointRadius = 6;
-                ds.pointBorderWidth = 1.5;
+                ds.pointBorderWidth = 2;
             } else {
                 ds.borderColor = GRAY;
                 ds.borderWidth = 1;
@@ -135,16 +136,15 @@ function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
         activeIndex = -1;
         chart.data.datasets.forEach((ds) => {
             ds.borderColor = ds._color;
-            ds.borderWidth = 1.5;
+            ds.borderWidth = 2;
             ds.pointBackgroundColor = ds._color;
-            ds.pointBorderColor = '#000';
-            ds.pointBorderWidth = 1.5;
+            ds.pointBorderColor = '#fff';
+            ds.pointBorderWidth = 2;
             ds.pointRadius = 4;
         });
         chart.update('none');
     }
 
-    // Mouse leave canvas = always reset (even sticky)
     canvas.addEventListener('mouseleave', () => {
         if (!sticky) resetHighlight();
     });
