@@ -5,7 +5,7 @@
  * Mouse leave restores all colors.
  */
 function createHighlightTrendChart(canvasId, labels, datasets, opts = {}) {
-    const colors = ['#6366f1', '#22c55e', '#3b82f6', '#f97316', '#ef4444', '#a855f7', '#14b8a6', '#64748b'];
+    const colors = ['#818cf8', '#34d399', '#60a5fa', '#fbbf24', '#f87171', '#c084fc', '#2dd4bf', '#94a3b8'];
     const GRAY = '#e2e8f0';
     const GRAY_POINT = '#cbd5e1';
     const yMax = opts.yMax || 5;
