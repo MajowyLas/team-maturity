@@ -1,129 +1,230 @@
 {% extends "base.html" %}
 {% block title %}Team Health Check — {{ team.name }}{% endblock %}
 
+{% block nav %}
+<nav class="sticky top-0 z-50 bg-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-14">
+            <span class="font-black text-lg tracking-tight uppercase text-white">Maturity_</span>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-3xl mx-auto">
-    <!-- Header -->
-    <div class="mb-10">
-        <h1 class="text-3xl font-black text-hub-text tracking-tight uppercase">Team Health Check</h1>
-        <p class="text-hub-muted text-sm mt-1">Rate how your team is doing — every role, every perspective matters.</p>
-        <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
-            <span class="w-2 h-2 bg-accent-500"></span>
-            <span class="text-xs font-black text-hub-text uppercase">{{ team.name }}</span>
+<div id="surveyApp" class="min-h-[calc(100vh-3.5rem)] flex flex-col">
+
+    <!-- Milestone toast -->
+    <div id="milestoneToast" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none opacity-0 transition-all duration-500 -translate-y-4">
+        <div class="bg-black text-white px-5 py-3 border-2 border-hub-border shadow-lg flex items-center gap-3">
+            <span id="milestoneEmoji" class="text-2xl"></span>
+            <span id="milestoneMsg" class="text-sm font-bold"></span>
         </div>
     </div>
 
     <!-- Draft recovery -->
-    <div id="draftBanner" class="hidden mb-6 border-2 border-hub-border p-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span class="text-lg">💾</span>
-            <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-accent-500 font-black">0</strong> saved answers. Pick up where you left off?</p>
-        </div>
-        <div class="flex gap-2 shrink-0 ml-4">
-            <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
-            <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
+    <div id="draftBanner" class="hidden fixed top-16 left-0 right-0 z-30 flex justify-center px-4">
+        <div class="border-2 border-hub-border bg-white p-4 flex items-center justify-between gap-4 max-w-lg w-full shadow-lg">
+            <div class="flex items-center gap-2">
+                <span class="font-black text-hub-text">[DRAFT]</span>
+                <p class="text-sm text-hub-muted">You have <strong id="draftCount" class="text-accent-500 font-black">0</strong> saved answers.</p>
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <button type="button" id="restoreDraft" class="px-3 py-1.5 bg-black text-white text-xs font-bold uppercase hover:bg-accent-500 transition">Restore</button>
+                <button type="button" id="discardDraft" class="px-3 py-1.5 text-hub-faint text-xs font-medium hover:text-hub-muted transition">Discard</button>
+            </div>
         </div>
     </div>
 
     {% if not rounds %}
-    <div class="border-2 border-hub-border p-8 text-center">
-        <p class="text-hub-text font-bold">No active rounds right now.</p>
-        <p class="text-hub-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
+    <div class="flex-1 flex items-center justify-center">
+        <div class="border-2 border-hub-border p-8 text-center">
+            <p class="text-hub-text font-bold">No active rounds right now.</p>
+            <p class="text-hub-faint text-sm mt-1">Ping your Scrum Master — they'll set one up.</p>
+        </div>
     </div>
     {% else %}
-    <form method="POST" action="/survey/{{ team.token }}" id="surveyForm">
-        <!-- Info card -->
-        <div class="border-2 border-hub-border p-6 mb-6">
-            <h2 class="text-sm font-black text-hub-text mb-4 uppercase tracking-wide">About you</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Round</label>
-                    <select name="round_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
-                        {% for r in rounds %}
-                        <option value="{{ r.id }}">{{ r.name }}</option>
-                        {% endfor %}
-                    </select>
+    <form method="POST" action="/survey/{{ team.token }}" id="surveyForm" class="flex-1 flex flex-col">
+
+        <!-- ==================== SCREEN: INTRO ==================== -->
+        <div id="introScreen" class="flex-1 flex items-center justify-center px-4">
+            <div class="max-w-md w-full">
+                <div class="mb-8 text-center">
+                    <div class="text-4xl mb-4 font-black text-hub-text">///</div>
+                    <h1 class="text-3xl font-black text-hub-text tracking-tight uppercase">Team Health Check</h1>
+                    <p class="text-hub-muted text-sm mt-2">Your honest perspective helps the team grow. No wrong answers!</p>
+                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border-2 border-hub-border">
+                        <span class="w-2 h-2 bg-accent-500"></span>
+                        <span class="text-xs font-black text-hub-text uppercase">{{ team.name }}</span>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
-                    <input type="text" name="respondent_name" required placeholder="e.g. Anna M."
-                           class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
+
+                <div class="space-y-4 mb-8">
+                    <div>
+                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Round</label>
+                        <select name="round_id" required class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text font-bold focus:ring-2 focus:ring-black">
+                            {% for r in rounds %}
+                            <option value="{{ r.id }}">{{ r.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-hub-muted mb-1.5 uppercase">Your name</label>
+                        <input type="text" name="respondent_name" id="respondentName" required placeholder="e.g. Anna M."
+                               class="w-full border-2 border-hub-border bg-white px-3 py-2.5 text-sm text-hub-text placeholder:text-hub-faint focus:ring-2 focus:ring-black">
+                    </div>
+                </div>
+
+                <button type="button" id="startBtn"
+                        class="w-full px-6 py-4 bg-black text-white font-black uppercase tracking-wide text-sm
+                               hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
+                               border-2 border-black hover:border-hub-muted disabled:opacity-40 disabled:cursor-not-allowed">
+                    Let's Go!
+                </button>
+                <p class="text-hub-faint text-xs mt-3 text-center">{{ total_questions }} questions · takes about 5 min</p>
+
+                <div class="mt-4 text-center">
+                    <span class="text-xs text-hub-faint">Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">Enter</kbd> to start</span>
                 </div>
             </div>
         </div>
 
-        <!-- Progress -->
-        <div class="bg-black text-white p-4 mb-6 sticky top-14 z-10">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-bold uppercase">Progress</span>
-                <span id="progressText" class="text-xs font-bold tabular-nums">0 / {{ total_questions }}</span>
-            </div>
-            <div class="relative w-full bg-white/20 h-2.5 overflow-hidden">
-                <div id="progressBar" class="h-2.5 bg-accent-500 transition-all duration-700 ease-out" style="width: 0%"></div>
-            </div>
-        </div>
+        <!-- ==================== SCREEN: QUESTIONS ==================== -->
+        <div id="questionScreen" class="hidden flex-1 flex flex-col">
 
-        <!-- Questions -->
-        {% for category, subcategories in grouped_questions.items() %}
-        <div class="border-2 border-hub-border mb-5 overflow-hidden transition-colors duration-300">
-            <button type="button" onclick="toggleCategory(this)"
-                    class="w-full flex items-center justify-between p-5 text-left hover:bg-hub-hover transition-all duration-200 group">
-                <div class="flex items-center gap-3">
-                    <span class="w-1.5 h-7 bg-accent-500"></span>
-                    <h2 class="text-base font-black text-hub-text uppercase">{{ category }}</h2>
-                </div>
-                <svg class="category-chevron w-4 h-4 text-hub-faint transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div class="category-content px-5 pb-5">
-                {% for subcategory, questions in subcategories.items() %}
-                <div class="mb-6 last:mb-0">
-                    <h3 class="text-xs font-black text-hub-text uppercase tracking-widest mb-3 pb-2 border-b-2 border-hub-border">
-                        {{ subcategory }}
-                    </h3>
-                    {% for q in questions %}
-                    <div class="question-block mb-5 last:mb-0">
-                        <p class="text-hub-text text-sm mb-3 leading-relaxed">{{ q.statement }}</p>
+            <!-- Top bar: progress -->
+            <div class="bg-black text-white px-4 py-3 sticky top-14 z-10">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span id="questionCategory" class="text-xs font-bold uppercase text-white/60 truncate"></span>
+                        </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-xs text-hub-faint shrink-0 text-right font-bold uppercase">disagree</span>
-                            <div class="flex items-center gap-2">
-                                {% for score in range(1, 6) %}
-                                <label class="relative cursor-pointer">
-                                    <input type="radio" name="q_{{ q.id }}" value="{{ score }}"
-                                           class="sr-only peer" onchange="updateProgress(event)">
-                                    <div class="w-10 h-10 border-2 border-hub-border flex items-center justify-center
-                                                text-sm font-black text-hub-faint
-                                                peer-checked:border-black peer-checked:bg-black peer-checked:text-white
-                                                hover:border-hub-text hover:bg-hub-hover
-                                                active:scale-95 transition-all duration-150">
-                                        {{ score }}
-                                    </div>
-                                </label>
-                                {% endfor %}
-                            </div>
-                            <span class="text-xs text-hub-faint shrink-0 font-bold uppercase">agree</span>
+                            <span id="progressMsg" class="text-xs text-white/50 hidden sm:inline transition-opacity duration-300"></span>
+                            <span id="progressText" class="text-xs font-bold tabular-nums shrink-0">0 / {{ total_questions }}</span>
                         </div>
                     </div>
+                    <div class="relative w-full bg-white/20 h-1.5 overflow-hidden">
+                        <div id="progressBar" class="h-1.5 bg-accent-500 transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question area -->
+            <div class="flex-1 flex items-center justify-center px-4 py-8">
+                <div class="max-w-xl w-full border-2 border-hub-border p-8 md:p-10">
+                    <!-- Question counter + subcategory -->
+                    <div class="flex items-center justify-between mb-6">
+                        <span id="questionNumber" class="text-xs font-black text-hub-faint uppercase tracking-widest"></span>
+                        <span id="questionSubcategory" class="text-xs text-hub-faint"></span>
+                    </div>
+
+                    <!-- Question text -->
+                    <p id="questionText" class="text-xl font-bold text-hub-text leading-relaxed mb-10 transition-opacity duration-200"></p>
+
+                    <!-- Answer options with brutal face scale -->
+                    <div class="mb-8">
+                        <div class="flex items-end justify-center gap-3 sm:gap-4" id="answerButtons">
+                            <!-- Rendered by JS -->
+                        </div>
+                        <!-- Minimal face labels (SVG, brutal style) -->
+                        <div class="flex justify-center mt-3 gap-3 sm:gap-4">
+                            <div class="w-12 flex justify-center" title="Strongly disagree">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-accent-500">
+                                    <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M6.5 14.5 C8 12, 12 12, 13.5 14.5"/>
+                                </svg>
+                            </div>
+                            <div class="w-12 flex justify-center" title="Disagree">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-hub-faint">
+                                    <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M7 14 C8.5 12.5, 11.5 12.5, 13 14"/>
+                                </svg>
+                            </div>
+                            <div class="w-12 flex justify-center" title="Neutral">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-hub-faint">
+                                    <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><line x1="7" y1="13" x2="13" y2="13"/>
+                                </svg>
+                            </div>
+                            <div class="w-12 flex justify-center" title="Agree">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-hub-faint">
+                                    <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M7 12.5 C8.5 14, 11.5 14, 13 12.5"/>
+                                </svg>
+                            </div>
+                            <div class="w-12 flex justify-center" title="Strongly agree">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" class="text-black">
+                                    <circle cx="10" cy="10" r="8.5"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1" fill="currentColor" stroke="none"/><path d="M6 12 C7.5 15, 12.5 15, 14 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-hub-border pt-5">
+                        <div class="flex items-center justify-between text-xs text-hub-faint">
+                            <span>Press <kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">1</kbd>–<kbd class="px-1.5 py-0.5 border border-hub-border text-hub-muted font-mono text-[10px]">5</kbd> to answer</span>
+                            <div class="flex items-center gap-4">
+                                <button type="button" id="prevBtn" class="hover:text-hub-text transition disabled:opacity-30" disabled>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                        Back
+                                    </span>
+                                </button>
+                                <button type="button" id="skipBtn" class="hover:text-hub-text transition">
+                                    <span class="flex items-center gap-1">
+                                        Skip
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden radio inputs for form submission -->
+            <div class="hidden">
+                {% for category, subcategories in grouped_questions.items() %}
+                {% for subcategory, questions in subcategories.items() %}
+                {% for q in questions %}
+                <div class="question-block" data-qid="{{ q.id }}" data-category="{{ category }}" data-subcategory="{{ subcategory }}">
+                    {% for score in range(1, 6) %}
+                    <input type="radio" name="q_{{ q.id }}" value="{{ score }}" class="q-radio">
                     {% endfor %}
                 </div>
                 {% endfor %}
+                {% endfor %}
+                {% endfor %}
             </div>
         </div>
-        {% endfor %}
 
-        <!-- Validation -->
-        <div id="validationMsg" class="hidden mb-4 mx-auto max-w-lg border-2 border-accent-500 bg-accent-50 p-4 text-center text-sm text-accent-600 font-bold"></div>
+        <!-- ==================== SCREEN: SUBMIT ==================== -->
+        <div id="submitScreen" class="hidden flex-1 flex items-center justify-center px-4">
+            <div class="max-w-md w-full text-center">
+                <div class="text-5xl mb-4 font-black" id="finishEmoji">
+                    <span class="text-accent-500">✓</span>
+                </div>
+                <h2 class="text-2xl font-black text-hub-text uppercase mb-2">You nailed it!</h2>
+                <p class="text-hub-muted text-sm mb-6">All {{ total_questions }} questions answered. Your team thanks you!</p>
 
-        <!-- Submit -->
-        <div class="text-center py-8">
-            <button type="submit" id="submitBtn"
-                    class="px-10 py-4 bg-black text-white font-black uppercase tracking-wide text-lg
-                           hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
-                           border-2 border-black hover:border-hub-muted">
-                Submit Assessment
-            </button>
-            <p class="text-hub-faint text-xs mt-3 font-medium">your perspective shapes the team</p>
+                <!-- Validation message -->
+                <div id="validationMsg" class="hidden mb-4 border-2 border-accent-500 bg-accent-50 p-4 text-sm text-accent-600 font-bold"></div>
+
+                <div id="unansweredNotice" class="hidden mb-4 border-2 border-hub-border p-4">
+                    <p class="text-sm text-hub-muted"><span id="unansweredCount" class="font-black text-accent-500">0</span> questions still unanswered.</p>
+                    <button type="button" id="goToUnanswered" class="mt-2 text-xs font-bold text-hub-text underline hover:text-accent-500 transition">Go back and answer them</button>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                        class="w-full px-10 py-4 bg-black text-white font-black uppercase tracking-wide text-lg
+                               hover:bg-hub-muted active:scale-[0.97] transition-all duration-200
+                               border-2 border-black hover:border-hub-muted">
+                    Submit Assessment
+                </button>
+                <p class="text-hub-faint text-xs mt-3 font-medium">your perspective shapes the team</p>
+
+                <button type="button" id="reviewBtn" class="mt-4 text-xs font-bold text-hub-faint hover:text-hub-text transition underline">
+                    ← Review answers
+                </button>
+            </div>
         </div>
     </form>
     {% endif %}
@@ -135,87 +236,283 @@
     const totalQuestions = {{ total_questions }};
     const DRAFT_KEY = 'survey_draft_{{ team.token }}';
 
+    // Milestones with brutal-fun messages
     const MILESTONES = [
-        { at: 0,   mood: '📋', msg: 'Ready when you are!' },
-        { at: 1,   mood: '✨', msg: 'First one down!' },
-        { at: 25,  mood: '🧩', msg: 'Pieces coming together...' },
-        { at: 50,  mood: '🚀', msg: 'Halfway — you\'re on a roll!' },
-        { at: 75,  mood: '💜', msg: 'Almost there, keep going!' },
-        { at: 90,  mood: '🎯', msg: 'Just a few more!' },
-        { at: 100, mood: '🏁', msg: 'All done — ready to submit!' },
+        { at: 1,   emoji: '▸', msg: 'Great start!' },
+        { at: 25,  emoji: '■□□□', msg: 'Quarter done — nice pace!' },
+        { at: 50,  emoji: '■■□□', msg: 'Halfway! You\'re on fire!' },
+        { at: 75,  emoji: '■■■□', msg: 'Almost there, keep it up!' },
+        { at: 90,  emoji: '■■■■', msg: 'Final stretch!' },
+        { at: 100, emoji: '✓', msg: 'All done — amazing!' },
     ];
-    let lastMilestone = -1;
 
-    function updateProgress(event) {
-        const answered = document.querySelectorAll('#surveyForm input[type="radio"]:checked').length;
-        const pct = Math.round((answered / totalQuestions) * 100);
+    // Encouraging messages for progress bar
+    const PROGRESS_MSGS = [
+        { at: 0,  msg: 'Every answer matters' },
+        { at: 10, msg: 'You\'re warming up!' },
+        { at: 25, msg: 'Nice flow!' },
+        { at: 40, msg: 'Keep that momentum' },
+        { at: 50, msg: 'Halfway hero!' },
+        { at: 65, msg: 'On a roll!' },
+        { at: 75, msg: 'The finish line is close' },
+        { at: 90, msg: 'Just a few more!' },
+    ];
 
-        document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressText').textContent = answered + ' / ' + totalQuestions;
+    let lastMilestoneAt = -1;
 
-        let current = MILESTONES[0];
-        for (const m of MILESTONES) { if (pct >= m.at) current = m; }
-        if (current.at !== lastMilestone) {
-            lastMilestone = current.at;
-            const moodEl = document.getElementById('progressMood');
-            const msgEl = document.getElementById('progressMsg');
-            if (moodEl) {
-                moodEl.textContent = current.mood;
-                moodEl.style.transform = 'scale(1.4)';
-                setTimeout(() => moodEl.style.transform = 'scale(1)', 300);
-            }
-            if (msgEl) {
-                msgEl.style.opacity = '0';
-                setTimeout(() => { msgEl.textContent = current.msg; msgEl.style.opacity = '1'; }, 150);
-            }
+    // Build questions array from DOM
+    const questions = [];
+    {% for category, subcategories in grouped_questions.items() %}
+    {% for subcategory, qs in subcategories.items() %}
+    {% for q in qs %}
+    questions.push({
+        id: {{ q.id }},
+        statement: {{ q.statement | tojson }},
+        category: {{ category | tojson }},
+        subcategory: {{ subcategory | tojson }}
+    });
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+
+    let currentIdx = 0;
+    let answers = {};
+    let advancing = false;
+
+    // === DOM refs ===
+    const introScreen = document.getElementById('introScreen');
+    const questionScreen = document.getElementById('questionScreen');
+    const submitScreen = document.getElementById('submitScreen');
+    const startBtn = document.getElementById('startBtn');
+    const respondentName = document.getElementById('respondentName');
+    const questionText = document.getElementById('questionText');
+    const questionNumber = document.getElementById('questionNumber');
+    const questionCategory = document.getElementById('questionCategory');
+    const questionSubcategory = document.getElementById('questionSubcategory');
+    const answerButtons = document.getElementById('answerButtons');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressMsg = document.getElementById('progressMsg');
+    const prevBtn = document.getElementById('prevBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const reviewBtn = document.getElementById('reviewBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // === Milestone toast ===
+    function showMilestone(emoji, msg) {
+        const toast = document.getElementById('milestoneToast');
+        document.getElementById('milestoneEmoji').textContent = emoji;
+        document.getElementById('milestoneMsg').textContent = msg;
+        toast.classList.remove('opacity-0', '-translate-y-4');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+            toast.classList.add('opacity-0', '-translate-y-4');
+            toast.classList.remove('opacity-100', 'translate-y-0');
+        }, 2000);
+    }
+
+    // === Start button logic ===
+    function checkCanStart() {
+        startBtn.disabled = !respondentName?.value.trim();
+    }
+    respondentName?.addEventListener('input', () => { checkCanStart(); saveDraft(); });
+    document.querySelector('[name="round_id"]')?.addEventListener('change', saveDraft);
+    checkCanStart();
+
+    startBtn?.addEventListener('click', startSurvey);
+
+    function startSurvey() {
+        if (!respondentName?.value.trim()) { respondentName?.focus(); return; }
+        introScreen.classList.add('hidden');
+        questionScreen.classList.remove('hidden');
+        showQuestion(0);
+    }
+
+    // === Highlight **key phrases** in red ===
+    function renderHighlight(text) {
+        // Escape HTML first, then convert **text** to red bold
+        const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="text-accent-500">$1</strong>');
+    }
+
+    // === Question rendering ===
+    function showQuestion(idx) {
+        if (idx < 0 || idx >= questions.length) return;
+        currentIdx = idx;
+        const q = questions[idx];
+
+        questionText.style.opacity = '0';
+        setTimeout(() => {
+            questionNumber.textContent = `${idx + 1} of ${questions.length}`;
+            questionCategory.textContent = q.category;
+            questionSubcategory.textContent = `· ${q.subcategory}`;
+            questionText.innerHTML = renderHighlight(q.statement);
+            questionText.style.opacity = '1';
+        }, 150);
+
+        // Render answer buttons (brutal: black/white)
+        const currentAnswer = answers[`q_${q.id}`];
+        answerButtons.innerHTML = '';
+        for (let score = 1; score <= 5; score++) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.score = score;
+            const isSelected = currentAnswer == score;
+            btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
+                transition-all duration-150 active:scale-90
+                ${isSelected
+                    ? 'border-black bg-black text-white'
+                    : 'border-hub-border text-hub-faint hover:border-hub-text hover:bg-hub-hover'}`;
+            btn.textContent = score;
+            btn.addEventListener('click', () => selectAnswer(score));
+            answerButtons.appendChild(btn);
         }
 
-        document.querySelectorAll('.unanswered-highlight').forEach(q => {
-            if (q.querySelector('input[type="radio"]:checked')) q.classList.remove('unanswered-highlight');
+        prevBtn.disabled = idx === 0;
+        skipBtn.textContent = idx === questions.length - 1 ? 'Finish' : 'Skip';
+        updateProgress();
+    }
+
+    function selectAnswer(score) {
+        if (advancing) return;
+        const q = questions[currentIdx];
+        answers[`q_${q.id}`] = score;
+
+        const radio = document.querySelector(`input[name="q_${q.id}"][value="${score}"]`);
+        if (radio) radio.checked = true;
+
+        // Visual feedback (brutal: black/white with bounce)
+        answerButtons.querySelectorAll('button').forEach(btn => {
+            const s = parseInt(btn.dataset.score);
+            if (s === score) {
+                btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
+                    transition-all duration-150 active:scale-90 border-black bg-black text-white scale-110`;
+                setTimeout(() => btn.classList.remove('scale-110'), 200);
+            } else {
+                btn.className = `w-12 h-12 border-2 flex items-center justify-center text-sm font-black
+                    transition-all duration-150 active:scale-90 border-hub-border text-hub-faint hover:border-hub-text hover:bg-hub-hover`;
+            }
         });
-        if (answered === totalQuestions) document.getElementById('validationMsg')?.classList.add('hidden');
 
+        updateProgress();
         saveDraft();
-        scrollByTwoQuestions(event);
+
+        advancing = true;
+        setTimeout(() => {
+            advancing = false;
+            if (currentIdx < questions.length - 1) {
+                showQuestion(currentIdx + 1);
+            } else {
+                goToSubmit();
+            }
+        }, 400);
     }
 
-    function scrollByTwoQuestions(event) {
-        const radio = event?.target;
-        if (!radio) return;
-        const currentBlock = radio.closest('.question-block');
-        if (!currentBlock) return;
+    function updateProgress() {
+        const answered = Object.keys(answers).length;
+        const pct = Math.round((answered / totalQuestions) * 100);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = `${answered} / ${totalQuestions}`;
 
-        const allBlocks = Array.from(document.querySelectorAll('#surveyForm .question-block'));
-        const currentIdx = allBlocks.indexOf(currentBlock);
-        if (currentIdx === -1) return;
-
-        const targetIdx = Math.min(currentIdx + 2, allBlocks.length - 1);
-        const targetBlock = allBlocks[targetIdx];
-
-        const catContent = targetBlock.closest('.category-content');
-        if (catContent && catContent.classList.contains('hidden')) {
-            catContent.classList.remove('hidden');
-            const chevron = catContent.previousElementSibling?.querySelector('.category-chevron');
-            if (chevron) chevron.classList.add('rotate-180');
-        }
-
-        const rect = targetBlock.getBoundingClientRect();
-        if (rect.bottom > window.innerHeight || rect.top < 0) {
+        // Update encouraging message
+        let currentMsg = PROGRESS_MSGS[0];
+        for (const m of PROGRESS_MSGS) { if (pct >= m.at) currentMsg = m; }
+        if (progressMsg) {
+            progressMsg.style.opacity = '0';
             setTimeout(() => {
-                window.scrollTo({
-                    top: window.scrollY + targetBlock.getBoundingClientRect().top - 130,
-                    behavior: 'smooth'
-                });
-            }, 200);
+                progressMsg.textContent = currentMsg.msg;
+                progressMsg.style.opacity = '1';
+            }, 150);
+        }
+
+        // Check milestones
+        for (const m of MILESTONES) {
+            if (pct >= m.at && m.at > lastMilestoneAt) {
+                lastMilestoneAt = m.at;
+                showMilestone(m.emoji, m.msg);
+                break;
+            }
         }
     }
 
+    // === Navigation ===
+    prevBtn?.addEventListener('click', () => {
+        if (currentIdx > 0) showQuestion(currentIdx - 1);
+    });
+
+    skipBtn?.addEventListener('click', () => {
+        if (currentIdx < questions.length - 1) {
+            showQuestion(currentIdx + 1);
+        } else {
+            goToSubmit();
+        }
+    });
+
+    reviewBtn?.addEventListener('click', () => {
+        submitScreen.classList.add('hidden');
+        questionScreen.classList.remove('hidden');
+        showQuestion(0);
+    });
+
+    document.getElementById('goToUnanswered')?.addEventListener('click', () => {
+        const firstUnanswered = questions.findIndex(q => !answers[`q_${q.id}`]);
+        if (firstUnanswered >= 0) {
+            submitScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            showQuestion(firstUnanswered);
+        }
+    });
+
+    function goToSubmit() {
+        questionScreen.classList.add('hidden');
+        submitScreen.classList.remove('hidden');
+
+        const unansweredCount = questions.filter(q => !answers[`q_${q.id}`]).length;
+        const notice = document.getElementById('unansweredNotice');
+        if (unansweredCount > 0) {
+            document.getElementById('unansweredCount').textContent = unansweredCount;
+            notice.classList.remove('hidden');
+            document.getElementById('finishEmoji').innerHTML = '<span class="text-hub-faint">…</span>';
+            document.querySelector('#submitScreen h2').textContent = 'Almost there!';
+            document.querySelector('#submitScreen h2 + p').textContent = 'Just a few left to go.';
+        } else {
+            notice.classList.add('hidden');
+        }
+    }
+
+    // === Keyboard navigation ===
+    document.addEventListener('keydown', (e) => {
+        if (!introScreen.classList.contains('hidden')) {
+            if (e.key === 'Enter' && !startBtn.disabled) {
+                e.preventDefault();
+                startSurvey();
+            }
+            return;
+        }
+
+        if (!questionScreen.classList.contains('hidden') && !advancing) {
+            const key = e.key;
+            if (key >= '1' && key <= '5') {
+                e.preventDefault();
+                selectAnswer(parseInt(key));
+            }
+            if (key === 'ArrowLeft' && currentIdx > 0) {
+                e.preventDefault();
+                showQuestion(currentIdx - 1);
+            }
+            if (key === 'ArrowRight' || key === 'Tab') {
+                e.preventDefault();
+                if (currentIdx < questions.length - 1) showQuestion(currentIdx + 1);
+                else goToSubmit();
+            }
+        }
+    });
+
+    // === Draft save/load ===
     function saveDraft() {
-        const data = {};
-        document.querySelectorAll('#surveyForm input[type="radio"]:checked').forEach(r => { data[r.name] = r.value; });
         const name = document.querySelector('[name="respondent_name"]')?.value || '';
         const round = document.querySelector('[name="round_id"]')?.value || '';
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers: data, name, round, ts: Date.now() }));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, name, round, ts: Date.now() }));
     }
 
     function loadDraft() {
@@ -226,17 +523,25 @@
             if (Date.now() - draft.ts > 7 * 24 * 60 * 60 * 1000) { localStorage.removeItem(DRAFT_KEY); return; }
             const count = Object.keys(draft.answers || {}).length;
             if (count === 0) return;
+
             document.getElementById('draftCount').textContent = count;
             document.getElementById('draftBanner').classList.remove('hidden');
+
             document.getElementById('restoreDraft').onclick = function() {
                 if (draft.name) document.querySelector('[name="respondent_name"]').value = draft.name;
                 if (draft.round) { const sel = document.querySelector('[name="round_id"]'); if (sel) sel.value = draft.round; }
-                for (const [name, value] of Object.entries(draft.answers)) {
+                answers = { ...draft.answers };
+                for (const [name, value] of Object.entries(answers)) {
                     const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
                     if (radio) radio.checked = true;
                 }
-                updateProgress();
                 document.getElementById('draftBanner').classList.add('hidden');
+
+                // Jump to question screen at first unanswered question
+                introScreen.classList.add('hidden');
+                questionScreen.classList.remove('hidden');
+                const firstUnanswered = questions.findIndex(q => !answers[`q_${q.id}`]);
+                showQuestion(firstUnanswered >= 0 ? firstUnanswered : 0);
             };
             document.getElementById('discardDraft').onclick = function() {
                 localStorage.removeItem(DRAFT_KEY);
@@ -245,41 +550,21 @@
         } catch(e) {}
     }
 
-    function validateBeforeSubmit(e) {
-        document.querySelectorAll('.unanswered-highlight').forEach(el => el.classList.remove('unanswered-highlight'));
-        const unanswered = [];
-        document.querySelectorAll('#surveyForm .question-block').forEach(qBlock => {
-            const radios = qBlock.querySelectorAll('input[type="radio"]');
-            if (radios.length > 0 && !qBlock.querySelector('input[type="radio"]:checked')) unanswered.push(qBlock);
-        });
+    // === Form validation ===
+    document.getElementById('surveyForm')?.addEventListener('submit', function(e) {
+        const unanswered = questions.filter(q => !answers[`q_${q.id}`]);
         if (unanswered.length > 0) {
             e.preventDefault();
             const msg = document.getElementById('validationMsg');
             msg.textContent = `${unanswered.length} question${unanswered.length > 1 ? 's' : ''} still need${unanswered.length === 1 ? 's' : ''} an answer`;
             msg.classList.remove('hidden');
-            unanswered.forEach(q => q.classList.add('unanswered-highlight'));
-            const first = unanswered[0];
-            const cat = first.closest('.category-content');
-            if (cat && cat.classList.contains('hidden')) cat.classList.remove('hidden');
-            setTimeout(() => {
-                window.scrollTo({ top: window.scrollY + first.getBoundingClientRect().top - 130, behavior: 'smooth' });
-            }, 100);
             return;
         }
         localStorage.removeItem(DRAFT_KEY);
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML = 'Submitting...';
-    }
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
+    });
 
-    function toggleCategory(btn) {
-        btn.nextElementSibling.classList.toggle('hidden');
-        btn.querySelector('.category-chevron').classList.toggle('rotate-180');
-    }
-
-    document.querySelector('[name="respondent_name"]')?.addEventListener('input', saveDraft);
-    document.querySelector('[name="round_id"]')?.addEventListener('change', saveDraft);
-    document.getElementById('surveyForm')?.addEventListener('submit', validateBeforeSubmit);
     loadDraft();
 </script>
 {% endblock %}
